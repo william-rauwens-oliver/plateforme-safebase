@@ -1,0 +1,35 @@
+[
+  {
+    "id": "34da716b-14f0-4da4-b635-ecbab8a02cc8",
+    "createdAt": "2025-10-27T12:18:04.541Z",
+    "name": "test-db",
+    "engine": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "root",
+    "password": "root",
+    "database": "test"
+  },
+  {
+    "id": "240eb50f-461a-4fe3-9d64-d4d010c0182c",
+    "createdAt": "2025-10-27T12:24:40.145Z",
+    "name": "Test",
+    "engine": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "safebase",
+    "password": "safebase",
+    "database": "safebase"
+  },
+  {
+    "id": "775a34f4-45db-4d98-982f-4df99926ecb1",
+    "createdAt": "2025-10-27T12:24:52.296Z",
+    "name": "Test",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 3306,
+    "username": "safebase",
+    "password": "safebase",
+    "database": "safebase"
+  }
+]
