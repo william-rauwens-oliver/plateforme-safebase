@@ -1,1 +1,61 @@
-[]
+[
+  {
+    "id": "7c100f3e-4cfa-477e-a3d9-6ad66cb83836",
+    "databaseId": "835ae2f4-cdb2-4c25-b569-58819b13a2c1",
+    "createdAt": "2025-11-03T12:58:30.677Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/835ae2f4-cdb2-4c25-b569-58819b13a2c1/TestPG8090_2025-11-03T12-58-30-676Z.sql",
+    "engine": "postgres",
+    "sizeBytes": 73,
+    "pinned": true
+  },
+  {
+    "id": "6c4676c7-e4b8-4d12-9e18-87879ac41c50",
+    "databaseId": "835ae2f4-cdb2-4c25-b569-58819b13a2c1",
+    "createdAt": "2025-11-03T12:58:32.747Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/835ae2f4-cdb2-4c25-b569-58819b13a2c1/TestPG8090_2025-11-03T12-58-32-745Z.sql",
+    "engine": "postgres",
+    "sizeBytes": 73,
+    "pinned": false
+  },
+  {
+    "id": "8730703d-387a-43b0-b2c8-ade5858b879c",
+    "databaseId": "ce23fa38-0b35-478d-b7f9-634510661d17",
+    "createdAt": "2025-11-03T12:58:33.783Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/ce23fa38-0b35-478d-b7f9-634510661d17/TestMySQL8090_2025-11-03T12-58-33-781Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 70
+  },
+  {
+    "id": "73541f85-ce10-438b-acbf-bf10dc3bc188",
+    "databaseId": "ce23fa38-0b35-478d-b7f9-634510661d17",
+    "createdAt": "2025-11-03T12:58:35.841Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/ce23fa38-0b35-478d-b7f9-634510661d17/TestMySQL8090_2025-11-03T12-58-35-840Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 70,
+    "pinned": false
+  },
+  {
+    "id": "309a5fcf-b373-4819-bb2f-567917caff32",
+    "databaseId": "835ae2f4-cdb2-4c25-b569-58819b13a2c1",
+    "createdAt": "2025-11-03T13:02:26.240Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/835ae2f4-cdb2-4c25-b569-58819b13a2c1/TestPG8090_2025-11-03T13-02-26-233Z.sql",
+    "engine": "postgres",
+    "sizeBytes": 73
+  },
+  {
+    "id": "eeb4244e-297b-4368-b7f0-6c3399324983",
+    "databaseId": "835ae2f4-cdb2-4c25-b569-58819b13a2c1",
+    "createdAt": "2025-11-03T13:02:29.118Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/835ae2f4-cdb2-4c25-b569-58819b13a2c1/TestPG8090_2025-11-03T13-02-29-117Z.sql",
+    "engine": "postgres",
+    "sizeBytes": 73
+  },
+  {
+    "id": "93ea67e9-9a01-4a2e-aa32-ea8efc9c6ece",
+    "databaseId": "ce23fa38-0b35-478d-b7f9-634510661d17",
+    "createdAt": "2025-11-03T13:02:43.698Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/ce23fa38-0b35-478d-b7f9-634510661d17/TestMySQL8090_2025-11-03T13-02-43-694Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 70
+  }
+]

@@ -61,7 +61,15 @@ export async function routes(app: FastifyInstance): Promise<void> {
       : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
 
     try {
-      await exec(cmd);
+      if (process.env.FAKE_DUMP === '1') {
+        // Simulation: écrire un fichier SQL minimal
+        await import('fs/promises').then(async fs => {
+          const header = `-- Fake dump for ${db.engine} ${db.database} at ${new Date().toISOString()}\n`;
+          await fs.writeFile(outPath, header + 'SELECT 1;\n');
+        });
+      } else {
+        await exec(cmd);
+      }
       const meta: BackupVersionMeta = {
         id: randomUUID(),
         databaseId: db.id,
@@ -155,7 +163,11 @@ export async function routes(app: FastifyInstance): Promise<void> {
       : `PGPASSWORD='${db.password}' psql -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -f ${v.path}`;
 
     try {
-      await exec(cmd);
+      if (process.env.FAKE_DUMP === '1') {
+        // Simulation: considérer comme restauré sans exécuter de commande
+      } else {
+        await exec(cmd);
+      }
       return { status: 'restored', versionId };
     } catch (err) {
       app.log.error(err);
