@@ -97,5 +97,16 @@
     "username": "postgres",
     "password": "postgres",
     "database": "postgres"
+  },
+  {
+    "id": "ea544af0-1d52-464b-8301-f4f67ff97944",
+    "createdAt": "2025-11-09T15:11:25.355Z",
+    "name": "SauvegardeParc",
+    "engine": "mysql",
+    "host": "127.0.0.1",
+    "port": 8889,
+    "username": "root",
+    "password": "root",
+    "database": "parcNational"
   }
 ]

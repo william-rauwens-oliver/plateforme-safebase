@@ -307,11 +307,12 @@ export async function routes(app: FastifyInstance): Promise<void> {
       : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
 
     try {
-      // Mode FAKE_DUMP activé par défaut si MySQL/Postgres non accessible
-      // Pour désactiver, définir FAKE_DUMP=0 explicitement
-      const useFakeDump = process.env.FAKE_DUMP !== '0';
+      // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
+      // Pour activer le mode fake (tests uniquement), définir FAKE_DUMP=1
+      const useFakeDump = process.env.FAKE_DUMP === '1';
       
       if (useFakeDump) {
+        app.log.warn({ message: 'Using FAKE_DUMP mode (testing only)', database: db.name });
         // Simulation: écrire un fichier SQL minimal
         await import('fs/promises').then(async fs => {
           const header = `-- Fake dump for ${db.engine} ${db.database} at ${new Date().toISOString()}\n`;
@@ -353,7 +354,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
       return reply.code(500).send({ 
         message: 'backup failed',
         error: errorMsg,
-        hint: process.env.FAKE_DUMP ? undefined : 'Vérifiez que la base de données est accessible et que mysqldump/pg_dump sont installés'
+        hint: process.env.FAKE_DUMP === '1' ? undefined : 'Vérifiez que la base de données est accessible et que mysqldump/pg_dump sont installés'
       });
     }
   });
@@ -370,21 +371,23 @@ export async function routes(app: FastifyInstance): Promise<void> {
       const cmd = db.engine === 'mysql'
         ? `mysqldump -h ${db.host} -P ${db.port} -u ${db.username} -p${db.password} ${db.database} > ${outPath}`
         : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
-      try {
-        // Mode FAKE_DUMP activé par défaut
-        const useFakeDump = process.env.FAKE_DUMP !== '0';
-        
-        if (useFakeDump) {
-          await import('fs/promises').then(async fs => {
-            const header = `-- Fake dump for ${db.engine} ${db.database} at ${new Date().toISOString()}\n`;
-            const content = db.engine === 'mysql' 
-              ? `-- MySQL Dump\nCREATE DATABASE IF NOT EXISTS ${db.database};\nUSE ${db.database};\nSELECT 1;\n`
-              : `-- PostgreSQL Dump\n-- Database: ${db.database}\nSELECT 1;\n`;
-            await fs.writeFile(outPath, header + content);
-          });
-        } else {
+    try {
+      // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
+      // Pour activer le mode fake (tests uniquement), définir FAKE_DUMP=1
+      const useFakeDump = process.env.FAKE_DUMP === '1';
+      
+      if (useFakeDump) {
+        app.log.warn({ message: 'Using FAKE_DUMP mode (testing only)', database: db.name });
+        await import('fs/promises').then(async fs => {
+          const header = `-- Fake dump for ${db.engine} ${db.database} at ${new Date().toISOString()}\n`;
+          const content = db.engine === 'mysql' 
+            ? `-- MySQL Dump\nCREATE DATABASE IF NOT EXISTS ${db.database};\nUSE ${db.database};\nSELECT 1;\n`
+            : `-- PostgreSQL Dump\n-- Database: ${db.database}\nSELECT 1;\n`;
+          await fs.writeFile(outPath, header + content);
+        });
+      } else {
         await exec(cmd);
-        }
+      }
         const meta: BackupVersionMeta = {
           id: randomUUID(),
           databaseId: db.id,
@@ -458,7 +461,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
       return reply.code(500).send({ 
         message: 'restore failed',
         error: errorMsg,
-        hint: process.env.FAKE_DUMP !== '0' ? undefined : 'Vérifiez que la base de données est accessible et que mysql/psql sont installés'
+        hint: process.env.FAKE_DUMP === '1' ? undefined : 'Vérifiez que la base de données est accessible et que mysql/psql sont installés'
       });
     }
   });
