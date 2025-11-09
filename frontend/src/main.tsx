@@ -271,9 +271,11 @@ export function App() {
   function pushToast(text: string, type: 'success'|'error'|'info' = 'info') {
     const id = Math.random().toString(36).slice(2)
     setToasts(ts => [...ts, { id, text, type }])
+    // Garder les erreurs plus longtemps pour qu'elles soient lisibles
+    const duration = type === 'error' ? 8000 : 3500
     setTimeout(() => {
       setToasts(ts => ts.filter(t => t.id !== id))
-    }, 3500)
+    }, duration)
   }
 
   const filtered = useMemo(() => {
