@@ -793,6 +793,23 @@ export async function routes(app: FastifyInstance): Promise<void> {
       });
     }
     
+    // Vérifier si le fichier a été modifié depuis le backup (optionnel, pour information)
+    const fileStats = statSync(v.path);
+    const backupDate = new Date(v.createdAt);
+    const fileModifiedDate = fileStats.mtime;
+    const fileWasModified = fileModifiedDate > backupDate;
+    
+    if (fileWasModified) {
+      app.log.info({ 
+        message: 'Backup file has been modified since creation', 
+        versionId, 
+        path: v.path,
+        backupDate: backupDate.toISOString(),
+        fileModifiedDate: fileModifiedDate.toISOString(),
+        note: 'La restauration utilisera le contenu actuel du fichier (modifié)'
+      });
+    }
+    
     const allDbs = await Store.getDatabases();
     const db = allDbs.find(d => d.id === v.databaseId);
     if (!db) return reply.code(404).send({ message: 'database not found' });
@@ -832,7 +849,18 @@ export async function routes(app: FastifyInstance): Promise<void> {
         // Simulation: considérer comme restauré sans exécuter de commande
         app.log.info({ message: 'Fake restore (FAKE_DUMP mode)', versionId, database: db.name });
       } else {
-        app.log.info({ message: 'Starting restore', versionId, database: db.name, engine: db.engine, path: v.path });
+        app.log.info({ 
+          message: 'Starting restore', 
+          versionId, 
+          database: db.name, 
+          engine: db.engine, 
+          path: v.path,
+          fileSize: fileStats.size,
+          fileModified: fileWasModified ? 'Oui (le fichier a été modifié depuis le backup)' : 'Non',
+          note: 'La restauration utilise le contenu actuel du fichier SQL'
+        });
+        // La commande mysql/psql lit le fichier directement depuis le disque au moment de l'exécution
+        // Donc si le fichier a été modifié, il utilisera le contenu modifié
         await exec(cmd);
         app.log.info({ message: 'Restore completed', versionId, database: db.name });
       }
