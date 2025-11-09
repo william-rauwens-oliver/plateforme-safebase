@@ -1,15 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8080'
-const API_KEY = import.meta.env.VITE_API_KEY
-
-function authHeaders(extra?: Record<string, string>) {
-  const headers: Record<string, string> = { ...(extra || {}) }
-  if (API_KEY) headers['x-api-key'] = String(API_KEY)
-  return headers
-}
-
 type Db = {
   id: string
   name: string
@@ -21,194 +12,141 @@ type Db = {
   database: string
 }
 
-function App() {
-  const [health, setHealth] = useState('pending')
+type Version = {
+  id: string
+  databaseId: string
+  createdAt: string
+  sizeBytes?: number
+  pinned?: boolean
+}
+
+/**
+ * Hook personnalisé pour gérer un état persistant dans localStorage
+ * @param key - Clé de stockage dans localStorage
+ * @param initial - Valeur initiale si aucune valeur n'est trouvée
+ * @returns Tuple [value, setValue] similaire à useState
+ */
+function usePersistentState<T>(key: string, initial: T) {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const raw = localStorage.getItem(key)
+      return raw ? (JSON.parse(raw) as T) : initial
+    } catch {
+      return initial
+    }
+  })
+  useEffect(() => {
+    try { 
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Ignore localStorage errors (private mode)
+    }
+  }, [key, value])
+  return [value, setValue] as const
+}
+
+interface ImportMetaEnv {
+  VITE_API_URL?: string;
+  VITE_API_KEY?: string;
+}
+
+interface ImportMeta {
+  env?: ImportMetaEnv;
+}
+
+/**
+ * Composant principal de l'application SafeBase
+ * Gère l'interface utilisateur complète pour la gestion des bases de données
+ * @returns Composant React de l'application
+ */
+export function App() {
+  const [config, setConfig] = usePersistentState('safebase-config', {
+    apiUrl: (import.meta as ImportMeta).env?.VITE_API_URL || 'http://localhost:8080',
+    apiKey: (import.meta as ImportMeta).env?.VITE_API_KEY || ''
+  })
+  const [health, setHealth] = useState<'pending'|'ok'|'down'>('pending')
   const [dbs, setDbs] = useState<Db[]>([])
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({
-    name: '', engine: 'mysql', host: 'localhost', port: 3306,
-    username: 'safebase', password: 'safebase', database: 'safebase'
-  } as any)
+  const [globalBusy, setGlobalBusy] = useState(false)
+  const [form, setForm] = useState<{
+    name: string;
+    engine: 'mysql' | 'postgres';
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    database: string;
+  }>({
+    name: '', engine: 'mysql', host: '127.0.0.1', port: 8889,
+    username: '', password: '', database: ''
+  })
+  const [availableDatabases, setAvailableDatabases] = useState<string[]>([])
+  const [loadingDatabases, setLoadingDatabases] = useState(false)
+  const [versionsModal, setVersionsModal] = useState<{ open: boolean, db?: Db, items: Version[] }>({ open: false, items: [] })
+  const [toasts, setToasts] = useState<Array<{ id: string, text: string, type?: 'success'|'error'|'info' }>>([])
+  const [theme, setTheme] = usePersistentState<'dark'|'light'>('safebase-theme', 'dark')
+  const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<'name'|'engine'|'created'>('name')
+  const [isLoadingList, setIsLoadingList] = useState(false)
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '2rem',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    },
-    content: {
-      maxWidth: '1200px',
-      margin: '0 auto'
-    },
-    header: {
-      textAlign: 'center' as const,
-      color: 'white',
-      marginBottom: '3rem'
-    },
-    title: {
-      fontSize: '3rem',
-      fontWeight: 'bold',
-      margin: '0 0 1rem 0',
-      textShadow: '0 4px 6px rgba(0,0,0,0.3)',
-      background: 'linear-gradient(45deg, #fff, #e0e7ff)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent'
-    },
-    subtitle: {
-      fontSize: '1.2rem',
-      opacity: 0.9,
-      fontStyle: 'italic'
-    },
-    card: {
-      background: 'rgba(255, 255, 255, 0.95)',
-      borderRadius: '20px',
-      padding: '2rem',
-      marginBottom: '2rem',
-      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-      backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255,255,255,0.2)'
-    },
-    healthBadge: {
-      display: 'inline-block',
-      padding: '0.5rem 1rem',
-      borderRadius: '50px',
-      fontSize: '0.9rem',
-      fontWeight: 'bold',
-      background: health === 'ok' ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#ef4444',
-      color: 'white',
-      marginLeft: '1rem'
-    },
-    form: {
-      display: 'grid',
-      gap: '1rem',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))'
-    },
-    input: {
-      padding: '0.875rem 1rem',
-      borderRadius: '12px',
-      border: '2px solid #e5e7eb',
-      fontSize: '1rem',
-      transition: 'all 0.3s',
-      outline: 'none'
-    },
-    inputFocus: {
-      borderColor: '#667eea',
-      boxShadow: '0 0 0 4px rgba(102, 126, 234, 0.1)'
-    },
-    select: {
-      padding: '0.875rem 1rem',
-      borderRadius: '12px',
-      border: '2px solid #e5e7eb',
-      fontSize: '1rem',
-      background: 'white',
-      cursor: 'pointer',
-      transition: 'all 0.3s'
-    },
-    button: {
-      padding: '0.875rem 2rem',
-      borderRadius: '12px',
-      border: 'none',
-      fontSize: '1rem',
-      fontWeight: 'bold',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      background: 'linear-gradient(135deg, #667eea, #764ba2)',
-      color: 'white',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-      gridColumn: '1 / -1'
-    },
-    buttonHover: {
-      transform: 'translateY(-2px)',
-      boxShadow: '0 6px 12px rgba(0,0,0,0.2)'
-    },
-    dbCard: {
-      background: 'linear-gradient(135deg, #f5f3ff, #e9d5ff)',
-      borderRadius: '16px',
-      padding: '1.5rem',
-      marginBottom: '1rem',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-      transition: 'all 0.3s'
-    },
-    dbCardHover: {
-      transform: 'translateY(-4px)',
-      boxShadow: '0 8px 16px rgba(0,0,0,0.15)'
-    },
-    dbHeader: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: '1rem'
-    },
-    dbTitle: {
-      fontSize: '1.25rem',
-      fontWeight: 'bold',
-      color: '#667eea',
-      margin: 0
-    },
-    engineBadge: {
-      padding: '0.25rem 0.75rem',
-      borderRadius: '20px',
-      fontSize: '0.75rem',
-      fontWeight: 'bold',
-      background: '#667eea',
-      color: 'white'
-    },
-    dbInfo: {
-      color: '#6b7280',
-      fontSize: '0.9rem',
-      marginBottom: '1rem',
-      fontFamily: 'monospace'
-    },
-    actionButtons: {
-      display: 'flex',
-      gap: '0.5rem'
-    },
-    actionButton: {
-      padding: '0.5rem 1rem',
-      borderRadius: '8px',
-      border: 'none',
-      fontSize: '0.875rem',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s'
-    },
-    backupBtn: {
-      background: 'linear-gradient(135deg, #667eea, #764ba2)',
-      color: 'white'
-    },
-    versionsBtn: {
-      background: '#10b981',
-      color: 'white'
-    },
-    emptyState: {
-      textAlign: 'center' as const,
-      padding: '3rem',
-      color: '#6b7280'
-    }
-  }
+  const headers = useMemo(() => {
+    const h: Record<string, string> = {}
+    if (config.apiKey) h['x-api-key'] = String(config.apiKey)
+    return h
+  }, [config.apiKey])
 
   useEffect(() => {
-    fetch(`${API}/health`).then(r => r.json()).then(() => setHealth('ok')).catch(() => setHealth('down'))
+    checkHealth()
     refresh()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.apiUrl, config.apiKey, headers])
 
-  function refresh() {
-    fetch(`${API}/databases`, { headers: authHeaders() }).then(r => r.json()).then(setDbs)
+  /**
+   * Vérifie l'état de santé de l'API
+   */
+  function checkHealth() {
+    setHealth('pending')
+    fetch(`${config.apiUrl}/health`).then(r => r.json()).then(() => setHealth('ok')).catch(() => setHealth('down'))
   }
 
+  /**
+   * Rafraîchit la liste des connexions enregistrées depuis l'API
+   */
+  function refresh() {
+    setIsLoadingList(true)
+    fetch(`${config.apiUrl}/databases`, { headers })
+      .then(r => r.json())
+      .then(setDbs)
+      .catch(() => setDbs([]))
+      .finally(() => setIsLoadingList(false))
+  }
+
+  /**
+   * Soumet le formulaire d'enregistrement d'une nouvelle connexion à une base de données
+   * @param e - Événement de soumission du formulaire
+   */
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     try {
-      await fetch(`${API}/databases`, { 
-        method: 'POST', 
-        headers: authHeaders({ 'Content-Type': 'application/json' }), 
+      const res = await fetch(`${config.apiUrl}/databases`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, port: Number(form.port) })
       })
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        // Afficher le message d'erreur détaillé du backend
+        const errorMsg = errorData.error || errorData.message || 'Erreur lors de la création'
+        const hint = errorData.hint ? `\n\n${errorData.hint}` : ''
+        throw new Error(`${errorMsg}${hint}`)
+      }
       setForm({ ...form, name: '' })
+      pushToast('Base ajoutée', 'success')
       refresh()
     } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Erreur: ajout impossible'
+      pushToast(errorMsg, 'error')
       console.error(err)
     } finally {
       setLoading(false)
@@ -216,174 +154,371 @@ function App() {
   }
 
   async function triggerBackup(id: string) {
-    setLoading(true)
+    setGlobalBusy(true)
     try {
-      await fetch(`${API}/backup/${id}`, { method: 'POST', headers: authHeaders() })
-      alert('✓ Backup déclenché avec succès!')
+      const res = await fetch(`${config.apiUrl}/backup/${id}`, { method: 'POST', headers })
+      if (!res.ok) throw new Error('backup failed')
+      pushToast('Backup déclenché', 'success')
     } catch (err) {
-      alert('✗ Erreur lors du backup')
+      pushToast('Erreur lors du backup', 'error')
       console.error(err)
     } finally {
-      setLoading(false)
+      setGlobalBusy(false)
     }
   }
 
-  async function showBackups(id: string) {
-    const versions = await fetch(`${API}/backups/${id}`, { headers: authHeaders() }).then(r => r.json())
-    const lines = versions.map((v: any) => 
-      `\n${v.id.substring(0, 8)}... | ${new Date(v.createdAt).toLocaleString()} | ${(v.sizeBytes||0)}B | ${v.pinned ? '📌' : ''}`
-    ).join('')
-    const action = window.prompt(`Versions disponibles:${lines}\n\nActions: restore <id> | pin <id> | unpin <id> | delete <id> | download <id>`)
-    if (!action) return
-    const [cmd, vid] = action.split(/\s+/)
-    if (!vid) return
-    
-    setLoading(true)
+  async function triggerBackupAll() {
+    setGlobalBusy(true)
     try {
-      if (cmd === 'restore') {
-        await fetch(`${API}/restore/${vid}`, { method: 'POST', headers: authHeaders() })
-        alert('✓ Restauration déclenchée')
-      } else if (cmd === 'pin') {
-        await fetch(`${API}/versions/${vid}/pin`, { method: 'POST', headers: authHeaders() })
-        alert('✓ Version épinglée')
-      } else if (cmd === 'unpin') {
-        await fetch(`${API}/versions/${vid}/unpin`, { method: 'POST', headers: authHeaders() })
-        alert('✓ Épingle retirée')
-      } else if (cmd === 'delete') {
-        await fetch(`${API}/versions/${vid}`, { method: 'DELETE', headers: authHeaders() })
-        alert('✓ Version supprimée')
-      } else if (cmd === 'download') {
-        window.location.href = `${API}/versions/${vid}/download`
+      const res = await fetch(`${config.apiUrl}/backup-all`, { method: 'POST', headers })
+      if (!res.ok) throw new Error('backup all failed')
+      pushToast('Backups lancés pour toutes les bases', 'success')
+    } catch (err) {
+      pushToast('Erreur lors des backups globaux', 'error')
+    } finally {
+      setGlobalBusy(false)
+    }
+  }
+
+  function copyDsn(db: Db) {
+    const dsn = db.engine === 'mysql'
+      ? `mysql://${db.username}:${encodeURIComponent(db.password)}@${db.host}:${db.port}/${db.database}`
+      : `postgres://${db.username}:${encodeURIComponent(db.password)}@${db.host}:${db.port}/${db.database}`
+    navigator.clipboard.writeText(dsn).then(() => pushToast('DSN copié', 'success')).catch(() => {
+      // Ignore clipboard errors
+    })
+  }
+
+  /**
+   * Supprime une base de données et toutes ses sauvegardes
+   * @param id - ID de la base de données à supprimer
+   */
+  async function deleteDatabase(id: string) {
+    const db = dbs.find(d => d.id === id);
+    if (!db) return;
+    
+    if (!confirm(`Supprimer définitivement la base "${db.name}" et toutes ses sauvegardes ?`)) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${config.apiUrl}/databases/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Erreur lors de la suppression');
+      }
+      
+      pushToast('Base supprimée', 'success');
+      refresh();
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+      pushToast(errorMsg, 'error');
+      console.error(err);
+    }
+  }
+
+  async function openVersions(db: Db) {
+    try {
+      const items = await fetch(`${config.apiUrl}/backups/${db.id}`, { headers }).then(r => r.json())
+      // Trier : épinglées en premier, puis par date (plus récent d'abord)
+      const sorted = items.sort((a: Version, b: Version) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      })
+      setVersionsModal({ open: true, db, items: sorted })
+    } catch (e) {
+      pushToast('Impossible de charger les versions', 'error')
+    }
+  }
+
+  async function actOnVersion(cmd: 'restore'|'pin'|'unpin'|'delete'|'download', vid: string) {
+    if (!versionsModal.db) return
+    try {
+      if (cmd === 'download') {
+        window.location.href = `${config.apiUrl}/versions/${vid}/download`
         return
       }
-      refresh()
-    } catch (err) {
-      alert('✗ Erreur lors de l\'opération')
-      console.error(err)
-    } finally {
-      setLoading(false)
+      if (cmd === 'restore') {
+        if (!confirm('Restaurer cette version ?')) return
+        await fetch(`${config.apiUrl}/restore/${vid}`, { method: 'POST', headers })
+      } else if (cmd === 'pin') {
+        await fetch(`${config.apiUrl}/versions/${vid}/pin`, { method: 'POST', headers })
+        pushToast('Version épinglée', 'success')
+      } else if (cmd === 'unpin') {
+        await fetch(`${config.apiUrl}/versions/${vid}/unpin`, { method: 'POST', headers })
+        pushToast('Épingle retirée', 'success')
+      } else if (cmd === 'delete') {
+        if (!confirm('Supprimer définitivement cette version non épinglée ?')) return
+        await fetch(`${config.apiUrl}/versions/${vid}`, { method: 'DELETE', headers })
+        pushToast('Version supprimée', 'success')
+      }
+      const items = await fetch(`${config.apiUrl}/backups/${versionsModal.db.id}`, { headers }).then(r => r.json())
+      // Trier : épinglées en premier, puis par date (plus récent d'abord)
+      const sorted = items.sort((a: Version, b: Version) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      })
+      setVersionsModal(v => ({ ...v, items: sorted }))
+    } catch (e) {
+      pushToast('Erreur lors de l\'opération', 'error')
     }
   }
 
+  function pushToast(text: string, type: 'success'|'error'|'info' = 'info') {
+    const id = Math.random().toString(36).slice(2)
+    setToasts(ts => [...ts, { id, text, type }])
+    // Garder les erreurs plus longtemps pour qu'elles soient lisibles
+    const duration = type === 'error' ? 8000 : 3500
+    setTimeout(() => {
+      setToasts(ts => ts.filter(t => t.id !== id))
+    }, duration)
+  }
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    let out = dbs.filter(db => {
+      if (!q) return true
+      return (
+        db.name.toLowerCase().includes(q) ||
+        db.engine.toLowerCase().includes(q) ||
+        db.host.toLowerCase().includes(q) ||
+        db.database.toLowerCase().includes(q)
+      )
+    })
+    if (sort === 'name') out = out.sort((a,b) => a.name.localeCompare(b.name))
+    if (sort === 'engine') out = out.sort((a,b) => a.engine.localeCompare(b.engine))
+    return out
+  }, [dbs, query, sort])
+
   return (
-    <div style={styles.container}>
-      <div style={styles.content}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>SafeBase</h1>
-          <p style={styles.subtitle}>"Parce qu'un DROP DATABASE est vite arrivé..."</p>
+    <div className="container" data-theme={theme}>
+      <div className="header">
+        <div className="brand">
+          <div className="logo">SB</div>
           <div>
-            API Status: <strong>{health}</strong>
-            <span style={styles.healthBadge}>{health === 'ok' ? '✓ En ligne' : '✗ Hors ligne'}</span>
+            <h1>SafeBase</h1>
+            <div className="muted">« Parce qu’un DROP DATABASE est vite arrivé… »</div>
           </div>
         </div>
+        <div className="header-actions">
+          <span className={`status-badge ${health === 'ok' ? 'success' : health === 'down' ? 'danger' : ''}`}>
+            {health === 'ok' ? 'API en ligne' : health === 'down' ? 'API hors ligne' : 'Vérification...'}
+          </span>
+          <button className="btn btn-ghost" onClick={checkHealth}>Rafraîchir</button>
+          <button className="btn btn-ghost" aria-pressed={theme==='dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            {theme === 'dark' ? 'Clair' : 'Sombre'}
+          </button>
+        </div>
+      </div>
 
-        <div style={styles.card}>
-          <h2 style={{ marginTop: 0, color: '#667eea' }}>➕ Ajouter une base de données</h2>
-          <form onSubmit={submit} style={styles.form}>
-            <input 
-              placeholder="Nom de la base" 
-              value={form.name} 
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              style={styles.input}
-              required
-            />
-            <select 
-              value={form.engine} 
-              onChange={e => setForm({ ...form, engine: e.target.value })}
-              style={styles.select}
-            >
-              <option value="mysql">🐬 MySQL</option>
-              <option value="postgres">🐘 PostgreSQL</option>
-            </select>
-            <input 
-              placeholder="Hôte" 
-              value={form.host} 
-              onChange={e => setForm({ ...form, host: e.target.value })}
-              style={styles.input}
-              required
-            />
-            <input 
-              placeholder="Port" 
-              type="number" 
-              value={form.port} 
-              onChange={e => setForm({ ...form, port: Number(e.target.value) })}
-              style={styles.input}
-              required
-            />
-            <input 
-              placeholder="Utilisateur" 
-              value={form.username} 
-              onChange={e => setForm({ ...form, username: e.target.value })}
-              style={styles.input}
-              required
-            />
-            <input 
-              placeholder="Mot de passe" 
-              type="password"
-              value={form.password} 
-              onChange={e => setForm({ ...form, password: e.target.value })}
-              style={styles.input}
-              required
-            />
-            <input 
-              placeholder="Nom de la base de données" 
-              value={form.database} 
-              onChange={e => setForm({ ...form, database: e.target.value })}
-              style={styles.input}
-              required
-            />
-            <button 
-              type="submit" 
-              style={styles.button}
-              disabled={loading}
-            >
-              {loading ? '⏳ Ajout en cours...' : '✨ Ajouter la base'}
-            </button>
+      <div className="grid">
+        <div className="card">
+          <h2>Enregistrer une connexion à une base de données</h2>
+          <p style={{ marginBottom: '20px', color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6' }}>
+            SafeBase sauvegarde des bases de données <strong>existantes</strong>. Enregistrez ici les informations de connexion à une base que vous avez déjà créée (ex: fittracker, symfony-e, etc.) pour que SafeBase puisse la sauvegarder automatiquement.
+          </p>
+          <form onSubmit={submit} className="form-grid">
+            <div className="form-col-6"><input placeholder="Nom de la connexion (ex: FitTracker Production)" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
+            <div className="form-col-6">
+              <select value={form.engine} onChange={e => {
+                const newEngine = e.target.value as 'mysql' | 'postgres';
+                // Mettre à jour les valeurs par défaut selon le moteur (bases locales)
+                if (newEngine === 'mysql') {
+                  // MAMP MySQL par défaut
+                  setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: '', password: '', database: '' });
+                } else {
+                  // PostgreSQL Homebrew par défaut
+                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: '', database: '' });
+                }
+                setAvailableDatabases([]); // Réinitialiser la liste
+              }}>
+                <option value="mysql">MySQL</option>
+                <option value="postgres">PostgreSQL</option>
+              </select>
+            </div>
+            <div className="form-col-6"><input placeholder="Hôte" value={form.host} onChange={e => setForm({ ...form, host: e.target.value })} required /></div>
+            <div className="form-col-6"><input type="number" placeholder="Port" value={form.port} onChange={e => setForm({ ...form, port: Number(e.target.value) })} required /></div>
+            <div className="form-col-6"><input placeholder="Utilisateur" value={form.username} onChange={e => setForm({ ...form, username: e.target.value, database: '' })} required /></div>
+            <div className="form-col-6"><input type="password" placeholder="Mot de passe" value={form.password} onChange={e => setForm({ ...form, password: e.target.value, database: '' })} required /></div>
+            <div className="form-col-12" style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <select 
+                value={form.database} 
+                onChange={e => setForm({ ...form, database: e.target.value })} 
+                required
+                style={{ flex: 1 }}
+                disabled={loadingDatabases || availableDatabases.length === 0}
+              >
+                <option value="">{loadingDatabases ? 'Chargement...' : availableDatabases.length === 0 ? 'Cliquez sur "Récupérer les bases"' : 'Sélectionnez une base'}</option>
+                {availableDatabases.map(db => (
+                  <option key={db} value={db}>{db}</option>
+                ))}
+              </select>
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={async () => {
+                  if (!form.host || !form.port || !form.username) {
+                    pushToast('Remplissez d\'abord hôte, port et utilisateur', 'error');
+                    return;
+                  }
+                  setLoadingDatabases(true);
+                  try {
+                    const params = new URLSearchParams({
+                      engine: form.engine,
+                      host: form.host,
+                      port: String(form.port),
+                      username: form.username,
+                      password: form.password
+                    });
+                    const res = await fetch(`${config.apiUrl}/databases/available?${params}`, { headers });
+                    if (!res.ok) {
+                      const errorData = await res.json().catch(() => ({}));
+                      // Utiliser le message utilisateur si disponible, sinon l'erreur technique
+                      throw new Error(errorData.message || errorData.error || 'Erreur lors de la récupération');
+                    }
+                    const data = await res.json();
+                    setAvailableDatabases(data.databases || []);
+                    if (data.databases && data.databases.length > 0) {
+                      pushToast(`${data.databases.length} base(s) trouvée(s)`, 'success');
+                    } else {
+                      pushToast('Aucune base de données trouvée sur ce serveur', 'info');
+                    }
+                  } catch (err) {
+                    const errorMsg = err instanceof Error ? err.message : 'Erreur lors de la récupération';
+                    pushToast(errorMsg, 'error');
+                    setAvailableDatabases([]);
+                  } finally {
+                    setLoadingDatabases(false);
+                  }
+                }}
+                disabled={loadingDatabases || !form.host || !form.port || !form.username}
+                style={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+              >
+                {loadingDatabases ? '...' : 'Récupérer'}
+              </button>
+            </div>
+            {form.database && (
+              <div className="form-col-12">
+                <input 
+                  placeholder="Ou tapez le nom de la base manuellement" 
+                  value={form.database} 
+                  onChange={e => setForm({ ...form, database: e.target.value })} 
+                />
+              </div>
+            )}
+            <div className="form-col-12"><button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Enregistrement...' : 'Enregistrer la connexion'}</button></div>
           </form>
         </div>
 
-        <div style={styles.card}>
-          <h2 style={{ marginTop: 0, color: '#667eea' }}>
-            📊 Bases de données enregistrées {dbs.length > 0 && `(${dbs.length})`}
-          </h2>
-          {dbs.length === 0 ? (
-            <div style={styles.emptyState}>
-              <p style={{ fontSize: '3rem', margin: 0 }}>📭</p>
-              <p>Aucune base de données configurée pour le moment.</p>
-              <p>Ajoutez-en une ci-dessus pour commencer !</p>
+        <div className="card">
+          <h2>Actions globales</h2>
+          <div className="form-grid">
+            <div className="form-col-12"><input placeholder="API URL" value={config.apiUrl} onChange={e => setConfig({ ...config, apiUrl: e.target.value })} /></div>
+            <div className="form-col-12"><input placeholder="API Key (optionnel)" value={config.apiKey} onChange={e => setConfig({ ...config, apiKey: e.target.value })} /></div>
+            <div className="form-col-12" style={{ display: 'flex', gap: '12px' }}>
+              <button className="btn btn-secondary" onClick={refresh}>Recharger</button>
+              <button className="btn btn-primary" onClick={triggerBackupAll} disabled={globalBusy || dbs.length === 0}>Sauvegarder toutes les bases</button>
             </div>
-          ) : (
-            dbs.map(db => (
-              <div key={db.id} style={styles.dbCard}>
-                <div style={styles.dbHeader}>
-                  <h3 style={styles.dbTitle}>{db.name}</h3>
-                  <span style={styles.engineBadge}>
-                    {db.engine === 'mysql' ? '🐬 MySQL' : '🐘 Postgres'}
-                  </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="search-filter-bar">
+          <h2 style={{ margin: 0, flex: 1 }}>Connexions enregistrées {dbs.length > 0 ? `(${filtered.length}/${dbs.length})` : ''}</h2>
+          <input aria-label="Rechercher" placeholder="Rechercher…" value={query} onChange={e => setQuery(e.target.value)} />
+          <select aria-label="Trier par" value={sort} onChange={e => setSort(e.target.value as 'name' | 'engine' | 'created')}>
+            <option value="name">Nom</option>
+            <option value="engine">Moteur</option>
+          </select>
+        </div>
+        {isLoadingList ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">⏳</div>
+            <div className="empty-state-text">Chargement…</div>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">📊</div>
+            <div className="empty-state-text">Aucune connexion enregistrée. Enregistrez une connexion à une base existante pour commencer les sauvegardes automatiques.</div>
+          </div>
+        ) : (
+          <div className="db-grid">
+            {filtered.map(db => (
+              <div key={db.id} className="db-card">
+                <div className="db-header">
+                  <h3 className="db-title">{db.name}</h3>
+                  <span className="db-badge">{db.engine === 'mysql' ? 'MySQL' : 'Postgres'}</span>
                 </div>
-                <div style={styles.dbInfo}>
-                  🔗 {db.username}@{db.host}:{db.port}/{db.database}
-                </div>
-                <div style={styles.actionButtons}>
-                  <button 
-                    onClick={() => triggerBackup(db.id)} 
-                    style={{ ...styles.actionButton, ...styles.backupBtn }}
-                    disabled={loading}
-                  >
-                    💾 Backup maintenant
-                  </button>
-                  <button 
-                    onClick={() => showBackups(db.id)} 
-                    style={{ ...styles.actionButton, ...styles.versionsBtn }}
-                    disabled={loading}
-                  >
-                    📦 Versions & Restore
-                  </button>
+                <div className="db-info">{db.username}@{db.host}:{db.port}/{db.database}</div>
+                <div className="db-actions">
+                  <button className="btn btn-secondary" onClick={() => copyDsn(db)}>DSN</button>
+                  <button className="btn btn-primary" onClick={() => triggerBackup(db.id)} disabled={globalBusy}>Backup</button>
+                  <button className="btn btn-secondary" onClick={() => openVersions(db)}>Versions</button>
+                  <button className="btn btn-danger" onClick={() => deleteDatabase(db.id)}>Supprimer</button>
                 </div>
               </div>
-            ))
-          )}
+            ))}
+          </div>
+        )}
+      </div>
+
+      {versionsModal.open && (
+        <div className="modal-backdrop" onClick={() => setVersionsModal({ open: false, items: [] })}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <strong>Versions</strong>
+                {versionsModal.db && <span className="status-badge">{versionsModal.db.name}</span>}
+              </div>
+              <button className="btn btn-ghost" onClick={() => setVersionsModal({ open: false, items: [] })}>Fermer</button>
+            </div>
+            <div className="modal-body">
+              {versionsModal.items.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-state-icon">📦</div>
+                  <div className="empty-state-text">Aucune version disponible.</div>
+                </div>
+              ) : (
+                versionsModal.items.map(v => (
+                  <div key={v.id} className="version-item">
+                    <div className="version-info">
+                      <div className="version-id">{v.id}</div>
+                      <div className="version-meta">
+                        {new Date(v.createdAt).toLocaleString()} · {(v.sizeBytes||0).toLocaleString()} octets {v.pinned ? '· Épinglée' : ''}
+                      </div>
+                    </div>
+                    <div className="version-actions">
+                      <button className="btn btn-secondary" onClick={() => actOnVersion('download', v.id)}>Télécharger</button>
+                      {v.pinned ? (
+                        <button className="btn btn-secondary" onClick={() => actOnVersion('unpin', v.id)}>Retirer</button>
+                      ) : (
+                        <button className="btn btn-secondary" onClick={() => actOnVersion('pin', v.id)}>Épingler</button>
+                      )}
+                      <button className="btn btn-primary" onClick={() => actOnVersion('restore', v.id)}>Restaurer</button>
+                      {!v.pinned && <button className="btn btn-danger" onClick={() => actOnVersion('delete', v.id)}>Supprimer</button>}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Toasts */}
+      <div className="toast-container" aria-live="polite">
+        {toasts.map(t => (
+          <div key={t.id} className={`toast ${t.type || 'info'}`}>
+            {t.text}
+          </div>
+        ))}
       </div>
     </div>
   )
