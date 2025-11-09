@@ -471,9 +471,14 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const db = Store.getDatabases().find(d => d.id === v.databaseId);
     if (!db) return reply.code(404).send({ message: 'database not found' });
 
+    // Échapper le mot de passe pour la commande shell
+    const escapeShell = (str: string) => {
+      return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
+    };
+
     const cmd = db.engine === 'mysql'
-      ? `mysql -h ${db.host} -P ${db.port} -u ${db.username} -p${db.password} ${db.database} < ${v.path}`
-      : `PGPASSWORD='${db.password}' psql -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -f ${v.path}`;
+      ? `mysql -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} < ${v.path}`
+      : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' psql` : `psql`) + ` -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -f ${v.path}`;
 
     try {
       // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
