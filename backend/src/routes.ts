@@ -1,5 +1,4 @@
 import type { FastifyInstance } from 'fastify';
-import { Store } from './store.js';
 import { encrypt, decrypt } from './crypto.js';
 
 export async function routes(app: FastifyInstance): Promise<void> {
