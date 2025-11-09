@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { exec as execCb } from 'child_process';
 import { promisify } from 'util';
 import { join } from 'path';
-import { statSync, createReadStream, rmSync } from 'fs';
+import { statSync, createReadStream, rmSync, existsSync } from 'fs';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { Store } from './store.js';
@@ -302,9 +302,21 @@ export async function routes(app: FastifyInstance): Promise<void> {
       await fs.mkdir(join(Store.paths.backupsDir, db.id), { recursive: true });
     });
 
+    // Trouver mysqldump (MAMP en priorité, sinon système)
+    const findMysqldump = () => {
+      const mampPath = '/Applications/MAMP/Library/bin/mysqldump';
+      if (existsSync(mampPath)) return mampPath;
+      return 'mysqldump'; // Fallback sur PATH système
+    };
+
+    // Échapper le mot de passe pour la commande shell
+    const escapeShell = (str: string) => {
+      return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
+    };
+
     const cmd = db.engine === 'mysql'
-      ? `mysqldump -h ${db.host} -P ${db.port} -u ${db.username} -p${db.password} ${db.database} > ${outPath}`
-      : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
+      ? `${findMysqldump()} -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${outPath}`
+      : `PGPASSWORD='${escapeShell(db.password)}' pg_dump -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p > ${outPath}`;
 
     try {
       // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
@@ -322,7 +334,9 @@ export async function routes(app: FastifyInstance): Promise<void> {
           await fs.writeFile(outPath, header + content);
         });
       } else {
+        app.log.info({ message: 'Starting backup', database: db.name, command: cmd.replace(/-p'[^']*'/, "-p'***'") });
         await exec(cmd);
+        app.log.info({ message: 'Backup completed', database: db.name, path: outPath });
       }
       const meta: BackupVersionMeta = {
         id: randomUUID(),

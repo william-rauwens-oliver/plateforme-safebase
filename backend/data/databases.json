@@ -108,5 +108,16 @@
     "username": "root",
     "password": "root",
     "database": "parcNational"
+  },
+  {
+    "id": "76bd1594-2ac0-43ca-83ce-941385da394c",
+    "createdAt": "2025-11-09T15:13:26.936Z",
+    "name": "TEst",
+    "engine": "mysql",
+    "host": "127.0.0.1",
+    "port": 8889,
+    "username": "root",
+    "password": "root",
+    "database": "finance-flow"
   }
 ]
