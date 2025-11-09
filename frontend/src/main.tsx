@@ -20,8 +20,7 @@ type Version = {
   pinned?: boolean
 }
 
-// Export for Fast Refresh
-export function usePersistentState<T>(key: string, initial: T) {
+function usePersistentState<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(() => {
     try {
       const raw = localStorage.getItem(key)
@@ -160,7 +159,9 @@ export function App() {
     const dsn = db.engine === 'mysql'
       ? `mysql://${db.username}:${encodeURIComponent(db.password)}@${db.host}:${db.port}/${db.database}`
       : `postgres://${db.username}:${encodeURIComponent(db.password)}@${db.host}:${db.port}/${db.database}`
-    navigator.clipboard.writeText(dsn).then(() => pushToast('DSN copié', 'success')).catch(() => {})
+    navigator.clipboard.writeText(dsn).then(() => pushToast('DSN copié', 'success')).catch(() => {
+      // Ignore clipboard errors
+    })
   }
 
   async function openVersions(db: Db) {

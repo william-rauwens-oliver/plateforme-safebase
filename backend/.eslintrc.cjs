@@ -4,12 +4,11 @@ module.exports = {
   extends: [
     'eslint:recommended',
   ],
-  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
-  ignorePatterns: ['dist', 'node_modules', '.eslintrc.cjs'],
+  ignorePatterns: ['dist', 'node_modules', '.eslintrc.cjs', '*.js', '*.ts'],
   rules: {
     'no-unused-vars': 'warn',
     'no-console': 'off',
