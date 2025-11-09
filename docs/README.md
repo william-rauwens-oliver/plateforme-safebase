@@ -1,63 +1,65 @@
 # 📚 Documentation SafeBase
 
-Ce dossier contient toute la documentation du projet SafeBase.
+Ce dossier contient toute la documentation du projet SafeBase, organisée par catégories.
 
-## 📖 Guides Principaux
+## 📖 Structure de la Documentation
 
-### Pour Démarrer
+### 🚀 Guides de Démarrage (`guides/`)
 - **START-HERE.md** - Guide de démarrage rapide
 - **DEMARRAGE-SIMPLE.md** - Démarrage simplifié
 - **PRESENTATION-SANS-DOCKER.md** - Présentation sans Docker
-
-### Architecture et Conformité
-- **ARCHITECTURE.md** - Architecture détaillée du projet
-- **ANALYSE-COMPLETE-CONSIGNES.md** - Analyse complète de conformité (98%)
-- **ANALYSE-CONFORMITE.md** - Analyse de conformité initiale
-- **CI-CD.md** - Documentation du pipeline CI/CD
-
-### Tests
+- **GUIDE-TEST.md** - Guide de test général
+- **GUIDE-RAPIDE-TEST.md** - Guide rapide de test
 - **TEST-FONCTIONNALITES.md** - Guide de test des fonctionnalités
 - **TEST-FRONTEND.md** - Guide complet de test frontend
 - **TEST-FRONTEND-RAPIDE.md** - Guide rapide de test frontend
 - **TEST-FRONTEND-CONSIGNES.md** - Tests selon les consignes
 - **TEST-SAUVEGARDES-AUTOMATIQUES.md** - Test des sauvegardes automatiques
-
-### Soutenance
-- **TUTO-SOUTENANCE-FRONTEND.md** - Tutoriel pour la soutenance
-- **SOUTENANCE.md** - Guide de soutenance
-- **COMMENT-PRESENTER.md** - Comment présenter le projet
-
-### Guides Techniques
-- **GUIDE-RAPIDE-TEST.md** - Guide rapide de test
-- **GUIDE-TEST.md** - Guide de test général
 - **QU-EST-CE-QUE-LA-RESTAURATION.md** - Explication de la restauration
 - **QUAND-SAUVEGARDES-AUTOMATIQUES.md** - Quand les sauvegardes automatiques
 
-### Résolution de Problèmes
-- **DEBUG-BACKUP.md** - Debug des backups
-- **SOLUTION-ERREUR-BACKUP.md** - Solutions aux erreurs de backup
+### 🔧 Dépannage (`depannage/`)
 - **CORRIGER-MAMP.md** - Correction des problèmes MAMP
 - **DEMARRER-MAMP.md** - Comment démarrer MAMP
+- **DEMARRER-MAMP-MYSQL.md** - Démarrer MySQL MAMP
 - **MAMP-NE-DEMARRE-PAS.md** - MAMP ne démarre pas
 - **PROBLEME-MAMP.md** - Problèmes MAMP
+- **RESOUDRE-MAMP-ORANGE.md** - Résoudre problème MAMP orange
+- **SOLUTION-ERREUR-BACKUP.md** - Solutions aux erreurs de backup
 - **SOLUTION-FINALE-MAMP.md** - Solution finale MAMP
 - **SOLUTION-IMMEDIATE.md** - Solution immédiate
+- **SOLUTION-MAMP-ORANGE-AUTO.md** - Solution automatique MAMP orange
 - **SOLUTION-RAPIDE-MAMP.md** - Solution rapide MAMP
+- **DEBUG-BACKUP.md** - Debug des backups
 - **STATUS-DEMARRAGE.md** - Statut du démarrage
 - **TOUT-EST-PRET.md** - Tout est prêt
+- **CHANGER-MOT-DE-PASSE-POSTGRES.md** - Changer mot de passe PostgreSQL
+- **POSTGRESQL-TRUST-MODE.md** - Mode trust PostgreSQL
 
-### Informations Techniques
-- **OU-SONT-LES-DONNEES.md** - Où sont stockées les données
-- **OU-SONT-LES-SAUVEGARDES.md** - Où sont les sauvegardes
-- **POURQUOI-ON-PEUT-CREER-UNE-BASE.md** - Pourquoi on peut créer une base
-- **IDENTIFIANTS-DEFAUT.md** - Identifiants par défaut
-- **VOS-IDENTIFIANTS.md** - Vos identifiants spécifiques
+### 📊 Analyse (`analyse/`)
+- **ANALYSE-CONFORMITE-FINALE.md** - Analyse de conformité finale (100%)
+- **ANALYSE-COMPETENCES-COMPLETE.md** - Analyse complète des compétences (98/98 points)
 
-### Résumés
-- **RESUME-CORRECTIONS.md** - Résumé des corrections
+### 📄 Documentation Principale
+- **ARCHITECTURE.md** - Architecture détaillée du projet
+- **CI-CD.md** - Documentation du pipeline CI/CD
+- **SOUTENANCE.md** - Guide de soutenance
+- **METHODOLOGIE-PROJET.md** - Méthodologie de développement
+- **MAQUETTE-INTERFACE.md** - Maquette de l'interface utilisateur
+- **USER-STORIES.md** - User stories du projet
+- **BUT-DU-PROJET.md** - But et objectifs du projet
 - **RESUME-PROJET.md** - Résumé du projet
+- **SECURITE-MOTS-DE-PASSE.md** - Sécurité des mots de passe
+
+---
+
+## 🎯 Pour Commencer
+
+1. **Nouveau sur le projet ?** → Lisez `guides/START-HERE.md`
+2. **Préparer la soutenance ?** → Lisez `SOUTENANCE.md`
+3. **Problème technique ?** → Consultez `depannage/`
+4. **Comprendre l'architecture ?** → Lisez `ARCHITECTURE.md`
 
 ---
 
 **Note** : La documentation principale du projet se trouve dans `README.md` à la racine.
-

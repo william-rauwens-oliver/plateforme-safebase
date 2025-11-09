@@ -166,7 +166,7 @@ curl -H 'x-api-key: change-me' http://localhost:8080/databases
 
 ## 📊 Conformité
 
-Le projet est **98% conforme** aux consignes. Voir [`docs/ANALYSE-COMPLETE-CONSIGNES.md`](docs/ANALYSE-COMPLETE-CONSIGNES.md) pour l'analyse détaillée.
+Le projet est **100% conforme** aux consignes. Voir [`docs/analyse/ANALYSE-CONFORMITE-FINALE.md`](docs/analyse/ANALYSE-CONFORMITE-FINALE.md) et [`docs/analyse/ANALYSE-COMPETENCES-COMPLETE.md`](docs/analyse/ANALYSE-COMPETENCES-COMPLETE.md) pour les analyses détaillées.
 
 ## 📝 License
 

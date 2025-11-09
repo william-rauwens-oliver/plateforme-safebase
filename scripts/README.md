@@ -1,33 +1,41 @@
-# 🔧 Scripts SafeBase
+# 🔧 Scripts Utilitaires - SafeBase
 
-Ce dossier contient tous les scripts utilitaires du projet.
+Ce dossier contient les scripts utilitaires pour le projet SafeBase.
 
-## 📜 Scripts Disponibles
+## 📋 Scripts Disponibles
 
-### Scripts de Test
-- **test-fonctionnalites.sh** - Teste toutes les fonctionnalités de l'API
-- **test-scheduler.sh** - Teste le scheduler et les sauvegardes automatiques
+### Tests
+- **test-fonctionnalites.sh** - Test complet des fonctionnalités de l'API
+- **test-scheduler.sh** - Test du scheduler et des sauvegardes automatiques
 
-### Scripts de Démarrage
-- **LANCER-PROJET.sh** - Lance le projet (backend + frontend)
+### Déploiement
+- **LANCER-PROJET.sh** - Script pour lancer le projet complet
 
-### Scripts de Maintenance
-- **corriger-mamp.sh** - Corrige les permissions MySQL MAMP
+### Configuration
+- **changer-mot-de-passe-postgres.sh** - Changer le mot de passe PostgreSQL
 
 ## 🚀 Utilisation
 
-Tous les scripts sont exécutables. Pour les utiliser :
-
+### Tester les fonctionnalités
 ```bash
-# Rendre exécutable (si nécessaire)
-chmod +x scripts/nom-du-script.sh
-
-# Exécuter
-./scripts/nom-du-script.sh
+./scripts/test-fonctionnalites.sh
 ```
 
-## 📝 Notes
+### Tester le scheduler
+```bash
+./scripts/test-scheduler.sh
+```
 
-- Les scripts utilisent `bash` et nécessitent les outils standards (curl, jq, etc.)
-- Certains scripts nécessitent des permissions spécifiques (sudo pour corriger-mamp.sh)
+### Lancer le projet
+```bash
+./scripts/LANCER-PROJET.sh
+```
 
+### Changer mot de passe PostgreSQL
+```bash
+./scripts/changer-mot-de-passe-postgres.sh
+```
+
+---
+
+**Note** : Assurez-vous que les scripts ont les permissions d'exécution (`chmod +x scripts/*.sh`)
