@@ -1,35 +1,144 @@
 import { randomUUID } from 'crypto';
-import { exec as execCb } from 'child_process';
-import { promisify } from 'util';
-import { join } from 'path';
-import { statSync, createReadStream, rmSync } from 'fs';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { Store } from './store.js';
-import { BackupVersionMeta, RegisteredDatabase } from './types.js';
+import { RegisteredDatabase } from './types.js';
+import mysql from 'mysql2/promise';
+import pg from 'pg';
 
-const exec = promisify(execCb);
+const { Client: PgClient } = pg;
+
+/**
+ * Teste la connexion à une base de données MySQL ou PostgreSQL
+ */
+async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (db.engine === 'mysql') {
+      const connection = await mysql.createConnection({
+        host: db.host,
+        port: db.port,
+        user: db.username,
+        password: db.password,
+        database: db.database,
+        connectTimeout: 10000,
+        enableKeepAlive: false,
+      });
+      await connection.ping();
+      await connection.query('SELECT 1');
+      await connection.end();
+      return { success: true };
+    } else {
+      const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
+      const client = new PgClient({
+        host: hostForConnection,
+        port: db.port,
+        user: db.username,
+        password: db.password || '',
+        database: db.database,
+        connectionTimeoutMillis: 10000,
+      });
+      await client.connect();
+      const result = await client.query('SELECT current_user, current_database()');
+      await client.end();
+      return { success: true };
+    }
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    if (errorMsg.includes('ECONNREFUSED') || errorMsg.includes('ENOTFOUND')) {
+      return { success: false, error: `Impossible de se connecter au serveur ${db.host}:${db.port}` };
+    }
+    if (errorMsg.includes('Access denied') || errorMsg.includes('password authentication failed')) {
+      return { success: false, error: 'Identifiants incorrects' };
+    }
+    if (errorMsg.includes('Unknown database') || errorMsg.includes('does not exist')) {
+      return { success: false, error: `La base de données "${db.database}" n'existe pas` };
+    }
+    return { success: false, error: errorMsg };
+  }
+}
 
 const RegisterSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, 'Le nom est requis'),
   engine: z.enum(['mysql', 'postgres']),
-  host: z.string().min(1),
-  port: z.number().int().positive(),
-  username: z.string().min(1),
-  password: z.string().min(1),
-  database: z.string().min(1),
+  host: z.string().min(1, 'L\'hôte est requis'),
+  port: z.number().int().positive('Le port doit être un nombre positif'),
+  username: z.string().min(1, 'L\'utilisateur est requis'),
+  password: z.string(),
+  database: z.string().min(1, 'Le nom de la base de données est requis'),
 });
 
 export async function routes(app: FastifyInstance): Promise<void> {
-  app.get('/', async () => ({ message: 'SafeBase API - see /health' }));
+  app.get('/', async () => ({ message: 'SafeBase API - Database Registration' }));
   app.get('/health', async () => ({ status: 'ok' }));
-  app.get('/scheduler/heartbeat', async () => Store.getSchedulerInfo());
-  app.post('/scheduler/heartbeat', async () => {
-    Store.setSchedulerHeartbeat(new Date().toISOString());
-    return { ok: true };
-  });
 
-  app.get('/databases', async () => Store.getDatabases());
+  app.get('/databases', async () => await Store.getDatabases());
+
+  app.get('/databases/available', async (req, reply) => {
+    const { engine, host, port, username, password } = req.query as {
+      engine?: string;
+      host?: string;
+      port?: string;
+      username?: string;
+      password?: string;
+    };
+
+    if (!engine || !host || !port || !username) {
+      return reply.code(400).send({ 
+        message: 'Paramètres manquants',
+        error: 'engine, host, port et username sont requis'
+      });
+    }
+
+    if (engine !== 'mysql' && engine !== 'postgres') {
+      return reply.code(400).send({ 
+        message: 'Moteur invalide',
+        error: 'engine doit être "mysql" ou "postgres"'
+      });
+    }
+
+    try {
+      if (engine === 'mysql') {
+        const hostForConnection = host === 'localhost' ? '127.0.0.1' : host;
+        const connection = await mysql.createConnection({
+          host: hostForConnection,
+          port: Number(port),
+          user: username,
+          password: password || '',
+          connectTimeout: 10000,
+          enableKeepAlive: false,
+        });
+        const [rows] = await connection.query('SHOW DATABASES');
+        await connection.end();
+        const databases = (rows as Array<{ Database: string }>)
+          .map(row => row.Database)
+          .filter(db => !['information_schema', 'performance_schema', 'mysql', 'sys'].includes(db));
+        return { databases };
+      } else {
+        const hostForConnection = host === 'localhost' ? '127.0.0.1' : host;
+        const client = new PgClient({
+          host: hostForConnection,
+          port: Number(port),
+          user: username,
+          password: password || '',
+          database: 'postgres',
+          connectionTimeoutMillis: 10000,
+        });
+        await client.connect();
+        const result = await client.query<{ datname: string }>(
+          "SELECT datname FROM pg_database WHERE datistemplate = false ORDER BY datname"
+        );
+        await client.end();
+        const databases = result.rows.map(row => row.datname);
+        return { databases };
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      return reply.code(400).send({ 
+        message: 'Impossible de lister les bases de données',
+        error: errorMsg
+      });
+    }
+  });
 
   app.post('/databases', async (req, reply) => {
     const parsed = RegisterSchema.safeParse(req.body);
@@ -37,182 +146,19 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const body = parsed.data;
     const now = new Date().toISOString();
     const db: RegisteredDatabase = { id: randomUUID(), createdAt: now, ...body };
-    const all = Store.getDatabases();
+    
+    const testResult = await testDatabaseConnection(db);
+    if (!testResult.success) {
+      return reply.code(400).send({ 
+        message: 'Connexion à la base de données échouée',
+        error: testResult.error || 'Impossible de se connecter à la base de données'
+      });
+    }
+    
+    const all = await Store.getDatabases();
     all.push(db);
-    Store.saveDatabases(all);
+    await Store.saveDatabases(all);
     return db;
   });
-
-  app.post('/backup/:id', async (req, reply) => {
-    const { id } = req.params as { id: string };
-    const db = Store.getDatabases().find(d => d.id === id);
-    if (!db) return reply.code(404).send({ message: 'database not found' });
-    const ts = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `${db.name}_${ts}.${db.engine === 'mysql' ? 'sql' : 'sql'}`;
-    const outPath = join(Store.paths.backupsDir, db.id, filename);
-
-    // ensure per-db dir exists
-    await import('fs/promises').then(async fs => {
-      await fs.mkdir(join(Store.paths.backupsDir, db.id), { recursive: true });
-    });
-
-    const cmd = db.engine === 'mysql'
-      ? `mysqldump -h ${db.host} -P ${db.port} -u ${db.username} -p${db.password} ${db.database} > ${outPath}`
-      : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
-
-    try {
-      await exec(cmd);
-      const meta: BackupVersionMeta = {
-        id: randomUUID(),
-        databaseId: db.id,
-        createdAt: new Date().toISOString(),
-        path: outPath,
-        engine: db.engine,
-      };
-      const s = statSync(outPath);
-      meta.sizeBytes = s.size;
-      const versions = Store.getVersions();
-      versions.push(meta);
-      Store.saveVersions(versions);
-      // Retention policy: keep max N versions per DB (env RETAIN_PER_DB, default 10)
-      const retain = Number(process.env.RETAIN_PER_DB || 10);
-      const perDb = versions.filter(v => v.databaseId === db.id)
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-      const excess = perDb.filter(v => !v.pinned).slice(retain);
-      for (const ex of excess) {
-        try { rmSync(ex.path, { force: true }); } catch {}
-      }
-      const kept = versions.filter(v => !excess.some(e => e.id === v.id));
-      Store.saveVersions(kept);
-      return meta;
-    } catch (err) {
-      app.log.error(err);
-      await sendAlert('backup_failed', { id, error: String(err) });
-      return reply.code(500).send({ message: 'backup failed' });
-    }
-  });
-
-  app.post('/backup-all', async (_req, reply) => {
-    const results: Array<{ id: string; ok: boolean }> = [];
-    for (const db of Store.getDatabases()) {
-      const ts = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${db.name}_${ts}.sql`;
-      const outPath = join(Store.paths.backupsDir, db.id, filename);
-      await import('fs/promises').then(async fs => {
-        await fs.mkdir(join(Store.paths.backupsDir, db.id), { recursive: true });
-      });
-      const cmd = db.engine === 'mysql'
-        ? `mysqldump -h ${db.host} -P ${db.port} -u ${db.username} -p${db.password} ${db.database} > ${outPath}`
-        : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
-      try {
-        await exec(cmd);
-        const meta: BackupVersionMeta = {
-          id: randomUUID(),
-          databaseId: db.id,
-          createdAt: new Date().toISOString(),
-          path: outPath,
-          engine: db.engine,
-        };
-        const s = statSync(outPath);
-        meta.sizeBytes = s.size;
-        const versions = Store.getVersions();
-        versions.push(meta);
-        Store.saveVersions(versions);
-        // retention per DB
-        const retain = Number(process.env.RETAIN_PER_DB || 10);
-        const perDb = versions.filter(v => v.databaseId === db.id)
-          .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-        const excess = perDb.filter(v => !v.pinned).slice(retain);
-        for (const ex of excess) {
-          try { rmSync(ex.path, { force: true }); } catch {}
-        }
-        const kept = versions.filter(v => !excess.some(e => e.id === v.id));
-        Store.saveVersions(kept);
-        results.push({ id: db.id, ok: true });
-      } catch (err) {
-        await sendAlert('backup_failed', { id: db.id, error: String(err) });
-        results.push({ id: db.id, ok: false });
-      }
-    }
-    return { results };
-  });
-
-  app.get('/backups/:id', async (req, reply) => {
-    const { id } = req.params as { id: string };
-    const versions = Store.getVersions().filter(v => v.databaseId === id);
-    return versions.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  });
-
-  app.post('/restore/:versionId', async (req, reply) => {
-    const { versionId } = req.params as { versionId: string };
-    const v = Store.getVersions().find(x => x.id === versionId);
-    if (!v) return reply.code(404).send({ message: 'version not found' });
-    const db = Store.getDatabases().find(d => d.id === v.databaseId);
-    if (!db) return reply.code(404).send({ message: 'database not found' });
-
-    const cmd = db.engine === 'mysql'
-      ? `mysql -h ${db.host} -P ${db.port} -u ${db.username} -p${db.password} ${db.database} < ${v.path}`
-      : `PGPASSWORD='${db.password}' psql -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -f ${v.path}`;
-
-    try {
-      await exec(cmd);
-      return { status: 'restored', versionId };
-    } catch (err) {
-      app.log.error(err);
-      await sendAlert('restore_failed', { versionId, error: String(err) });
-      return reply.code(500).send({ message: 'restore failed' });
-    }
-  });
-
-  // Version management
-  app.post('/versions/:versionId/pin', async (req, reply) => {
-    const { versionId } = req.params as { versionId: string };
-    const versions = Store.getVersions();
-    const v = versions.find(x => x.id === versionId);
-    if (!v) return reply.code(404).send({ message: 'version not found' });
-    v.pinned = true;
-    Store.saveVersions(versions);
-    return v;
-  });
-
-  app.post('/versions/:versionId/unpin', async (req, reply) => {
-    const { versionId } = req.params as { versionId: string };
-    const versions = Store.getVersions();
-    const v = versions.find(x => x.id === versionId);
-    if (!v) return reply.code(404).send({ message: 'version not found' });
-    v.pinned = false;
-    Store.saveVersions(versions);
-    return v;
-  });
-
-  app.get('/versions/:versionId/download', async (req, reply) => {
-    const { versionId } = req.params as { versionId: string };
-    const v = Store.getVersions().find(x => x.id === versionId);
-    if (!v) return reply.code(404).send({ message: 'version not found' });
-    reply.header('Content-Type', 'application/sql');
-    reply.header('Content-Disposition', `attachment; filename="${v.path.split('/').pop()}"`);
-    return reply.send(createReadStream(v.path));
-  });
-
-  app.delete('/versions/:versionId', async (req, reply) => {
-    const { versionId } = req.params as { versionId: string };
-    const versions = Store.getVersions();
-    const v = versions.find(x => x.id === versionId);
-    if (!v) return reply.code(404).send({ message: 'version not found' });
-    if (v.pinned) return reply.code(400).send({ message: 'version is pinned' });
-    try { rmSync(v.path, { force: true }); } catch {}
-    const kept = versions.filter(x => x.id !== versionId);
-    Store.saveVersions(kept);
-    return { deleted: true };
-  });
 }
-async function sendAlert(type: string, payload: unknown) {
-  const url = process.env.ALERT_WEBHOOK_URL;
-  if (!url) return;
-  try {
-    const body = JSON.stringify({ type, timestamp: new Date().toISOString(), payload });
-    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-  } catch {}
-}
-
 
