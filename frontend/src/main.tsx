@@ -254,6 +254,14 @@ export function App() {
           }
           const data = await res.json()
           pushToast('Restauration réussie', 'success')
+          // Recharger les versions après une restauration réussie
+          const items = await fetch(`${config.apiUrl}/backups/${versionsModal.db.id}`, { headers }).then(r => r.json())
+          const sorted = items.sort((a: Version, b: Version) => {
+            if (a.pinned && !b.pinned) return -1;
+            if (!a.pinned && b.pinned) return 1;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          })
+          setVersionsModal(v => ({ ...v, items: sorted }))
         } catch (err) {
           const errorMsg = err instanceof Error ? err.message : 'Erreur lors de la restauration'
           pushToast(errorMsg, 'error')
@@ -261,6 +269,7 @@ export function App() {
         } finally {
           setGlobalBusy(false)
         }
+        return
       } else if (cmd === 'pin') {
         await fetch(`${config.apiUrl}/versions/${vid}/pin`, { method: 'POST', headers })
         pushToast('Version épinglée', 'success')
@@ -272,6 +281,7 @@ export function App() {
         await fetch(`${config.apiUrl}/versions/${vid}`, { method: 'DELETE', headers })
         pushToast('Version supprimée', 'success')
       }
+      // Recharger les versions après pin/unpin/delete
       const items = await fetch(`${config.apiUrl}/backups/${versionsModal.db.id}`, { headers }).then(r => r.json())
       // Trier : épinglées en premier, puis par date (plus récent d'abord)
       const sorted = items.sort((a: Version, b: Version) => {
