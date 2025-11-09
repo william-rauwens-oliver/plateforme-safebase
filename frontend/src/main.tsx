@@ -361,7 +361,7 @@ export function App() {
               </select>
               <button 
                 type="button"
-                className="btn btn-secondary" 
+                className="btn btn-success" 
                 onClick={async () => {
                   if (!form.host || !form.port || !form.username) {
                     pushToast('Remplissez d\'abord hôte, port et utilisateur', 'error');
