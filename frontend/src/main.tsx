@@ -185,6 +185,38 @@ export function App() {
     })
   }
 
+  /**
+   * Supprime une base de données et toutes ses sauvegardes
+   * @param id - ID de la base de données à supprimer
+   */
+  async function deleteDatabase(id: string) {
+    const db = dbs.find(d => d.id === id);
+    if (!db) return;
+    
+    if (!confirm(`Supprimer définitivement la base "${db.name}" et toutes ses sauvegardes ?`)) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${config.apiUrl}/databases/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Erreur lors de la suppression');
+      }
+      
+      pushToast('Base supprimée', 'success');
+      refresh();
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+      pushToast(errorMsg, 'error');
+      console.error(err);
+    }
+  }
+
   async function openVersions(db: Db) {
     try {
       const items = await fetch(`${config.apiUrl}/backups/${db.id}`, { headers }).then(r => r.json())
