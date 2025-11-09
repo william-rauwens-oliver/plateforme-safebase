@@ -7,7 +7,7 @@
     "host": "127.0.0.1",
     "port": 8889,
     "username": "root",
-    "password": "Q5Kb67BCbygnrOihDsYz4A==:oLJKeEXHOtlxib1XDrFsi1n8Qcj0Brs+LCcei7Q+dak=:6TJG5GAwDK3gRUi9Y6/JCzozOpW6aOTWDel96phkyh6bXKsSBU5Vi7LzDT4P69fBTtAo4pBC7KAnW4/NWVLNfKZtJ6RimHibaj9FQp2vdiOlFQL0cQS2ADpKNVzlh34rZ8uol2loCg==:WHrvIK9xy89fRn9OwTqRxw==",
+    "password": "I6n/95ubFUUYe3aottx61A==:xwjgPFBwBGDh88lM0TrLfv4OZquUaJmxQ872NZl6PAc=:hNw9ZpxQp4bgZ2J6yDA/YPaIwJUpzW+ofbWcpeTHWUBZ42/JY8n5eitMGmVYEh2I8PdpAEPPd6TfA9tc5DY0/LnKDqsBqwVjw+se54Il4XNLQi/4j+3LWgEIhNI/tx+bIprwFb0mIw==:ZBrxHahX+aLFcXw2ZwX7Yg==",
     "database": "symfony_e"
   },
   {
@@ -18,7 +18,7 @@
     "host": "127.0.0.1",
     "port": 8889,
     "username": "root",
-    "password": "wkD+qkgO/45Q7mT39Q2/Vg==:nD73IggRNE5egwaW1V8LHjudi8IQf3BItLKGa+ZSyBk=:lklPU3mwMctqBxZMquw6ekZpzawjKpEktXkRMNh8GLTjaX0iS1/DisAopOERDbd2RmzX00P5T9AvKB0HjxEELBwMjKXBVhfnqHgLpAsC5/7CLcJZSa6qjb6J6Q6clfbhkxBhcQKZqQ==:M+Fgyk2HBKK6uPUfdh90Mw==",
+    "password": "b47d8IkP6cyEYsU9W+nE2g==:sDkT8DLQfkHgSIibqxpZgI1YPu3Hb+IcmmUIjXHhYAw=:nu8Lv3o+fy8zA203swyLDHe8KcxmzNd/i/JLGi+L+Z4qJuWAbT9kElJfwziEO96zZB0gQUmpUwXPlLqXnk5tadmve+oBZV2FmLPmuQ79wxrH5+9bDUzlQLuCcY8iWRUbqSZZjwYANA==:8SduTlrxcA1V4aFFNyn/2w==",
     "database": "lp_official"
   },
   {
@@ -29,7 +29,7 @@
     "host": "localhost",
     "port": 5432,
     "username": "postgres",
-    "password": "6k9KPWVWscMIxoyhairACg==:5d/AAWp1SO8Wpz1oQdpS+zV7FNNYHCFla3TP/g68oS0=:YIrSZ38g5gqht6caJOzOHa6xGIDigA/UgHeGzcLPXu0df5ifuPuUCbObzuy5fdCSeAsuLZG/c7sclIcrng3NNcdQyBwLE0nPr5vVHOYyTYJrIt9zeF3+La98xFLqEVU2+jTP+C5dEQ==:l/Ds/rO0EWH1KW1ixGVhlA==",
+    "password": "EcWSF2CCssJHQsu8B1P/Ow==:jvO2CyXALYr5KLL1KPcsraW0h/G4KNwJMP7d4qJkevQ=:4vvSvqPAbedssj/kH2PiRWh9sLM2EWnxDFgi2eUe4HTglAu7ET4ItYlGm2YD9mdCA5qKyTqZOjIpqUerHISx62nR23YxLxYPHrX10sYosqtI5V3WQzt+P1kpevcjW5//zAN3kIb4VQ==:HEwqF0iXt1kMhja2OzLWGQ==",
     "database": "symfony-e"
   }
 ]

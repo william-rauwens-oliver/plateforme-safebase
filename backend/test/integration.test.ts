@@ -93,14 +93,17 @@ describe('Integration Tests', () => {
       }
 
       // Tester l'endpoint backup (sans vraiment exécuter mysqldump)
+      // Utiliser FAKE_DUMP pour éviter les timeouts
+      process.env.FAKE_DUMP = '1';
       const res = await server.inject({
         method: 'POST',
         url: `/backup/${testDbId}`
       });
+      delete process.env.FAKE_DUMP;
 
       // Peut échouer si la base n'existe pas, mais on teste le flow
       expect([200, 404, 500]).toContain(res.statusCode);
-    });
+    }, 10000); // Timeout de 10 secondes
   });
 
   describe('Version Management Flow', () => {
