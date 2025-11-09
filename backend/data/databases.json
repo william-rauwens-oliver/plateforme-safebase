@@ -119,5 +119,27 @@
     "username": "root",
     "password": "root",
     "database": "finance-flow"
+  },
+  {
+    "id": "26179aa7-ec2a-49e4-8630-84509801dd7d",
+    "createdAt": "2025-11-09T15:16:37.056Z",
+    "name": "45",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres",
+    "database": "postgres"
+  },
+  {
+    "id": "6da75bdf-27da-43c6-b341-6512ecaba37f",
+    "createdAt": "2025-11-09T15:16:44.708Z",
+    "name": "rgrg",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgresgg",
+    "database": "fittracker"
   }
 ]

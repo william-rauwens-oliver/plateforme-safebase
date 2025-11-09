@@ -386,5 +386,13 @@
     "engine": "mysql",
     "sizeBytes": 150,
     "pinned": true
+  },
+  {
+    "id": "b0189ac0-21c1-49fa-8fda-09f7c85b7b6c",
+    "databaseId": "ea544af0-1d52-464b-8301-f4f67ff97944",
+    "createdAt": "2025-11-09T15:15:15.547Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/ea544af0-1d52-464b-8301-f4f67ff97944/SauvegardeParc_2025-11-09T15-15-14-962Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 42185
   }
 ]

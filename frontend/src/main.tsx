@@ -334,7 +334,7 @@ export function App() {
                   setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: 'root', password: 'root', database: '' });
                 } else {
                   // PostgreSQL Homebrew par défaut
-                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: 'postgres', database: '' });
+                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: 'root', database: '' });
                 }
                 setAvailableDatabases([]); // Réinitialiser la liste
               }}>

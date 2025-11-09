@@ -317,9 +317,9 @@ export async function routes(app: FastifyInstance): Promise<void> {
       return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
     };
 
-    const cmd = db.engine === 'mysql'
-      ? `${findMysqldump()} -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${outPath}`
-      : `PGPASSWORD='${escapeShell(db.password)}' pg_dump -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p > ${outPath}`;
+      const cmd = db.engine === 'mysql'
+        ? `${findMysqldump()} -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${outPath}`
+        : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`) + ` -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p > ${outPath}`;
 
     try {
       // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
@@ -402,7 +402,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
       const cmd = db.engine === 'mysql'
         ? `${findMysqldump()} -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${outPath}`
-        : `PGPASSWORD='${escapeShell(db.password)}' pg_dump -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p > ${outPath}`;
+        : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`) + ` -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p > ${outPath}`;
     try {
       // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
       // Pour activer le mode fake (tests uniquement), définir FAKE_DUMP=1
