@@ -20,6 +20,12 @@ type Version = {
   pinned?: boolean
 }
 
+/**
+ * Hook personnalisé pour gérer un état persistant dans localStorage
+ * @param key - Clé de stockage dans localStorage
+ * @param initial - Valeur initiale si aucune valeur n'est trouvée
+ * @returns Tuple [value, setValue] similaire à useState
+ */
 function usePersistentState<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(() => {
     try {
@@ -48,6 +54,11 @@ interface ImportMeta {
   env?: ImportMetaEnv;
 }
 
+/**
+ * Composant principal de l'application SafeBase
+ * Gère l'interface utilisateur complète pour la gestion des bases de données
+ * @returns Composant React de l'application
+ */
 export function App() {
   const [config, setConfig] = usePersistentState('safebase-config', {
     apiUrl: (import.meta as ImportMeta).env?.VITE_API_URL || 'http://localhost:8080',
@@ -88,11 +99,17 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.apiUrl, config.apiKey, headers])
 
+  /**
+   * Vérifie l'état de santé de l'API
+   */
   function checkHealth() {
     setHealth('pending')
     fetch(`${config.apiUrl}/health`).then(r => r.json()).then(() => setHealth('ok')).catch(() => setHealth('down'))
   }
 
+  /**
+   * Rafraîchit la liste des bases de données depuis l'API
+   */
   function refresh() {
     setIsLoadingList(true)
     fetch(`${config.apiUrl}/databases`, { headers })
@@ -102,6 +119,10 @@ export function App() {
       .finally(() => setIsLoadingList(false))
   }
 
+  /**
+   * Soumet le formulaire d'ajout d'une nouvelle base de données
+   * @param e - Événement de soumission du formulaire
+   */
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)

@@ -42,22 +42,45 @@ function writeJson(file: string, data: unknown): void {
   writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
+/**
+ * Store pour la gestion des données persistantes (JSON file-based)
+ * Gère les bases de données, versions de backup et état du scheduler
+ */
 export const Store = {
+  /**
+   * Initialise le store en créant les répertoires et fichiers nécessaires
+   */
   init(): void {
     ensureDirs();
     if (!existsSync(dbsFile)) writeJson(dbsFile, [] as RegisteredDatabase[]);
     if (!existsSync(versionsFile)) writeJson(versionsFile, [] as BackupVersionMeta[]);
     if (!existsSync(schedulerFile)) writeJson(schedulerFile, { lastHeartbeat: null as string | null });
   },
+  /**
+   * Récupère toutes les bases de données enregistrées
+   * @returns Liste des bases de données
+   */
   getDatabases(): RegisteredDatabase[] {
     return readJson<RegisteredDatabase[]>(dbsFile, []);
   },
+  /**
+   * Sauvegarde la liste des bases de données
+   * @param dbs - Liste des bases de données à sauvegarder
+   */
   saveDatabases(dbs: RegisteredDatabase[]): void {
     writeJson(dbsFile, dbs);
   },
+  /**
+   * Récupère toutes les versions de backup
+   * @returns Liste des versions de backup
+   */
   getVersions(): BackupVersionMeta[] {
     return readJson<BackupVersionMeta[]>(versionsFile, []);
   },
+  /**
+   * Sauvegarde la liste des versions de backup
+   * @param v - Liste des versions à sauvegarder
+   */
   saveVersions(v: BackupVersionMeta[]): void {
     writeJson(versionsFile, v);
   },

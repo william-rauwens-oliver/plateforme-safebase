@@ -13,7 +13,11 @@ import pg from 'pg';
 const exec = promisify(execCb);
 const { Client: PgClient } = pg;
 
-// Fonction pour tester la connexion à une base de données
+/**
+ * Teste la connexion à une base de données MySQL ou PostgreSQL
+ * @param db - Base de données à tester
+ * @returns Résultat du test avec succès ou message d'erreur
+ */
 async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success: boolean; error?: string }> {
   try {
     if (db.engine === 'mysql') {
@@ -49,6 +53,9 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
   }
 }
 
+/**
+ * Schéma de validation Zod pour l'enregistrement d'une base de données
+ */
 const RegisterSchema = z.object({
   name: z.string().min(1),
   engine: z.enum(['mysql', 'postgres']),
@@ -59,6 +66,10 @@ const RegisterSchema = z.object({
   database: z.string().min(1),
 });
 
+/**
+ * Définit toutes les routes de l'API SafeBase
+ * @param app - Instance Fastify
+ */
 export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/', async () => ({ message: 'SafeBase API - see /health' }));
   app.get('/health', async () => ({ status: 'ok' }));
