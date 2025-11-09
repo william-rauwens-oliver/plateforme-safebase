@@ -136,6 +136,79 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.get('/databases', async () => Store.getDatabases());
 
+  /**
+   * Liste les bases de données disponibles sur un serveur MySQL ou PostgreSQL
+   * @param query - Paramètres : engine, host, port, username, password
+   */
+  app.get('/databases/available', async (req, reply) => {
+    const { engine, host, port, username, password } = req.query as {
+      engine?: string;
+      host?: string;
+      port?: string;
+      username?: string;
+      password?: string;
+    };
+
+    if (!engine || !host || !port || !username) {
+      return reply.code(400).send({ 
+        message: 'Paramètres manquants',
+        error: 'engine, host, port et username sont requis'
+      });
+    }
+
+    if (engine !== 'mysql' && engine !== 'postgres') {
+      return reply.code(400).send({ 
+        message: 'Moteur invalide',
+        error: 'engine doit être "mysql" ou "postgres"'
+      });
+    }
+
+    try {
+      if (engine === 'mysql') {
+        const connection = await mysql.createConnection({
+          host,
+          port: Number(port),
+          user: username,
+          password: password || '',
+          connectTimeout: 10000,
+          enableKeepAlive: false,
+        });
+        const [rows] = await connection.query<Array<{ Database: string }>>('SHOW DATABASES');
+        await connection.end();
+        // Filtrer les bases système
+        const databases = (rows as Array<{ Database: string }>)
+          .map(row => row.Database)
+          .filter(db => !['information_schema', 'performance_schema', 'mysql', 'sys'].includes(db));
+        return { databases };
+      } else {
+        // PostgreSQL
+        const hostForConnection = host === 'localhost' ? '127.0.0.1' : host;
+        const client = new PgClient({
+          host: hostForConnection,
+          port: Number(port),
+          user: username,
+          password: password || '',
+          database: 'postgres', // Se connecter à postgres pour lister les bases
+          connectionTimeoutMillis: 10000,
+        });
+        await client.connect();
+        const result = await client.query<{ datname: string }>(
+          "SELECT datname FROM pg_database WHERE datistemplate = false ORDER BY datname"
+        );
+        await client.end();
+        const databases = result.rows.map(row => row.datname);
+        return { databases };
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      app.log.error({ message: 'Failed to list databases', error: errorMsg, engine, host, port });
+      return reply.code(400).send({ 
+        message: 'Impossible de lister les bases de données',
+        error: errorMsg
+      });
+    }
+  });
+
   app.delete('/databases/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
     const all = Store.getDatabases();

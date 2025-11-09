@@ -78,8 +78,10 @@ export function App() {
     database: string;
   }>({
     name: '', engine: 'mysql', host: '127.0.0.1', port: 8889,
-    username: 'root', password: 'root', database: 'safebase'
+    username: 'root', password: 'root', database: ''
   })
+  const [availableDatabases, setAvailableDatabases] = useState<string[]>([])
+  const [loadingDatabases, setLoadingDatabases] = useState(false)
   const [versionsModal, setVersionsModal] = useState<{ open: boolean, db?: Db, items: Version[] }>({ open: false, items: [] })
   const [toasts, setToasts] = useState<Array<{ id: string, text: string, type?: 'success'|'error'|'info' }>>([])
   const [theme, setTheme] = usePersistentState<'dark'|'light'>('safebase-theme', 'dark')
@@ -326,11 +328,12 @@ export function App() {
                 // Mettre à jour les valeurs par défaut selon le moteur (bases locales)
                 if (newEngine === 'mysql') {
                   // MAMP MySQL par défaut
-                  setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: 'root', password: 'root' });
+                  setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: 'root', password: 'root', database: '' });
                 } else {
                   // PostgreSQL Homebrew par défaut
-                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: '' });
+                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: 'postgres', database: '' });
                 }
+                setAvailableDatabases([]); // Réinitialiser la liste
               }}>
                 <option value="mysql">MySQL</option>
                 <option value="postgres">PostgreSQL</option>
@@ -338,9 +341,73 @@ export function App() {
             </div>
             <div className="form-col-6"><input placeholder="Hôte" value={form.host} onChange={e => setForm({ ...form, host: e.target.value })} required /></div>
             <div className="form-col-6"><input type="number" placeholder="Port" value={form.port} onChange={e => setForm({ ...form, port: Number(e.target.value) })} required /></div>
-            <div className="form-col-6"><input placeholder="Utilisateur" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required /></div>
-            <div className="form-col-6"><input type="password" placeholder="Mot de passe" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></div>
-            <div className="form-col-12"><input placeholder="Nom de la base de données" value={form.database} onChange={e => setForm({ ...form, database: e.target.value })} required /></div>
+            <div className="form-col-6"><input placeholder="Utilisateur" value={form.username} onChange={e => setForm({ ...form, username: e.target.value, database: '' })} required /></div>
+            <div className="form-col-6"><input type="password" placeholder="Mot de passe" value={form.password} onChange={e => setForm({ ...form, password: e.target.value, database: '' })} required /></div>
+            <div className="form-col-12" style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <select 
+                value={form.database} 
+                onChange={e => setForm({ ...form, database: e.target.value })} 
+                required
+                style={{ flex: 1 }}
+                disabled={loadingDatabases || availableDatabases.length === 0}
+              >
+                <option value="">{loadingDatabases ? 'Chargement...' : availableDatabases.length === 0 ? 'Cliquez sur "Récupérer les bases"' : 'Sélectionnez une base'}</option>
+                {availableDatabases.map(db => (
+                  <option key={db} value={db}>{db}</option>
+                ))}
+              </select>
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={async () => {
+                  if (!form.host || !form.port || !form.username) {
+                    pushToast('Remplissez d\'abord hôte, port et utilisateur', 'error');
+                    return;
+                  }
+                  setLoadingDatabases(true);
+                  try {
+                    const params = new URLSearchParams({
+                      engine: form.engine,
+                      host: form.host,
+                      port: String(form.port),
+                      username: form.username,
+                      password: form.password
+                    });
+                    const res = await fetch(`${config.apiUrl}/databases/available?${params}`, { headers });
+                    if (!res.ok) {
+                      const errorData = await res.json().catch(() => ({}));
+                      throw new Error(errorData.error || errorData.message || 'Erreur lors de la récupération');
+                    }
+                    const data = await res.json();
+                    setAvailableDatabases(data.databases || []);
+                    if (data.databases && data.databases.length > 0) {
+                      pushToast(`${data.databases.length} base(s) trouvée(s)`, 'success');
+                    } else {
+                      pushToast('Aucune base de données trouvée', 'info');
+                    }
+                  } catch (err) {
+                    const errorMsg = err instanceof Error ? err.message : 'Erreur lors de la récupération';
+                    pushToast(errorMsg, 'error');
+                    setAvailableDatabases([]);
+                  } finally {
+                    setLoadingDatabases(false);
+                  }
+                }}
+                disabled={loadingDatabases || !form.host || !form.port || !form.username}
+                style={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+              >
+                {loadingDatabases ? '...' : 'Récupérer'}
+              </button>
+            </div>
+            {form.database && (
+              <div className="form-col-12">
+                <input 
+                  placeholder="Ou tapez le nom de la base manuellement" 
+                  value={form.database} 
+                  onChange={e => setForm({ ...form, database: e.target.value })} 
+                />
+              </div>
+            )}
             <div className="form-col-12"><button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Ajout...' : 'Ajouter la base'}</button></div>
           </form>
         </div>
