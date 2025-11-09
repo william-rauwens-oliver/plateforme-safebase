@@ -38,22 +38,54 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
     } else {
       // PostgreSQL
       // Forcer l'authentification par mot de passe en utilisant TCP/IP
+      // Utiliser 127.0.0.1 au lieu de localhost pour éviter le socket Unix
+      const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
+      
       const client = new PgClient({
-        host: db.host === 'localhost' ? '127.0.0.1' : db.host, // Forcer TCP/IP au lieu du socket Unix
+        host: hostForConnection,
         port: db.port,
         user: db.username,
-        password: db.password,
+        password: db.password || '', // Permettre mot de passe vide
         database: db.database,
         connectionTimeoutMillis: 10000, // 10 secondes max
       });
-      await client.connect();
-      // Test réel : requête simple pour vérifier que la base existe ET que l'authentification fonctionne
-      const result = await client.query('SELECT current_user, current_database()');
-      // Vérifier que l'utilisateur connecté correspond bien à celui demandé
-      if (result.rows[0]?.current_user !== db.username) {
-        await client.end();
-        return { success: false, error: `Utilisateur connecté (${result.rows[0]?.current_user}) ne correspond pas à l'utilisateur demandé (${db.username})` };
+      
+      try {
+        await client.connect();
+      } catch (connectErr) {
+        // Si la connexion échoue, c'est probablement une erreur d'authentification
+        const errorMsg = connectErr instanceof Error ? connectErr.message : String(connectErr);
+        if (errorMsg.includes('password authentication failed') || errorMsg.includes('authentication failed')) {
+          return { success: false, error: 'Identifiants incorrects : utilisateur ou mot de passe invalide' };
+        }
+        throw connectErr; // Relancer pour traitement normal
       }
+      
+      // Test réel : requête simple pour vérifier que la base existe ET que l'authentification fonctionne
+      const result = await client.query('SELECT current_user, current_database(), has_database_privilege($1, $2, $3) as can_connect', [db.username, db.database, 'CONNECT']);
+      
+      // Vérifier que l'utilisateur connecté correspond bien à celui demandé
+      const connectedUser = result.rows[0]?.current_user;
+      if (connectedUser !== db.username) {
+        await client.end();
+        return { success: false, error: `Utilisateur connecté (${connectedUser}) ne correspond pas à l'utilisateur demandé (${db.username})` };
+      }
+      
+      // Vérifier que la base de données existe et que l'utilisateur a les droits
+      const connectedDb = result.rows[0]?.current_database;
+      if (connectedDb !== db.database) {
+        await client.end();
+        return { success: false, error: `Base de données connectée (${connectedDb}) ne correspond pas à celle demandée (${db.database})` };
+      }
+      
+      // Test supplémentaire : essayer une opération qui nécessite des privilèges
+      try {
+        await client.query('SELECT pg_backend_pid()');
+      } catch (privErr) {
+        await client.end();
+        return { success: false, error: 'Connexion réussie mais l\'utilisateur n\'a pas les privilèges nécessaires' };
+      }
+      
       await client.end();
       return { success: true };
     }
