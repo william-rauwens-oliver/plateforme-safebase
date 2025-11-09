@@ -57,13 +57,13 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
  * Schéma de validation Zod pour l'enregistrement d'une base de données
  */
 const RegisterSchema = z.object({
-  name: z.string().min(1),
-  engine: z.enum(['mysql', 'postgres']),
-  host: z.string().min(1),
-  port: z.number().int().positive(),
-  username: z.string().min(1),
-  password: z.string().min(1),
-  database: z.string().min(1),
+  name: z.string().min(1, 'Le nom est requis'),
+  engine: z.enum(['mysql', 'postgres'], { errorMap: () => ({ message: 'Le moteur doit être mysql ou postgres' }) }),
+  host: z.string().min(1, 'L\'hôte est requis'),
+  port: z.number().int().positive('Le port doit être un nombre positif'),
+  username: z.string().min(1, 'L\'utilisateur est requis'),
+  password: z.string(), // Permettre mot de passe vide pour PostgreSQL
+  database: z.string().min(1, 'Le nom de la base de données est requis'),
 });
 
 /**
@@ -122,24 +122,24 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const db: RegisteredDatabase = { id: randomUUID(), createdAt: now, ...body };
     
     // Vérifier la connexion avant d'enregistrer
-    // Sauter la vérification si FAKE_DUMP est activé (mode test)
-    // OU si VALIDATE_CONNECTION est explicitement désactivé
-    const skipValidation = process.env.FAKE_DUMP === '1' || process.env.VALIDATE_CONNECTION === '0';
+    // La validation est TOUJOURS activée par défaut
+    // Pour la désactiver (mode test uniquement), définir VALIDATE_CONNECTION=0 explicitement
+    const skipValidation = process.env.VALIDATE_CONNECTION === '0';
     
     if (!skipValidation) {
-      app.log.info({ message: 'Testing database connection', database: db.name, host: db.host, port: db.port });
+      app.log.info({ message: 'Testing database connection', database: db.name, host: db.host, port: db.port, engine: db.engine });
       const testResult = await testDatabaseConnection(db);
       if (!testResult.success) {
         app.log.error({ message: 'Database connection failed', database: db.name, error: testResult.error });
         return reply.code(400).send({ 
           message: 'Connexion à la base de données échouée',
           error: testResult.error || 'Impossible de se connecter à la base de données',
-          hint: 'Vérifiez que :\n- La base de données existe\n- Les identifiants sont corrects\n- Le serveur MySQL/PostgreSQL est démarré\n- Le port est correct (8889 pour MAMP, 3306 pour MySQL standard)'
+          hint: 'Vérifiez que :\n- La base de données existe\n- Les identifiants sont corrects\n- Le serveur MySQL/PostgreSQL est démarré\n- Le port est correct (8889 pour MAMP MySQL, 3306 pour MySQL standard, 5432 pour PostgreSQL)'
         });
       }
       app.log.info({ message: 'Database connection successful', database: db.name });
     } else {
-      app.log.info({ message: 'Skipping database connection validation', database: db.name, reason: skipValidation ? 'FAKE_DUMP or VALIDATE_CONNECTION=0' : 'none' });
+      app.log.warn({ message: 'Skipping database connection validation (VALIDATE_CONNECTION=0)', database: db.name });
     }
     
     const all = Store.getDatabases();
