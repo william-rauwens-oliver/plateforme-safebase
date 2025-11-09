@@ -1,6 +1,10 @@
 import type { FastifyInstance } from 'fastify';
-import { Store } from './store.js';
 
+/**
+ * Envoie une alerte via webhook
+ * @param type - Type d'alerte (ex: 'backup_failed', 'restore_failed')
+ * @param payload - Données de l'alerte
+ */
 async function sendAlert(type: string, payload: unknown) {
   const url = process.env.ALERT_WEBHOOK_URL;
   if (!url) return;
@@ -13,7 +17,6 @@ async function sendAlert(type: string, payload: unknown) {
 export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/', async () => ({ message: 'SafeBase API - Alerts System' }));
   app.get('/health', async () => ({ status: 'ok' }));
-  app.get('/databases', async () => await Store.getDatabases());
 
   // Exemple d'utilisation des alertes
   app.post('/test-alert', async (req, reply) => {
