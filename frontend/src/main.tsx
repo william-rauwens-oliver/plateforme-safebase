@@ -110,7 +110,7 @@ export function App() {
   }
 
   /**
-   * Rafraîchit la liste des bases de données depuis l'API
+   * Rafraîchit la liste des connexions enregistrées depuis l'API
    */
   function refresh() {
     setIsLoadingList(true)
