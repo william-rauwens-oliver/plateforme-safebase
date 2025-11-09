@@ -1,6 +1,15 @@
-# SafeBase Platform
+# 🛡️ SafeBase Platform
 
-Solution de sauvegarde/restauration MySQL & Postgres avec API REST, scheduler et frontend.
+[![CI/CD](https://github.com/william-rauwens-oliver/plateforme-safebase/actions/workflows/ci.yml/badge.svg)](https://github.com/william-rauwens-oliver/plateforme-safebase/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20-green)](https://nodejs.org/)
+[![Fastify](https://img.shields.io/badge/Fastify-4.28-green)](https://fastify.dev/)
+[![React](https://img.shields.io/badge/React-18.3-blue)](https://reactjs.org/)
+
+> **"Parce qu'un DROP DATABASE est vite arrivé... Safebase, I'll be back(up)."**
+
+Solution complète de gestion de sauvegarde et restauration de bases de données MySQL & PostgreSQL avec API REST, scheduler automatique et interface utilisateur moderne.
 
 ## 📁 Structure du Projet
 
@@ -170,6 +179,28 @@ curl -H "x-api-key: ${API_KEY}" http://localhost:8080/databases
 
 Le projet est **100% conforme** aux consignes. Voir [`docs/analyse/ANALYSE-CONFORMITE-FINALE.md`](docs/analyse/ANALYSE-CONFORMITE-FINALE.md) et [`docs/analyse/ANALYSE-COMPETENCES-COMPLETE.md`](docs/analyse/ANALYSE-COMPETENCES-COMPLETE.md) pour les analyses détaillées.
 
-## 📝 License
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Veuillez lire notre [Guide de Contribution](CONTRIBUTING.md) pour plus de détails.
+
+## 📝 Changelog
+
+Voir [CHANGELOG.md](CHANGELOG.md) pour la liste des changements.
+
+## 📄 License
 
 Ce projet est un projet éducatif.
+
+## 👥 Auteurs
+
+- **William Rauwens-Oliver** - [@william-rauwens-oliver](https://github.com/william-rauwens-oliver)
+
+## 🙏 Remerciements
+
+- Fastify pour l'excellent framework API
+- React pour l'interface utilisateur
+- Tous les contributeurs open source
+
+---
+
+⭐ Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile !
