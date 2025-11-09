@@ -3,4 +3,9 @@ dist
 .DS_Store
 *.log
 backups
+*.swp
+*.swo
+*~
+.env.local
+.env.*.local
 

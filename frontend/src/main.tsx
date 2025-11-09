@@ -20,7 +20,8 @@ type Version = {
   pinned?: boolean
 }
 
-function usePersistentState<T>(key: string, initial: T) {
+// Export for Fast Refresh
+export function usePersistentState<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(() => {
     try {
       const raw = localStorage.getItem(key)
@@ -30,24 +31,46 @@ function usePersistentState<T>(key: string, initial: T) {
     }
   })
   useEffect(() => {
-    try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
+    try { 
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Ignore localStorage errors (private mode)
+    }
+  }
   }, [key, value])
   return [value, setValue] as const
 }
 
-function App() {
+interface ImportMetaEnv {
+  VITE_API_URL?: string;
+  VITE_API_KEY?: string;
+}
+
+interface ImportMeta {
+  env?: ImportMetaEnv;
+}
+
+export function App() {
   const [config, setConfig] = usePersistentState('safebase-config', {
-    apiUrl: (import.meta as any).env?.VITE_API_URL || 'http://localhost:8080',
-    apiKey: (import.meta as any).env?.VITE_API_KEY || ''
+    apiUrl: (import.meta as ImportMeta).env?.VITE_API_URL || 'http://localhost:8080',
+    apiKey: (import.meta as ImportMeta).env?.VITE_API_KEY || ''
   })
   const [health, setHealth] = useState<'pending'|'ok'|'down'>('pending')
   const [dbs, setDbs] = useState<Db[]>([])
   const [loading, setLoading] = useState(false)
   const [globalBusy, setGlobalBusy] = useState(false)
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    engine: 'mysql' | 'postgres';
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    database: string;
+  }>({
     name: '', engine: 'mysql', host: 'localhost', port: 3306,
     username: 'safebase', password: 'safebase', database: 'safebase'
-  } as any)
+  })
   const [versionsModal, setVersionsModal] = useState<{ open: boolean, db?: Db, items: Version[] }>({ open: false, items: [] })
   const [toasts, setToasts] = useState<Array<{ id: string, text: string, type?: 'success'|'error'|'info' }>>([])
   const [theme, setTheme] = usePersistentState<'dark'|'light'>('safebase-theme', 'dark')
@@ -64,7 +87,8 @@ function App() {
   useEffect(() => {
     checkHealth()
     refresh()
-  }, [config.apiUrl, config.apiKey])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.apiUrl, config.apiKey, headers])
 
   function checkHealth() {
     setHealth('pending')
@@ -270,7 +294,7 @@ function App() {
           <h2 style={{ margin: 0 }}>Bases de données {dbs.length > 0 ? `(${filtered.length}/${dbs.length})` : ''}</h2>
           <div className="row-compact">
             <input aria-label="Rechercher" placeholder="Rechercher…" value={query} onChange={e => setQuery(e.target.value)} />
-            <select aria-label="Trier par" value={sort} onChange={e => setSort(e.target.value as any)}>
+            <select aria-label="Trier par" value={sort} onChange={e => setSort(e.target.value as 'name' | 'engine' | 'created')}>
               <option value="name">Nom</option>
               <option value="engine">Moteur</option>
             </select>

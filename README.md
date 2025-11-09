@@ -2,13 +2,20 @@
 
 Solution de sauvegarde/restauration MySQL & Postgres avec API REST, scheduler et frontend.
 
-## Stack
-- API: Fastify (TypeScript)
-- DBs: MySQL 8, Postgres 16
-- Scheduler: Alpine + cron (appel `/backup-all`)
-- Frontend: Vite + React
+## 📁 Structure du Projet
 
-## Démarrage rapide
+```
+plateforme-safebase/
+├── backend/          # API Fastify (TypeScript)
+├── frontend/         # Interface React + Vite
+├── scheduler/        # Scheduler cron pour backups automatiques
+├── docs/             # Documentation complète
+├── scripts/          # Scripts utilitaires
+├── docker-compose.yml
+└── README.md
+```
+
+## 🚀 Démarrage Rapide
 
 ### Avec Docker (recommandé)
 ```bash
@@ -39,7 +46,24 @@ npm run dev  # Interface sur http://localhost:5173
 
 **Note:** Le backend nécessite `mysql-client` et `postgresql-client` installés pour les backups.
 
-## Variables d'environnement principales
+## 📚 Documentation
+
+Toute la documentation est disponible dans le dossier [`docs/`](docs/README.md) :
+- Guide de démarrage
+- Architecture
+- Tests
+- Soutenance
+- Résolution de problèmes
+
+## 🔧 Scripts Utilitaires
+
+Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
+- Tests fonctionnels
+- Tests scheduler
+- Lancement du projet
+- Correction MAMP
+
+## ⚙️ Variables d'environnement principales
 
 - API (service api)
   - `API_KEY`: clé API pour protéger les endpoints (ex: `change-me`)
@@ -53,7 +77,7 @@ npm run dev  # Interface sur http://localhost:5173
   - `SCHEDULER_API_URL`: URL de l'API (ex: `http://api:8080`)
   - `API_KEY`: même valeur que le service API si activé
 
-## Endpoints principaux
+## 🔌 Endpoints principaux
 
 - `GET /health`
 - `GET /databases` / `POST /databases`
@@ -67,16 +91,23 @@ npm run dev  # Interface sur http://localhost:5173
 
 Backups stockés dans le volume `backups`, par base.
 
-## Tests
+## 🧪 Tests
 
 ```bash
+# Backend
 cd backend
+npm test
+
+# Frontend
+cd frontend
 npm test
 ```
 
-Les tests fournis valident la santé, l'auth basique, et l'heartbeat.
+## 🔄 CI/CD
 
-## Exemples d'utilisation de l'API
+Le projet utilise GitHub Actions pour automatiser les tests et le linting. Voir [`docs/CI-CD.md`](docs/CI-CD.md) pour plus de détails.
+
+## 📖 Exemples d'utilisation de l'API
 
 ### 1. Vérifier la santé
 ```bash
@@ -124,3 +155,19 @@ Ajoutez le header `x-api-key` :
 curl -H 'x-api-key: change-me' http://localhost:8080/databases
 ```
 
+## 🏗️ Stack
+
+- API: Fastify (TypeScript)
+- DBs: MySQL 8, Postgres 16
+- Scheduler: Alpine + cron (appel `/backup-all`)
+- Frontend: Vite + React
+- Tests: Vitest
+- CI/CD: GitHub Actions
+
+## 📊 Conformité
+
+Le projet est **98% conforme** aux consignes. Voir [`docs/ANALYSE-COMPLETE-CONSIGNES.md`](docs/ANALYSE-COMPLETE-CONSIGNES.md) pour l'analyse détaillée.
+
+## 📝 License
+
+Ce projet est un projet éducatif.

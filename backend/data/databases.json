@@ -20,5 +20,16 @@
     "username": "safebase",
     "password": "safebase",
     "database": "safebase"
+  },
+  {
+    "id": "ae81b1e8-f4e0-4ce1-8921-3b4fb0796383",
+    "createdAt": "2025-11-09T13:57:24.936Z",
+    "name": "TG'G",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 3306,
+    "username": "safebase",
+    "password": "safebase",
+    "database": "safebase"
   }
 ]

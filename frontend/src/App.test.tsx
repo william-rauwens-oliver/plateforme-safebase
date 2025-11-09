@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 
 // Mock fetch globally
-global.fetch = vi.fn();
+global.fetch = vi.fn() as unknown as Mock;
 
 describe('SafeBase App - Tests unitaires', () => {
   beforeEach(() => {
@@ -12,7 +12,7 @@ describe('SafeBase App - Tests unitaires', () => {
   });
 
   it('should handle API health check', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ status: 'ok' }),
     });
@@ -39,7 +39,7 @@ describe('SafeBase App - Tests unitaires', () => {
       },
     ];
 
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => mockDatabases,
     });
@@ -53,7 +53,7 @@ describe('SafeBase App - Tests unitaires', () => {
   });
 
   it('should handle API errors gracefully', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as Mock).mockResolvedValueOnce({
       ok: false,
       status: 500,
       json: async () => ({ message: 'Internal server error' }),
