@@ -1,3 +1,28 @@
+#!/usr/bin/env python3
+"""
+Script pour créer des versions simplifiées de routes.ts pour chaque branche feature/
+"""
+import re
+
+# Lire le fichier routes.ts complet depuis main
+with open('backend/src/routes.ts', 'r', encoding='utf-8') as f:
+    full_routes = f.read()
+
+# Extraire les sections nécessaires
+def extract_section(content, start_pattern, end_pattern):
+    """Extrait une section entre deux patterns"""
+    start_match = re.search(start_pattern, content)
+    if not start_match:
+        return None
+    start_pos = start_match.start()
+    
+    end_match = re.search(end_pattern, content, pos=start_pos)
+    if not end_match:
+        return content[start_pos:]
+    return content[start_pos:end_match.end()]
+
+# Pour feature/manual-backup: garder uniquement POST /backup/:id
+manual_backup_code = """
 import { randomUUID } from 'crypto';
 import { exec as execCb } from 'child_process';
 import { promisify } from 'util';
@@ -144,3 +169,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
     }
   });
 }
+"""
+
+print("Script créé pour générer les routes simplifiées")
+
