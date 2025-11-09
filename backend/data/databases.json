@@ -20,5 +20,16 @@
     "username": "root",
     "password": "root",
     "database": "lp_official"
+  },
+  {
+    "id": "1d9690a4-d9cb-419f-8f74-f91b8b8ed377",
+    "createdAt": "2025-11-09T15:25:13.640Z",
+    "name": "Test323",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "root",
+    "database": "symfony-e"
   }
 ]

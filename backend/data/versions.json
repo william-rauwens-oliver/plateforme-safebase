@@ -15,5 +15,13 @@
     "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/0f04c6e8-e700-4081-b052-d521a456b098/TEST34_2025-11-09T15-23-12-457Z.sql",
     "engine": "mysql",
     "sizeBytes": 27799
+  },
+  {
+    "id": "80a34e00-43b7-4900-bad4-cf8aaf775c2b",
+    "databaseId": "a5ed7cad-290b-45be-9dba-4cc2ea3456ce",
+    "createdAt": "2025-11-09T15:25:16.905Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/a5ed7cad-290b-45be-9dba-4cc2ea3456ce/Test_2025-11-09T15-25-16-839Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 1256
   }
 ]
