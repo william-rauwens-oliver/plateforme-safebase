@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "id": "a5ed7cad-290b-45be-9dba-4cc2ea3456ce",
+    "createdAt": "2025-11-09T15:22:37.914Z",
+    "name": "Test",
+    "engine": "mysql",
+    "host": "127.0.0.1",
+    "port": 8889,
+    "username": "root",
+    "password": "root",
+    "database": "symfony_e"
+  },
+  {
+    "id": "0f04c6e8-e700-4081-b052-d521a456b098",
+    "createdAt": "2025-11-09T15:23:08.443Z",
+    "name": "TEST34",
+    "engine": "mysql",
+    "host": "127.0.0.1",
+    "port": 8889,
+    "username": "root",
+    "password": "root",
+    "database": "lp_official"
+  }
+]

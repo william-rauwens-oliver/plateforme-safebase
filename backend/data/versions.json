@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "id": "b65d3b27-47e2-49c5-9d68-338402ce8151",
+    "databaseId": "a5ed7cad-290b-45be-9dba-4cc2ea3456ce",
+    "createdAt": "2025-11-09T15:22:39.715Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/a5ed7cad-290b-45be-9dba-4cc2ea3456ce/Test_2025-11-09T15-22-39-625Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 1256,
+    "pinned": true
+  },
+  {
+    "id": "32d6a01a-219c-4767-8a2c-55f10e74ae67",
+    "databaseId": "0f04c6e8-e700-4081-b052-d521a456b098",
+    "createdAt": "2025-11-09T15:23:12.541Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/0f04c6e8-e700-4081-b052-d521a456b098/TEST34_2025-11-09T15-23-12-457Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 27799
+  }
+]
