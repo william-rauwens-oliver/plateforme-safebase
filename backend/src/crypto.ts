@@ -6,12 +6,21 @@ const scryptAsync = promisify(scrypt);
 /**
  * Clé de chiffrement dérivée depuis une variable d'environnement
  * ⚠️ IMPORTANT : Définir ENCRYPTION_KEY en production
- * Si non définie, génère une erreur pour forcer la configuration
+ * En développement, utilise une clé par défaut (non sécurisée)
  */
-const ENCRYPTION_KEY_ENV = process.env.ENCRYPTION_KEY;
-if (!ENCRYPTION_KEY_ENV) {
-  throw new Error('ENCRYPTION_KEY environment variable is required. Please set it in your environment or .env file.');
-}
+const getEncryptionKeyEnv = (): string => {
+  const envKey = process.env.ENCRYPTION_KEY;
+  if (envKey) return envKey;
+  
+  // En production, forcer la définition
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('ENCRYPTION_KEY environment variable is required in production. Please set it in your environment or .env file.');
+  }
+  
+  // En développement, utiliser une clé par défaut (non sécurisée)
+  return 'dev-key-not-for-production-change-in-env';
+};
+
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
 const SALT_LENGTH = 32;
@@ -25,8 +34,9 @@ let encryptionKey: Buffer | null = null;
 async function getEncryptionKey(): Promise<Buffer> {
   if (encryptionKey) return encryptionKey;
   
+  const keyEnv = getEncryptionKeyEnv();
   // Dériver une clé de 32 bytes depuis la clé d'environnement
-  encryptionKey = (await scryptAsync(ENCRYPTION_KEY_ENV, 'safebase-salt', 32)) as Buffer;
+  encryptionKey = (await scryptAsync(keyEnv, 'safebase-salt', 32)) as Buffer;
   return encryptionKey;
 }
 
