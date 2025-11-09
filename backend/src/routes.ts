@@ -444,8 +444,8 @@ export async function routes(app: FastifyInstance): Promise<void> {
       : `PGPASSWORD='${db.password}' psql -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -f ${v.path}`;
 
     try {
-      // Mode FAKE_DUMP activé par défaut (même logique que backup)
-      const useFakeDump = process.env.FAKE_DUMP !== '0';
+      // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
+      const useFakeDump = process.env.FAKE_DUMP === '1';
       
       if (useFakeDump) {
         // Simulation: considérer comme restauré sans exécuter de commande
