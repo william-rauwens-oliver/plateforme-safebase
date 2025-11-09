@@ -379,7 +379,8 @@ export function App() {
                     const res = await fetch(`${config.apiUrl}/databases/available?${params}`, { headers });
                     if (!res.ok) {
                       const errorData = await res.json().catch(() => ({}));
-                      throw new Error(errorData.error || errorData.message || 'Erreur lors de la récupération');
+                      // Utiliser le message utilisateur si disponible, sinon l'erreur technique
+                      throw new Error(errorData.message || errorData.error || 'Erreur lors de la récupération');
                     }
                     const data = await res.json();
                     setAvailableDatabases(data.databases || []);

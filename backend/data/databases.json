@@ -86,5 +86,16 @@
     "username": "postgres",
     "password": "postgres",
     "database": "symfony-e"
+  },
+  {
+    "id": "ccabe16d-ed3c-4966-9225-9028f775bd75",
+    "createdAt": "2025-11-09T15:01:56.550Z",
+    "name": "TEst5353",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres",
+    "database": "postgres"
   }
 ]

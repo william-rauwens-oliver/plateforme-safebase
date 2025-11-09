@@ -165,15 +165,17 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
     try {
       if (engine === 'mysql') {
+        // Convertir localhost en 127.0.0.1 pour MySQL (comme PostgreSQL)
+        const hostForConnection = host === 'localhost' ? '127.0.0.1' : host;
         const connection = await mysql.createConnection({
-          host,
+          host: hostForConnection,
           port: Number(port),
           user: username,
           password: password || '',
           connectTimeout: 10000,
           enableKeepAlive: false,
         });
-        const [rows] = await connection.query<Array<{ Database: string }>>('SHOW DATABASES');
+        const [rows] = await connection.query('SHOW DATABASES');
         await connection.end();
         // Filtrer les bases système
         const databases = (rows as Array<{ Database: string }>)
@@ -202,8 +204,19 @@ export async function routes(app: FastifyInstance): Promise<void> {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       app.log.error({ message: 'Failed to list databases', error: errorMsg, engine, host, port });
+      
+      // Messages d'erreur plus clairs selon le type d'erreur
+      let userMessage = 'Impossible de lister les bases de données';
+      if (errorMsg.includes('ECONNREFUSED') || errorMsg.includes('ENOTFOUND') || errorMsg.includes('getaddrinfo')) {
+        userMessage = `Impossible de se connecter au serveur ${host}:${port}. Vérifiez que le serveur MySQL/PostgreSQL est démarré (MAMP pour MySQL, service PostgreSQL pour Postgres).`;
+      } else if (errorMsg.includes('Access denied') || errorMsg.includes('password authentication failed') || errorMsg.includes('authentication failed')) {
+        userMessage = 'Identifiants incorrects : utilisateur ou mot de passe invalide';
+      } else if (errorMsg.includes('ETIMEDOUT') || errorMsg.includes('timeout')) {
+        userMessage = `Connexion au serveur ${host}:${port} expirée. Vérifiez que le serveur est accessible.`;
+      }
+      
       return reply.code(400).send({ 
-        message: 'Impossible de lister les bases de données',
+        message: userMessage,
         error: errorMsg
       });
     }
