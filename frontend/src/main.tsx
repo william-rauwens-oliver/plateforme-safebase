@@ -244,8 +244,23 @@ export function App() {
         return
       }
       if (cmd === 'restore') {
-        if (!confirm('Restaurer cette version ?')) return
-        await fetch(`${config.apiUrl}/restore/${vid}`, { method: 'POST', headers })
+        if (!confirm('Restaurer cette version ? Cette opération remplacera les données actuelles de la base.')) return
+        setGlobalBusy(true)
+        try {
+          const res = await fetch(`${config.apiUrl}/restore/${vid}`, { method: 'POST', headers })
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({ message: 'Erreur lors de la restauration' }))
+            throw new Error(errorData.message || errorData.error || `Erreur ${res.status}`)
+          }
+          const data = await res.json()
+          pushToast('Restauration réussie', 'success')
+        } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : 'Erreur lors de la restauration'
+          pushToast(errorMsg, 'error')
+          console.error('Restore error:', err)
+        } finally {
+          setGlobalBusy(false)
+        }
       } else if (cmd === 'pin') {
         await fetch(`${config.apiUrl}/versions/${vid}/pin`, { method: 'POST', headers })
         pushToast('Version épinglée', 'success')
