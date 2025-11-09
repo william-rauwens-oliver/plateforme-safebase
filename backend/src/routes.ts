@@ -51,7 +51,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       app.log.error({ restoreError: errorMsg, versionId, database: db.name });
-      await sendAlert('restore_failed', { versionId, error: errorMsg });
       return reply.code(500).send({ 
         message: 'restore failed',
         error: errorMsg
