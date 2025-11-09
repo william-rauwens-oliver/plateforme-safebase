@@ -134,7 +134,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
     return { ok: true };
   });
 
-  app.get('/databases', async () => Store.getDatabases());
+  app.get('/databases', async () => await Store.getDatabases());
 
   /**
    * Liste les bases de données disponibles sur un serveur MySQL ou PostgreSQL
@@ -224,7 +224,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.delete('/databases/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
-    const all = Store.getDatabases();
+    const all = await Store.getDatabases();
     const db = all.find(d => d.id === id);
     if (!db) return reply.code(404).send({ message: 'database not found' });
     
@@ -251,7 +251,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
     
     // Supprimer la base de la liste
     const kept = all.filter(d => d.id !== id);
-    Store.saveDatabases(kept);
+    await Store.saveDatabases(kept);
     return { deleted: true, id };
   });
 
@@ -283,15 +283,16 @@ export async function routes(app: FastifyInstance): Promise<void> {
       app.log.warn({ message: 'Skipping database connection validation (VALIDATE_CONNECTION=0)', database: db.name });
     }
     
-    const all = Store.getDatabases();
+    const all = await Store.getDatabases();
     all.push(db);
-    Store.saveDatabases(all);
+    await Store.saveDatabases(all);
     return db;
   });
 
   app.post('/backup/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
-    const db = Store.getDatabases().find(d => d.id === id);
+    const allDbs = await Store.getDatabases();
+    const db = allDbs.find(d => d.id === id);
     if (!db) return reply.code(404).send({ message: 'database not found' });
     const ts = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `${db.name}_${ts}.${db.engine === 'mysql' ? 'sql' : 'sql'}`;
@@ -378,7 +379,8 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.post('/backup-all', async (_req, reply) => {
     const results: Array<{ id: string; ok: boolean }> = [];
-    for (const db of Store.getDatabases()) {
+    const allDbs = await Store.getDatabases();
+    for (const db of allDbs) {
       const ts = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `${db.name}_${ts}.sql`;
       const outPath = join(Store.paths.backupsDir, db.id, filename);
@@ -468,7 +470,8 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const { versionId } = req.params as { versionId: string };
     const v = Store.getVersions().find(x => x.id === versionId);
     if (!v) return reply.code(404).send({ message: 'version not found' });
-    const db = Store.getDatabases().find(d => d.id === v.databaseId);
+    const allDbs = await Store.getDatabases();
+    const db = allDbs.find(d => d.id === v.databaseId);
     if (!db) return reply.code(404).send({ message: 'database not found' });
 
     // Échapper le mot de passe pour la commande shell

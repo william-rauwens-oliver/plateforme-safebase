@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { BackupVersionMeta, RegisteredDatabase } from './types.js';
+import { encrypt, decrypt } from './crypto.js';
 
 let dataDir = process.env.DATA_DIR || '/app/data';
 let backupsDir = process.env.BACKUPS_DIR || '/backups';
@@ -28,18 +29,42 @@ function ensureDirs(): void {
   schedulerFile = join(dataDir, 'scheduler.json');
 }
 
-function readJson<T>(file: string, fallback: T): T {
+async function readJson<T>(file: string, fallback: T): Promise<T> {
   try {
     if (!existsSync(file)) return fallback;
     const raw = readFileSync(file, 'utf-8');
-    return JSON.parse(raw) as T;
+    const parsed = JSON.parse(raw) as T;
+    
+    // Si c'est un tableau de bases de données, déchiffrer les mots de passe
+    if (Array.isArray(parsed) && parsed.length > 0 && 'password' in (parsed[0] as any)) {
+      const decrypted = await Promise.all(
+        (parsed as RegisteredDatabase[]).map(async (db) => ({
+          ...db,
+          password: await decrypt(db.password)
+        }))
+      );
+      return decrypted as T;
+    }
+    
+    return parsed;
   } catch {
     return fallback;
   }
 }
 
-function writeJson(file: string, data: unknown): void {
-  writeFileSync(file, JSON.stringify(data, null, 2));
+async function writeJson(file: string, data: unknown): Promise<void> {
+  // Si c'est un tableau de bases de données, chiffrer les mots de passe
+  if (Array.isArray(data) && data.length > 0 && 'password' in (data[0] as any)) {
+    const encrypted = await Promise.all(
+      (data as RegisteredDatabase[]).map(async (db) => ({
+        ...db,
+        password: await encrypt(db.password)
+      }))
+    );
+    writeFileSync(file, JSON.stringify(encrypted, null, 2));
+  } else {
+    writeFileSync(file, JSON.stringify(data, null, 2));
+  }
 }
 
 /**
@@ -50,42 +75,54 @@ export const Store = {
   /**
    * Initialise le store en créant les répertoires et fichiers nécessaires
    */
-  init(): void {
+  async init(): Promise<void> {
     ensureDirs();
-    if (!existsSync(dbsFile)) writeJson(dbsFile, [] as RegisteredDatabase[]);
-    if (!existsSync(versionsFile)) writeJson(versionsFile, [] as BackupVersionMeta[]);
-    if (!existsSync(schedulerFile)) writeJson(schedulerFile, { lastHeartbeat: null as string | null });
+    if (!existsSync(dbsFile)) await writeJson(dbsFile, [] as RegisteredDatabase[]);
+    if (!existsSync(versionsFile)) writeFileSync(versionsFile, JSON.stringify([], null, 2));
+    if (!existsSync(schedulerFile)) writeFileSync(schedulerFile, JSON.stringify({ lastHeartbeat: null as string | null }, null, 2));
   },
   /**
-   * Récupère toutes les bases de données enregistrées
+   * Récupère toutes les bases de données enregistrées (mots de passe déchiffrés)
    * @returns Liste des bases de données
    */
-  getDatabases(): RegisteredDatabase[] {
-    return readJson<RegisteredDatabase[]>(dbsFile, []);
+  async getDatabases(): Promise<RegisteredDatabase[]> {
+    return await readJson<RegisteredDatabase[]>(dbsFile, []);
   },
   /**
-   * Sauvegarde la liste des bases de données
+   * Sauvegarde la liste des bases de données (mots de passe seront chiffrés)
    * @param dbs - Liste des bases de données à sauvegarder
    */
-  saveDatabases(dbs: RegisteredDatabase[]): void {
-    writeJson(dbsFile, dbs);
+  async saveDatabases(dbs: RegisteredDatabase[]): Promise<void> {
+    await writeJson(dbsFile, dbs);
   },
   /**
    * Récupère toutes les versions de backup
    * @returns Liste des versions de backup
    */
   getVersions(): BackupVersionMeta[] {
-    return readJson<BackupVersionMeta[]>(versionsFile, []);
+    try {
+      if (!existsSync(versionsFile)) return [];
+      const raw = readFileSync(versionsFile, 'utf-8');
+      return JSON.parse(raw) as BackupVersionMeta[];
+    } catch {
+      return [];
+    }
   },
   /**
    * Sauvegarde la liste des versions de backup
    * @param v - Liste des versions à sauvegarder
    */
   saveVersions(v: BackupVersionMeta[]): void {
-    writeJson(versionsFile, v);
+    writeFileSync(versionsFile, JSON.stringify(v, null, 2));
   },
   getSchedulerInfo(): { lastHeartbeat: string | null } {
-    return readJson<{ lastHeartbeat: string | null }>(schedulerFile, { lastHeartbeat: null });
+    try {
+      if (!existsSync(schedulerFile)) return { lastHeartbeat: null };
+      const raw = readFileSync(schedulerFile, 'utf-8');
+      return JSON.parse(raw) as { lastHeartbeat: string | null };
+    } catch {
+      return { lastHeartbeat: null };
+    }
   },
   setSchedulerHeartbeat(isoDate: string): void {
     writeJson(schedulerFile, { lastHeartbeat: isoDate });

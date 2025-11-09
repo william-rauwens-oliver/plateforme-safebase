@@ -7,7 +7,7 @@
     "host": "127.0.0.1",
     "port": 8889,
     "username": "root",
-    "password": "root",
+    "password": "nt18jgGbvKk5M7aRnVSu6g==:dHscap5xxqvz4fO85EOan99vRKn6W5K+f0L2EueppCM=:tuGJuw==:Xt4tC+f4Zur+TGvkOiR/qw==",
     "database": "symfony_e"
   },
   {
@@ -18,7 +18,7 @@
     "host": "127.0.0.1",
     "port": 8889,
     "username": "root",
-    "password": "root",
+    "password": "lH5hJUDw6rUJ8bLfCsG4YQ==:fCIE92i4tNqZ2ctqFRGOyeCsWigQuTJ9vaTM24vVo28=:yCuWoQ==:71lE+y7tWyIA8bnaCr/U7Q==",
     "database": "lp_official"
   },
   {
@@ -29,7 +29,7 @@
     "host": "localhost",
     "port": 5432,
     "username": "postgres",
-    "password": "root",
+    "password": "MTZKqsYtoc3jUzZM4AaoIw==:gm8jwm0/psl9H5Khn63KUQO06W8H4SHNpmsly9JqpAU=:xTUWWw==:hymnnjTmT5/D52rbQ2Lmqg==",
     "database": "symfony-e"
   }
 ]
