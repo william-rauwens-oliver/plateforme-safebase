@@ -134,8 +134,10 @@ export function App() {
       })
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
-        const errorMsg = errorData.message || errorData.error || 'Erreur lors de la création'
-        throw new Error(errorMsg)
+        // Afficher le message d'erreur détaillé du backend
+        const errorMsg = errorData.error || errorData.message || 'Erreur lors de la création'
+        const hint = errorData.hint ? `\n\n${errorData.hint}` : ''
+        throw new Error(`${errorMsg}${hint}`)
       }
       setForm({ ...form, name: '' })
       pushToast('Base ajoutée', 'success')

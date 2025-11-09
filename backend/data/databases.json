@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "32ec3194-1755-4068-94a8-db8c93649d28",
+    "createdAt": "2025-11-09T14:44:08.687Z",
+    "name": "Test",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres",
+    "database": "postgres"
+  }
+]
