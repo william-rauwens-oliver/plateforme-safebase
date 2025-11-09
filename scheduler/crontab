@@ -1,4 +1,0 @@
-# m h  dom mon dow   command
-# Toutes les heures, lancer backup-all
-0 * * * * /app/scripts/backup_all.sh >> /var/log/cron.log 2>&1
-
