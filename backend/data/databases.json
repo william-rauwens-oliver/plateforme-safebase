@@ -9,5 +9,38 @@
     "username": "postgres",
     "password": "postgres",
     "database": "postgres"
+  },
+  {
+    "id": "7cbd8f2f-d326-4dd2-b3b4-cbfa8441483e",
+    "createdAt": "2025-11-09T14:46:50.791Z",
+    "name": "Test Error",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "mauvais_mdp",
+    "database": "postgres"
+  },
+  {
+    "id": "00d7f8f3-242d-42c3-9fc8-30e708f370f0",
+    "createdAt": "2025-11-09T14:47:21.296Z",
+    "name": "Test Validation",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "MAUVAIS_MDP",
+    "database": "postgres"
+  },
+  {
+    "id": "2734a01b-efcb-4040-9417-500dc0b6462f",
+    "createdAt": "2025-11-09T14:47:39.778Z",
+    "name": "Test Erreur",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "MAUVAIS_MDP_123",
+    "database": "postgres"
   }
 ]

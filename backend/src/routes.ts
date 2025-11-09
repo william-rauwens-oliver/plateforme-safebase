@@ -37,8 +37,9 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
       return { success: true };
     } else {
       // PostgreSQL
+      // Forcer l'authentification par mot de passe en utilisant TCP/IP
       const client = new PgClient({
-        host: db.host,
+        host: db.host === 'localhost' ? '127.0.0.1' : db.host, // Forcer TCP/IP au lieu du socket Unix
         port: db.port,
         user: db.username,
         password: db.password,
@@ -46,8 +47,13 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
         connectionTimeoutMillis: 10000, // 10 secondes max
       });
       await client.connect();
-      // Test réel : requête simple pour vérifier que la base existe
-      await client.query('SELECT 1');
+      // Test réel : requête simple pour vérifier que la base existe ET que l'authentification fonctionne
+      const result = await client.query('SELECT current_user, current_database()');
+      // Vérifier que l'utilisateur connecté correspond bien à celui demandé
+      if (result.rows[0]?.current_user !== db.username) {
+        await client.end();
+        return { success: false, error: `Utilisateur connecté (${result.rows[0]?.current_user}) ne correspond pas à l'utilisateur demandé (${db.username})` };
+      }
       await client.end();
       return { success: true };
     }
