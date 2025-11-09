@@ -383,7 +383,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
             await fs.writeFile(outPath, header + content);
           });
         } else {
-          await exec(cmd);
+        await exec(cmd);
         }
         const meta: BackupVersionMeta = {
           id: randomUUID(),
