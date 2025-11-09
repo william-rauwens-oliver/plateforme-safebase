@@ -44,17 +44,6 @@
     "database": "postgres"
   },
   {
-    "id": "cee92181-b737-4ae8-b8c9-36fff7e47da4",
-    "createdAt": "2025-11-09T14:48:06.135Z",
-    "name": "Test Erreur Final",
-    "engine": "postgres",
-    "host": "localhost",
-    "port": 5432,
-    "username": "postgres",
-    "password": "MAUVAIS_MDP_456",
-    "database": "postgres"
-  },
-  {
     "id": "830d5bc8-f97b-404c-bf1e-877bdae48f94",
     "createdAt": "2025-11-09T14:48:33.645Z",
     "name": "Test Validation Finale",
