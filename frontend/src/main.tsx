@@ -77,7 +77,7 @@ export function App() {
     password: string;
     database: string;
   }>({
-    name: '', engine: 'mysql', host: 'localhost', port: 3306,
+    name: '', engine: 'mysql', host: '127.0.0.1', port: 8889,
     username: 'root', password: 'root', database: 'safebase'
   })
   const [versionsModal, setVersionsModal] = useState<{ open: boolean, db?: Db, items: Version[] }>({ open: false, items: [] })
@@ -300,10 +300,12 @@ export function App() {
             <div className="muted">« Parce qu’un DROP DATABASE est vite arrivé… »</div>
           </div>
         </div>
-        <div className="row-compact">
-          <span className={`pill ${health === 'ok' ? 'success' : health === 'down' ? 'danger' : ''}`}>{health === 'ok' ? 'API en ligne' : health === 'down' ? 'API hors ligne' : 'Vérification...'}</span>
-          <button className="ghost" onClick={checkHealth}>Rafraîchir</button>
-          <button className="ghost" aria-pressed={theme==='dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+        <div className="header-actions">
+          <span className={`status-badge ${health === 'ok' ? 'success' : health === 'down' ? 'danger' : ''}`}>
+            {health === 'ok' ? 'API en ligne' : health === 'down' ? 'API hors ligne' : 'Vérification...'}
+          </span>
+          <button className="btn btn-ghost" onClick={checkHealth}>Rafraîchir</button>
+          <button className="btn btn-ghost" aria-pressed={theme==='dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? 'Clair' : 'Sombre'}
           </button>
         </div>
@@ -312,75 +314,79 @@ export function App() {
       <div className="grid">
         <div className="card">
           <h2>Ajouter une base de données</h2>
-          <form onSubmit={submit} className="row">
-            <div className="col-6"><input placeholder="Nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
-            <div className="col-6">
+          <form onSubmit={submit} className="form-grid">
+            <div className="form-col-6"><input placeholder="Nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
+            <div className="form-col-6">
               <select value={form.engine} onChange={e => {
                 const newEngine = e.target.value as 'mysql' | 'postgres';
-                // Mettre à jour les valeurs par défaut selon le moteur
+                // Mettre à jour les valeurs par défaut selon le moteur (bases locales)
                 if (newEngine === 'mysql') {
-                  setForm({ ...form, engine: newEngine, port: 3306, username: 'root', password: 'root' });
+                  // MAMP MySQL par défaut
+                  setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: 'root', password: 'root' });
                 } else {
-                  setForm({ ...form, engine: newEngine, port: 5432, username: 'postgres', password: '' });
+                  // PostgreSQL Homebrew par défaut
+                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: '' });
                 }
               }}>
                 <option value="mysql">MySQL</option>
                 <option value="postgres">PostgreSQL</option>
               </select>
             </div>
-            <div className="col-6"><input placeholder="Hôte" value={form.host} onChange={e => setForm({ ...form, host: e.target.value })} required /></div>
-            <div className="col-6"><input type="number" placeholder="Port" value={form.port} onChange={e => setForm({ ...form, port: Number(e.target.value) })} required /></div>
-            <div className="col-6"><input placeholder="Utilisateur" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required /></div>
-            <div className="col-6"><input type="password" placeholder="Mot de passe" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></div>
-            <div className="col-12"><input placeholder="Nom de la base de données" value={form.database} onChange={e => setForm({ ...form, database: e.target.value })} required /></div>
-            <div className="col-12"><button className="primary" type="submit" disabled={loading}>{loading ? 'Ajout...' : 'Ajouter la base'}</button></div>
+            <div className="form-col-6"><input placeholder="Hôte" value={form.host} onChange={e => setForm({ ...form, host: e.target.value })} required /></div>
+            <div className="form-col-6"><input type="number" placeholder="Port" value={form.port} onChange={e => setForm({ ...form, port: Number(e.target.value) })} required /></div>
+            <div className="form-col-6"><input placeholder="Utilisateur" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required /></div>
+            <div className="form-col-6"><input type="password" placeholder="Mot de passe" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></div>
+            <div className="form-col-12"><input placeholder="Nom de la base de données" value={form.database} onChange={e => setForm({ ...form, database: e.target.value })} required /></div>
+            <div className="form-col-12"><button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Ajout...' : 'Ajouter la base'}</button></div>
           </form>
         </div>
 
         <div className="card">
           <h2>Réglages</h2>
-          <div className="row">
-            <div className="col-12"><input placeholder="API URL" value={config.apiUrl} onChange={e => setConfig({ ...config, apiUrl: e.target.value })} /></div>
-            <div className="col-12"><input placeholder="API Key (optionnel)" value={config.apiKey} onChange={e => setConfig({ ...config, apiKey: e.target.value })} /></div>
-            <div className="col-12 toolbar">
-              <button className="ghost" onClick={refresh}>Recharger</button>
-              <button className="primary" onClick={triggerBackupAll} disabled={globalBusy || dbs.length === 0}>Backup All</button>
+          <div className="form-grid">
+            <div className="form-col-12"><input placeholder="API URL" value={config.apiUrl} onChange={e => setConfig({ ...config, apiUrl: e.target.value })} /></div>
+            <div className="form-col-12"><input placeholder="API Key (optionnel)" value={config.apiKey} onChange={e => setConfig({ ...config, apiKey: e.target.value })} /></div>
+            <div className="form-col-12" style={{ display: 'flex', gap: '12px' }}>
+              <button className="btn btn-secondary" onClick={refresh}>Recharger</button>
+              <button className="btn btn-primary" onClick={triggerBackupAll} disabled={globalBusy || dbs.length === 0}>Backup All</button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <h2 style={{ margin: 0 }}>Bases de données {dbs.length > 0 ? `(${filtered.length}/${dbs.length})` : ''}</h2>
-          <div className="row-compact">
-            <input aria-label="Rechercher" placeholder="Rechercher…" value={query} onChange={e => setQuery(e.target.value)} />
-            <select aria-label="Trier par" value={sort} onChange={e => setSort(e.target.value as 'name' | 'engine' | 'created')}>
-              <option value="name">Nom</option>
-              <option value="engine">Moteur</option>
-            </select>
-          </div>
+      <div className="card">
+        <div className="search-filter-bar">
+          <h2 style={{ margin: 0, flex: 1 }}>Bases de données {dbs.length > 0 ? `(${filtered.length}/${dbs.length})` : ''}</h2>
+          <input aria-label="Rechercher" placeholder="Rechercher…" value={query} onChange={e => setQuery(e.target.value)} />
+          <select aria-label="Trier par" value={sort} onChange={e => setSort(e.target.value as 'name' | 'engine' | 'created')}>
+            <option value="name">Nom</option>
+            <option value="engine">Moteur</option>
+          </select>
         </div>
         {isLoadingList ? (
-          <div className="empty">Chargement…</div>
+          <div className="empty-state">
+            <div className="empty-state-icon">⏳</div>
+            <div className="empty-state-text">Chargement…</div>
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="empty">
-            <div>Aucune base configurée. Ajoutez-en une pour commencer.</div>
+          <div className="empty-state">
+            <div className="empty-state-icon">📊</div>
+            <div className="empty-state-text">Aucune base configurée. Ajoutez-en une pour commencer.</div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+          <div className="db-grid">
             {filtered.map(db => (
-              <div key={db.id} className="db">
-                <div className="db-head">
+              <div key={db.id} className="db-card">
+                <div className="db-header">
                   <h3 className="db-title">{db.name}</h3>
-                  <span className="badge">{db.engine === 'mysql' ? 'MySQL' : 'Postgres'}</span>
+                  <span className="db-badge">{db.engine === 'mysql' ? 'MySQL' : 'Postgres'}</span>
                 </div>
-                <div className="kbd muted">{db.username}@{db.host}:{db.port}/{db.database}</div>
-                <div className="actions">
-                  <button className="ghost" onClick={() => copyDsn(db)}>Copier DSN</button>
-                  <button className="primary" onClick={() => triggerBackup(db.id)} disabled={globalBusy}>Backup</button>
-                  <button onClick={() => openVersions(db)}>Versions</button>
-                  <button className="ghost" onClick={() => deleteDatabase(db.id)} style={{ color: 'var(--danger, #ff4444)' }}>Supprimer</button>
+                <div className="db-info">{db.username}@{db.host}:{db.port}/{db.database}</div>
+                <div className="db-actions">
+                  <button className="btn btn-secondary" onClick={() => copyDsn(db)}>DSN</button>
+                  <button className="btn btn-primary" onClick={() => triggerBackup(db.id)} disabled={globalBusy}>Backup</button>
+                  <button className="btn btn-secondary" onClick={() => openVersions(db)}>Versions</button>
+                  <button className="btn btn-danger" onClick={() => deleteDatabase(db.id)}>Supprimer</button>
                 </div>
               </div>
             ))}
@@ -391,32 +397,37 @@ export function App() {
       {versionsModal.open && (
         <div className="modal-backdrop" onClick={() => setVersionsModal({ open: false, items: [] })}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-head">
-              <div className="row-compact">
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <strong>Versions</strong>
-                {versionsModal.db && <span className="pill">{versionsModal.db.name}</span>}
+                {versionsModal.db && <span className="status-badge">{versionsModal.db.name}</span>}
               </div>
-              <button className="ghost" onClick={() => setVersionsModal({ open: false, items: [] })}>Fermer</button>
+              <button className="btn btn-ghost" onClick={() => setVersionsModal({ open: false, items: [] })}>Fermer</button>
             </div>
             <div className="modal-body">
               {versionsModal.items.length === 0 ? (
-                <div className="empty">Aucune version disponible.</div>
+                <div className="empty-state">
+                  <div className="empty-state-icon">📦</div>
+                  <div className="empty-state-text">Aucune version disponible.</div>
+                </div>
               ) : (
                 versionsModal.items.map(v => (
-                  <div key={v.id} className="version">
-                    <div>
-                      <div className="kbd">{v.id}</div>
-                      <div className="muted">{new Date(v.createdAt).toLocaleString()} · {(v.sizeBytes||0)} octets {v.pinned ? '· Épinglée' : ''}</div>
+                  <div key={v.id} className="version-item">
+                    <div className="version-info">
+                      <div className="version-id">{v.id}</div>
+                      <div className="version-meta">
+                        {new Date(v.createdAt).toLocaleString()} · {(v.sizeBytes||0).toLocaleString()} octets {v.pinned ? '· Épinglée' : ''}
+                      </div>
                     </div>
-                    <div className="row-compact">
-                      <button onClick={() => actOnVersion('download', v.id)}>Télécharger</button>
+                    <div className="version-actions">
+                      <button className="btn btn-secondary" onClick={() => actOnVersion('download', v.id)}>Télécharger</button>
                       {v.pinned ? (
-                        <button onClick={() => actOnVersion('unpin', v.id)}>Retirer</button>
+                        <button className="btn btn-secondary" onClick={() => actOnVersion('unpin', v.id)}>Retirer</button>
                       ) : (
-                        <button onClick={() => actOnVersion('pin', v.id)}>Épingler</button>
+                        <button className="btn btn-secondary" onClick={() => actOnVersion('pin', v.id)}>Épingler</button>
                       )}
-                      <button className="primary" onClick={() => actOnVersion('restore', v.id)}>Restaurer</button>
-                      {!v.pinned && <button className="ghost" onClick={() => actOnVersion('delete', v.id)}>Supprimer</button>}
+                      <button className="btn btn-primary" onClick={() => actOnVersion('restore', v.id)}>Restaurer</button>
+                      {!v.pinned && <button className="btn btn-danger" onClick={() => actOnVersion('delete', v.id)}>Supprimer</button>}
                     </div>
                   </div>
                 ))
@@ -427,9 +438,9 @@ export function App() {
       )}
 
       {/* Toasts */}
-      <div aria-live="polite" style={{ position: 'fixed', right: 24, bottom: 24, display: 'flex', flexDirection: 'column', gap: 8, zIndex: 2000 }}>
+      <div className="toast-container" aria-live="polite">
         {toasts.map(t => (
-          <div key={t.id} className="pill">
+          <div key={t.id} className={`toast ${t.type || 'info'}`}>
             {t.text}
           </div>
         ))}
