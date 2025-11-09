@@ -5,53 +5,9 @@ import { join } from 'path';
 import { statSync, rmSync, existsSync } from 'fs';
 import type { FastifyInstance } from 'fastify';
 import { Store } from './store.js';
-import { BackupVersionMeta, RegisteredDatabase } from './types.js';
-import pg from 'pg';
+import { BackupVersionMeta } from './types.js';
 
 const exec = promisify(execCb);
-const { Client: PgClient } = pg;
-
-async function tryGrantPostgresPermissions(db: RegisteredDatabase): Promise<boolean> {
-  if (db.engine !== 'postgres') return true;
-  try {
-    const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
-    const client = new PgClient({
-      host: hostForConnection,
-      port: db.port,
-      user: db.username,
-      password: db.password || '',
-      database: db.database,
-      connectionTimeoutMillis: 5000,
-    });
-    await client.connect();
-    const superCheck = await client.query('SELECT usesuper FROM pg_user WHERE usename = current_user');
-    const isSuper = superCheck.rows[0]?.usesuper === true;
-    if (isSuper) {
-      try {
-        await client.query('GRANT SELECT ON ALL TABLES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
-        await client.query('GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
-        await client.end();
-        return true;
-      } catch {
-        await client.end();
-        return false;
-      }
-    }
-    await client.end();
-    return false;
-  } catch {
-    return false;
-  }
-}
-
-async function sendAlert(type: string, payload: unknown) {
-  const url = process.env.ALERT_WEBHOOK_URL;
-  if (!url) return;
-  try {
-    const body = JSON.stringify({ type, timestamp: new Date().toISOString(), payload });
-    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-  } catch {}
-}
 
 export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/', async () => ({ message: 'SafeBase API - Manual Backup' }));
@@ -136,7 +92,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       app.log.error({ backupError: errorMsg, databaseId: id, database: db.name });
-      await sendAlert('backup_failed', { id, error: errorMsg });
       return reply.code(500).send({ 
         message: 'backup failed',
         error: errorMsg
