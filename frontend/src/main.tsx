@@ -89,12 +89,17 @@ function App() {
         headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, port: Number(form.port) })
       })
-      if (!res.ok) throw new Error('create failed')
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        const errorMsg = errorData.message || errorData.error || 'Erreur lors de la création'
+        throw new Error(errorMsg)
+      }
       setForm({ ...form, name: '' })
       pushToast('Base ajoutée', 'success')
       refresh()
     } catch (err) {
-      pushToast('Erreur: ajout impossible', 'error')
+      const errorMsg = err instanceof Error ? err.message : 'Erreur: ajout impossible'
+      pushToast(errorMsg, 'error')
       console.error(err)
     } finally {
       setLoading(false)
@@ -138,7 +143,13 @@ function App() {
   async function openVersions(db: Db) {
     try {
       const items = await fetch(`${config.apiUrl}/backups/${db.id}`, { headers }).then(r => r.json())
-      setVersionsModal({ open: true, db, items })
+      // Trier : épinglées en premier, puis par date (plus récent d'abord)
+      const sorted = items.sort((a: Version, b: Version) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      })
+      setVersionsModal({ open: true, db, items: sorted })
     } catch (e) {
       pushToast('Impossible de charger les versions', 'error')
     }
@@ -166,7 +177,13 @@ function App() {
         pushToast('Version supprimée', 'success')
       }
       const items = await fetch(`${config.apiUrl}/backups/${versionsModal.db.id}`, { headers }).then(r => r.json())
-      setVersionsModal(v => ({ ...v, items }))
+      // Trier : épinglées en premier, puis par date (plus récent d'abord)
+      const sorted = items.sort((a: Version, b: Version) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      })
+      setVersionsModal(v => ({ ...v, items: sorted }))
     } catch (e) {
       pushToast('Erreur lors de l\'opération', 'error')
     }

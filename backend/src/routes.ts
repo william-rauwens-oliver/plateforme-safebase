@@ -7,8 +7,47 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { Store } from './store.js';
 import { BackupVersionMeta, RegisteredDatabase } from './types.js';
+import mysql from 'mysql2/promise';
+import pg from 'pg';
 
 const exec = promisify(execCb);
+const { Client: PgClient } = pg;
+
+// Fonction pour tester la connexion à une base de données
+async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (db.engine === 'mysql') {
+      const connection = await mysql.createConnection({
+        host: db.host,
+        port: db.port,
+        user: db.username,
+        password: db.password,
+        database: db.database,
+        connectTimeout: 5000, // 5 secondes max
+      });
+      await connection.ping();
+      await connection.end();
+      return { success: true };
+    } else {
+      // PostgreSQL
+      const client = new PgClient({
+        host: db.host,
+        port: db.port,
+        user: db.username,
+        password: db.password,
+        database: db.database,
+        connectionTimeoutMillis: 5000, // 5 secondes max
+      });
+      await client.connect();
+      await client.query('SELECT 1');
+      await client.end();
+      return { success: true };
+    }
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    return { success: false, error: errorMsg };
+  }
+}
 
 const RegisterSchema = z.object({
   name: z.string().min(1),
@@ -37,6 +76,28 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const body = parsed.data;
     const now = new Date().toISOString();
     const db: RegisteredDatabase = { id: randomUUID(), createdAt: now, ...body };
+    
+    // Vérifier la connexion avant d'enregistrer
+    // Sauter la vérification si FAKE_DUMP est activé (mode test)
+    // OU si VALIDATE_CONNECTION est explicitement désactivé
+    const skipValidation = process.env.FAKE_DUMP === '1' || process.env.VALIDATE_CONNECTION === '0';
+    
+    if (!skipValidation) {
+      app.log.info({ message: 'Testing database connection', database: db.name, host: db.host, port: db.port });
+      const testResult = await testDatabaseConnection(db);
+      if (!testResult.success) {
+        app.log.error({ message: 'Database connection failed', database: db.name, error: testResult.error });
+        return reply.code(400).send({ 
+          message: 'Connexion à la base de données échouée',
+          error: testResult.error || 'Impossible de se connecter à la base de données',
+          hint: 'Vérifiez que :\n- La base de données existe\n- Les identifiants sont corrects\n- Le serveur MySQL/PostgreSQL est démarré\n- Le port est correct (8889 pour MAMP, 3306 pour MySQL standard)'
+        });
+      }
+      app.log.info({ message: 'Database connection successful', database: db.name });
+    } else {
+      app.log.info({ message: 'Skipping database connection validation', database: db.name, reason: skipValidation ? 'FAKE_DUMP or VALIDATE_CONNECTION=0' : 'none' });
+    }
+    
     const all = Store.getDatabases();
     all.push(db);
     Store.saveDatabases(all);
@@ -173,7 +234,14 @@ export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/backups/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
     const versions = Store.getVersions().filter(v => v.databaseId === id);
-    return versions.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    // Trier : épinglées en premier, puis par date (plus récent d'abord)
+    return versions.sort((a, b) => {
+      // Si une est épinglée et l'autre non, l'épinglée vient en premier
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      // Sinon, trier par date (plus récent d'abord)
+      return b.createdAt.localeCompare(a.createdAt);
+    });
   });
 
   app.post('/restore/:versionId', async (req, reply) => {
