@@ -122,7 +122,7 @@ export function App() {
   }
 
   /**
-   * Soumet le formulaire d'ajout d'une nouvelle base de données
+   * Soumet le formulaire d'enregistrement d'une nouvelle connexion à une base de données
    * @param e - Événement de soumission du formulaire
    */
   async function submit(e: React.FormEvent) {
@@ -319,9 +319,12 @@ export function App() {
 
       <div className="grid">
         <div className="card">
-          <h2>Ajouter une base de données</h2>
+          <h2>Enregistrer une connexion à une base de données</h2>
+          <p style={{ marginBottom: '20px', color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6' }}>
+            SafeBase sauvegarde des bases de données <strong>existantes</strong>. Enregistrez ici les informations de connexion à une base que vous avez déjà créée (ex: fittracker, symfony-e, etc.) pour que SafeBase puisse la sauvegarder automatiquement.
+          </p>
           <form onSubmit={submit} className="form-grid">
-            <div className="form-col-6"><input placeholder="Nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
+            <div className="form-col-6"><input placeholder="Nom de la connexion (ex: FitTracker Production)" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
             <div className="form-col-6">
               <select value={form.engine} onChange={e => {
                 const newEngine = e.target.value as 'mysql' | 'postgres';
@@ -383,7 +386,7 @@ export function App() {
                     if (data.databases && data.databases.length > 0) {
                       pushToast(`${data.databases.length} base(s) trouvée(s)`, 'success');
                     } else {
-                      pushToast('Aucune base de données trouvée', 'info');
+                      pushToast('Aucune base de données trouvée sur ce serveur', 'info');
                     }
                   } catch (err) {
                     const errorMsg = err instanceof Error ? err.message : 'Erreur lors de la récupération';
@@ -408,18 +411,18 @@ export function App() {
                 />
               </div>
             )}
-            <div className="form-col-12"><button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Ajout...' : 'Ajouter la base'}</button></div>
+            <div className="form-col-12"><button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Enregistrement...' : 'Enregistrer la connexion'}</button></div>
           </form>
         </div>
 
         <div className="card">
-          <h2>Réglages</h2>
+          <h2>Actions globales</h2>
           <div className="form-grid">
             <div className="form-col-12"><input placeholder="API URL" value={config.apiUrl} onChange={e => setConfig({ ...config, apiUrl: e.target.value })} /></div>
             <div className="form-col-12"><input placeholder="API Key (optionnel)" value={config.apiKey} onChange={e => setConfig({ ...config, apiKey: e.target.value })} /></div>
             <div className="form-col-12" style={{ display: 'flex', gap: '12px' }}>
               <button className="btn btn-secondary" onClick={refresh}>Recharger</button>
-              <button className="btn btn-primary" onClick={triggerBackupAll} disabled={globalBusy || dbs.length === 0}>Backup All</button>
+              <button className="btn btn-primary" onClick={triggerBackupAll} disabled={globalBusy || dbs.length === 0}>Sauvegarder toutes les bases</button>
             </div>
           </div>
         </div>
@@ -427,7 +430,7 @@ export function App() {
 
       <div className="card">
         <div className="search-filter-bar">
-          <h2 style={{ margin: 0, flex: 1 }}>Bases de données {dbs.length > 0 ? `(${filtered.length}/${dbs.length})` : ''}</h2>
+          <h2 style={{ margin: 0, flex: 1 }}>Connexions enregistrées {dbs.length > 0 ? `(${filtered.length}/${dbs.length})` : ''}</h2>
           <input aria-label="Rechercher" placeholder="Rechercher…" value={query} onChange={e => setQuery(e.target.value)} />
           <select aria-label="Trier par" value={sort} onChange={e => setSort(e.target.value as 'name' | 'engine' | 'created')}>
             <option value="name">Nom</option>
@@ -442,7 +445,7 @@ export function App() {
         ) : filtered.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">📊</div>
-            <div className="empty-state-text">Aucune base configurée. Ajoutez-en une pour commencer.</div>
+            <div className="empty-state-text">Aucune connexion enregistrée. Enregistrez une connexion à une base existante pour commencer les sauvegardes automatiques.</div>
           </div>
         ) : (
           <div className="db-grid">
