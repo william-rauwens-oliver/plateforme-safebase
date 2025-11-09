@@ -78,7 +78,7 @@ export function App() {
     database: string;
   }>({
     name: '', engine: 'mysql', host: 'localhost', port: 3306,
-    username: 'safebase', password: 'safebase', database: 'safebase'
+    username: 'root', password: 'root', database: 'safebase'
   })
   const [versionsModal, setVersionsModal] = useState<{ open: boolean, db?: Db, items: Version[] }>({ open: false, items: [] })
   const [toasts, setToasts] = useState<Array<{ id: string, text: string, type?: 'success'|'error'|'info' }>>([])
@@ -283,7 +283,15 @@ export function App() {
           <form onSubmit={submit} className="row">
             <div className="col-6"><input placeholder="Nom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
             <div className="col-6">
-              <select value={form.engine} onChange={e => setForm({ ...form, engine: e.target.value })}>
+              <select value={form.engine} onChange={e => {
+                const newEngine = e.target.value as 'mysql' | 'postgres';
+                // Mettre à jour les valeurs par défaut selon le moteur
+                if (newEngine === 'mysql') {
+                  setForm({ ...form, engine: newEngine, port: 3306, username: 'root', password: 'root' });
+                } else {
+                  setForm({ ...form, engine: newEngine, port: 5432, username: 'postgres', password: '' });
+                }
+              }}>
                 <option value="mysql">MySQL</option>
                 <option value="postgres">PostgreSQL</option>
               </select>
@@ -340,6 +348,7 @@ export function App() {
                   <button className="ghost" onClick={() => copyDsn(db)}>Copier DSN</button>
                   <button className="primary" onClick={() => triggerBackup(db.id)} disabled={globalBusy}>Backup</button>
                   <button onClick={() => openVersions(db)}>Versions</button>
+                  <button className="ghost" onClick={() => deleteDatabase(db.id)} style={{ color: 'var(--danger, #ff4444)' }}>Supprimer</button>
                 </div>
               </div>
             ))}

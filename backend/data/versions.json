@@ -369,13 +369,5 @@
     "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/87890e70-398b-4e4c-8887-5ad499ab8922/3T3G3_2025-11-09T13-19-20-683Z.sql",
     "engine": "mysql",
     "sizeBytes": 138
-  },
-  {
-    "id": "dbca47bd-9018-4962-a92a-37b1c132b6e3",
-    "databaseId": "ae81b1e8-f4e0-4ce1-8921-3b4fb0796383",
-    "createdAt": "2025-11-09T13:57:28.786Z",
-    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/ae81b1e8-f4e0-4ce1-8921-3b4fb0796383/TG'G_2025-11-09T13-57-28-781Z.sql",
-    "engine": "postgres",
-    "sizeBytes": 114
   }
 ]

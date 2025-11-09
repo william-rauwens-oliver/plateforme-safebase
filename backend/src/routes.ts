@@ -81,6 +81,39 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.get('/databases', async () => Store.getDatabases());
 
+  app.delete('/databases/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const all = Store.getDatabases();
+    const db = all.find(d => d.id === id);
+    if (!db) return reply.code(404).send({ message: 'database not found' });
+    
+    // Supprimer aussi toutes les versions de backup associées
+    const versions = Store.getVersions();
+    const versionsToDelete = versions.filter(v => v.databaseId === id);
+    for (const v of versionsToDelete) {
+      try {
+        rmSync(v.path, { force: true });
+      } catch {
+        // Ignore si le fichier n'existe pas
+      }
+    }
+    const keptVersions = versions.filter(v => v.databaseId !== id);
+    Store.saveVersions(keptVersions);
+    
+    // Supprimer le dossier de backup
+    try {
+      const backupDir = join(Store.paths.backupsDir, id);
+      rmSync(backupDir, { recursive: true, force: true });
+    } catch {
+      // Ignore si le dossier n'existe pas
+    }
+    
+    // Supprimer la base de la liste
+    const kept = all.filter(d => d.id !== id);
+    Store.saveDatabases(kept);
+    return { deleted: true, id };
+  });
+
   app.post('/databases', async (req, reply) => {
     const parsed = RegisterSchema.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send(parsed.error);
