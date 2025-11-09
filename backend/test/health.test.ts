@@ -19,7 +19,8 @@ describe('health', () => {
   });
 
   it('requires API key for protected endpoints when configured', async () => {
-    process.env.API_KEY = 'testkey';
+    const testApiKey = process.env.TEST_API_KEY || 'test-api-key-' + Date.now();
+    process.env.API_KEY = testApiKey;
     const srv = await createServer();
     const res = await srv.inject({ method: 'GET', url: '/databases' });
     expect(res.statusCode).toBe(401);
