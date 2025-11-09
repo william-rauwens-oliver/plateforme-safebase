@@ -385,9 +385,24 @@ export async function routes(app: FastifyInstance): Promise<void> {
       await import('fs/promises').then(async fs => {
         await fs.mkdir(join(Store.paths.backupsDir, db.id), { recursive: true });
       });
+      // Trouver mysqldump (MAMP en priorité, sinon système)
+      const findMysqldump = () => {
+        // MAMP utilise mysql80 ou mysql57
+        const mamp80 = '/Applications/MAMP/Library/bin/mysql80/bin/mysqldump';
+        const mamp57 = '/Applications/MAMP/Library/bin/mysql57/bin/mysqldump';
+        if (existsSync(mamp80)) return mamp80;
+        if (existsSync(mamp57)) return mamp57;
+        return 'mysqldump'; // Fallback sur PATH système
+      };
+
+      // Échapper le mot de passe pour la commande shell
+      const escapeShell = (str: string) => {
+        return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
+      };
+
       const cmd = db.engine === 'mysql'
-        ? `mysqldump -h ${db.host} -P ${db.port} -u ${db.username} -p${db.password} ${db.database} > ${outPath}`
-        : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
+        ? `${findMysqldump()} -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${outPath}`
+        : `PGPASSWORD='${escapeShell(db.password)}' pg_dump -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p > ${outPath}`;
     try {
       // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
       // Pour activer le mode fake (tests uniquement), définir FAKE_DUMP=1
