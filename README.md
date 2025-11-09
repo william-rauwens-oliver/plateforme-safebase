@@ -66,7 +66,8 @@ Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
 ## ⚙️ Variables d'environnement principales
 
 - API (service api)
-  - `API_KEY`: clé API pour protéger les endpoints (ex: `change-me`)
+  - `API_KEY`: clé API pour protéger les endpoints (optionnel, définir via variable d'environnement)
+  - `ENCRYPTION_KEY`: clé de chiffrement pour les mots de passe (requis, définir via variable d'environnement)
   - `CORS_ORIGIN`: origine autorisée pour le frontend (ex: `http://localhost:5173`)
   - `ALERT_WEBHOOK_URL`: URL webhook (Slack/Teams/HTTP) pour alertes
   - `RETAIN_PER_DB`: nombre de versions à conserver par base (par défaut 10)
@@ -75,7 +76,7 @@ Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
 
 - Scheduler
   - `SCHEDULER_API_URL`: URL de l'API (ex: `http://api:8080`)
-  - `API_KEY`: même valeur que le service API si activé
+  - `API_KEY`: même valeur que le service API si activé (optionnel)
 
 ## 🔌 Endpoints principaux
 
@@ -152,7 +153,7 @@ curl -X POST http://localhost:8080/restore/VERSION_ID
 ### Avec API Key (si configuré)
 Ajoutez le header `x-api-key` :
 ```bash
-curl -H 'x-api-key: change-me' http://localhost:8080/databases
+curl -H "x-api-key: ${API_KEY}" http://localhost:8080/databases
 ```
 
 ## 🏗️ Stack

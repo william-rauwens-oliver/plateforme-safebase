@@ -81,8 +81,8 @@ MYSQL_DB=$(cat <<EOF
   "engine": "mysql",
   "host": "localhost",
   "port": 3306,
-  "username": "root",
-  "password": "root",
+  "username": "${MYSQL_USER:-root}",
+  "password": "${MYSQL_PASSWORD:-}",
   "database": "test"
 }
 EOF
@@ -103,7 +103,7 @@ PG_DB=$(cat <<EOF
   "host": "localhost",
   "port": 5432,
   "username": "postgres",
-  "password": "postgres",
+  "password": "${POSTGRES_PASSWORD:-}",
   "database": "test"
 }
 EOF

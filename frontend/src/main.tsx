@@ -78,7 +78,7 @@ export function App() {
     database: string;
   }>({
     name: '', engine: 'mysql', host: '127.0.0.1', port: 8889,
-    username: 'root', password: 'root', database: ''
+    username: '', password: '', database: ''
   })
   const [availableDatabases, setAvailableDatabases] = useState<string[]>([])
   const [loadingDatabases, setLoadingDatabases] = useState(false)
@@ -331,10 +331,10 @@ export function App() {
                 // Mettre à jour les valeurs par défaut selon le moteur (bases locales)
                 if (newEngine === 'mysql') {
                   // MAMP MySQL par défaut
-                  setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: 'root', password: 'root', database: '' });
+                  setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: '', password: '', database: '' });
                 } else {
                   // PostgreSQL Homebrew par défaut
-                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: 'root', database: '' });
+                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: '', database: '' });
                 }
                 setAvailableDatabases([]); // Réinitialiser la liste
               }}>

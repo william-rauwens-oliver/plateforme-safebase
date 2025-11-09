@@ -5,9 +5,13 @@ const scryptAsync = promisify(scrypt);
 
 /**
  * Clé de chiffrement dérivée depuis une variable d'environnement
- * Si non définie, utilise une clé par défaut (non sécurisée pour production)
+ * ⚠️ IMPORTANT : Définir ENCRYPTION_KEY en production
+ * Si non définie, génère une erreur pour forcer la configuration
  */
-const ENCRYPTION_KEY_ENV = process.env.ENCRYPTION_KEY || 'safebase-default-key-change-in-production';
+const ENCRYPTION_KEY_ENV = process.env.ENCRYPTION_KEY;
+if (!ENCRYPTION_KEY_ENV) {
+  throw new Error('ENCRYPTION_KEY environment variable is required. Please set it in your environment or .env file.');
+}
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
 const SALT_LENGTH = 32;

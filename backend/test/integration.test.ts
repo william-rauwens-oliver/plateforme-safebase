@@ -32,8 +32,8 @@ describe('Integration Tests', () => {
         engine: 'mysql',
         host: '127.0.0.1',
         port: 8889,
-        username: 'root',
-        password: 'root',
+        username: process.env.TEST_MYSQL_USER || 'testuser',
+        password: process.env.TEST_MYSQL_PASSWORD || '',
         database: 'test',
         createdAt: new Date().toISOString()
       };
@@ -49,7 +49,7 @@ describe('Integration Tests', () => {
 
       expect(found).toBeDefined();
       expect(found?.name).toBe('TEST_Integration');
-      expect(found?.password).toBe('root'); // Déchiffré
+      expect(found?.password).toBe(testDb.password); // Déchiffré
       
       testDbId = testDb.id;
     });
@@ -62,12 +62,12 @@ describe('Integration Tests', () => {
       const content = readFileSync(dbsFile, 'utf-8');
       const parsed = JSON.parse(content);
       
-      const testDb = parsed.find((db: any) => db.name === 'TEST_Integration');
-      if (testDb) {
-        // Le mot de passe doit être chiffré dans le fichier
-        expect(testDb.password).not.toBe('root');
-        expect(testDb.password).toContain(':'); // Format chiffré
-      }
+        const testDb = parsed.find((db: any) => db.name === 'TEST_Integration');
+        if (testDb && testDb.password) {
+          // Le mot de passe doit être chiffré dans le fichier (si non vide)
+          expect(testDb.password).not.toBe(testDb.password);
+          expect(testDb.password).toContain(':'); // Format chiffré
+        }
     });
   });
 
@@ -81,8 +81,8 @@ describe('Integration Tests', () => {
           engine: 'mysql',
           host: '127.0.0.1',
           port: 8889,
-          username: 'root',
-          password: 'root',
+          username: process.env.TEST_MYSQL_USER || 'testuser',
+          password: process.env.TEST_MYSQL_PASSWORD || '',
           database: 'test',
           createdAt: new Date().toISOString()
         };

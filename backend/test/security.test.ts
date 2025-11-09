@@ -50,7 +50,8 @@ describe('Security Tests', () => {
 
   describe('API Security', () => {
     it('should require API key when configured', async () => {
-      process.env.API_KEY = 'test-secret-key';
+      const testApiKey = process.env.TEST_API_KEY || 'test-api-key-' + Date.now();
+      process.env.API_KEY = testApiKey;
       const srv = await createServer();
       
       const res = await srv.inject({ 
@@ -64,14 +65,15 @@ describe('Security Tests', () => {
     });
 
     it('should accept requests with valid API key', async () => {
-      process.env.API_KEY = 'test-secret-key';
+      const testApiKey = process.env.TEST_API_KEY || 'test-api-key-' + Date.now();
+      process.env.API_KEY = testApiKey;
       const srv = await createServer();
       
       const res = await srv.inject({ 
         method: 'GET', 
         url: '/databases',
         headers: {
-          'x-api-key': 'test-secret-key'
+          'x-api-key': testApiKey
         }
       });
       
@@ -81,14 +83,15 @@ describe('Security Tests', () => {
     });
 
     it('should reject requests with invalid API key', async () => {
-      process.env.API_KEY = 'test-secret-key';
+      const testApiKey = process.env.TEST_API_KEY || 'test-api-key-' + Date.now();
+      process.env.API_KEY = testApiKey;
       const srv = await createServer();
       
       const res = await srv.inject({ 
         method: 'GET', 
         url: '/databases',
         headers: {
-          'x-api-key': 'wrong-key'
+          'x-api-key': 'invalid-key-' + Date.now()
         }
       });
       
