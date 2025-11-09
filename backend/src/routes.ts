@@ -109,6 +109,124 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
 }
 
 /**
+ * Essaie de donner les permissions nécessaires pour PostgreSQL avant un backup
+ * @param db - Base de données PostgreSQL
+ * @returns true si les permissions ont été données (ou si l'utilisateur est superuser)
+ */
+async function tryGrantPostgresPermissions(db: RegisteredDatabase): Promise<boolean> {
+  if (db.engine !== 'postgres') return true; // Pas nécessaire pour MySQL
+  
+  try {
+    const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
+    const client = new PgClient({
+      host: hostForConnection,
+      port: db.port,
+      user: db.username,
+      password: db.password || '',
+      database: db.database,
+      connectionTimeoutMillis: 5000,
+    });
+    
+    await client.connect();
+    
+    // Vérifier si l'utilisateur est superuser
+    const superCheck = await client.query('SELECT usesuper FROM pg_user WHERE usename = current_user');
+    const isSuper = superCheck.rows[0]?.usesuper === true;
+    
+    if (isSuper) {
+      // Si superuser, donner les permissions directement
+      try {
+        await client.query('GRANT SELECT ON ALL TABLES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
+        await client.query('GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
+        await client.query('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO ' + client.escapeIdentifier(db.username));
+        await client.query('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO ' + client.escapeIdentifier(db.username));
+        await client.end();
+        return true;
+      } catch (grantErr) {
+        await client.end();
+        return false;
+      }
+    } else {
+      // Si pas superuser, essayer de trouver le propriétaire de la base et utiliser SET ROLE
+      try {
+        const dbOwnerResult = await client.query('SELECT pg_catalog.pg_get_userbyid(datdba) as owner FROM pg_database WHERE datname = current_database()');
+        const dbOwner = dbOwnerResult.rows[0]?.owner;
+        
+        if (dbOwner && dbOwner !== db.username) {
+          // Essayer de se connecter en tant que propriétaire (nécessite que l'utilisateur actuel puisse SET ROLE)
+          // Mais cela nécessite généralement d'être membre du rôle, donc on essaie juste de donner les permissions
+          // avec l'utilisateur actuel (peut échouer si pas propriétaire)
+          try {
+            await client.query('GRANT SELECT ON ALL TABLES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
+            await client.query('GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
+            await client.end();
+            return true;
+          } catch (grantErr) {
+            await client.end();
+            return false;
+          }
+        } else {
+          // L'utilisateur est le propriétaire, donner les permissions
+          try {
+            await client.query('GRANT SELECT ON ALL TABLES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
+            await client.query('GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
+            await client.end();
+            return true;
+          } catch (grantErr) {
+            await client.end();
+            return false;
+          }
+        }
+      } catch (err) {
+        await client.end();
+        return false;
+      }
+    }
+  } catch (err) {
+    // En cas d'erreur de connexion, on continue quand même
+    return false;
+  }
+}
+
+/**
+ * Liste les tables accessibles dans une base PostgreSQL
+ * @param db - Base de données PostgreSQL
+ * @returns Liste des noms de tables accessibles
+ */
+async function listAccessiblePostgresTables(db: RegisteredDatabase): Promise<string[]> {
+  if (db.engine !== 'postgres') return [];
+  
+  try {
+    const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
+    const client = new PgClient({
+      host: hostForConnection,
+      port: db.port,
+      user: db.username,
+      password: db.password || '',
+      database: db.database,
+      connectionTimeoutMillis: 5000,
+    });
+    
+    await client.connect();
+    
+    // Lister les tables où l'utilisateur a les permissions SELECT
+    // Utiliser current_user au lieu de db.username pour éviter les problèmes de permissions
+    const result = await client.query(`
+      SELECT tablename 
+      FROM pg_tables 
+      WHERE schemaname = 'public' 
+      AND has_table_privilege(current_user, 'public.' || tablename, 'SELECT')
+      ORDER BY tablename
+    `);
+    
+    await client.end();
+    return result.rows.map(row => row.tablename);
+  } catch (err) {
+    return [];
+  }
+}
+
+/**
  * Schéma de validation Zod pour l'enregistrement d'une base de données
  */
 const RegisterSchema = z.object({
@@ -318,9 +436,26 @@ export async function routes(app: FastifyInstance): Promise<void> {
       return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
     };
 
-      const cmd = db.engine === 'mysql'
-        ? `${findMysqldump()} -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${outPath}`
-        : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`) + ` -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p > ${outPath}`;
+    // Échapper le chemin du fichier pour la commande shell
+    const escapePath = (path: string) => {
+      return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
+    };
+
+    // Pour PostgreSQL, utiliser 127.0.0.1 au lieu de localhost pour éviter les problèmes IPv6
+    const hostForBackup = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
+
+    // Pour PostgreSQL, utiliser une approche qui gère les permissions : d'abord essayer avec --exclude-table-data pour les tables problématiques
+    // Si cela échoue, utiliser --schema-only pour au moins sauvegarder le schéma
+    let cmd: string;
+    if (db.engine === 'mysql') {
+      cmd = `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${escapePath(outPath)}`;
+    } else {
+      // PostgreSQL : utiliser une approche qui gère les permissions
+      // D'abord essayer avec les options standard, puis fallback sur schema-only si nécessaire
+      const pgDumpBase = db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`;
+      // Essayer d'abord sans exclusion (pour les bases avec bonnes permissions)
+      cmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges -f ${escapePath(outPath)}`;
+    }
 
     try {
       // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
@@ -338,9 +473,178 @@ export async function routes(app: FastifyInstance): Promise<void> {
           await fs.writeFile(outPath, header + content);
         });
       } else {
-        app.log.info({ message: 'Starting backup', database: db.name, command: cmd.replace(/-p'[^']*'/, "-p'***'") });
-        await exec(cmd);
-        app.log.info({ message: 'Backup completed', database: db.name, path: outPath });
+        app.log.info({ message: 'Starting backup', database: db.name, engine: db.engine, command: cmd.replace(/-p'[^']*'/, "-p'***'").replace(/PGPASSWORD='[^']*'/, "PGPASSWORD='***'") });
+        try {
+          await exec(cmd);
+          app.log.info({ message: 'Backup completed', database: db.name, path: outPath });
+        } catch (execErr: any) {
+          const errorMsg = execErr instanceof Error ? execErr.message : String(execErr);
+          const stderr = execErr?.stderr || '';
+          app.log.error({ message: 'Backup command failed', database: db.name, engine: db.engine, error: errorMsg, stderr });
+          
+          // Pour PostgreSQL avec erreurs de permissions, utiliser une approche qui liste toutes les tables et essaie de les sauvegarder
+          if (db.engine === 'postgres' && (stderr.includes('permission denied') || errorMsg.includes('permission denied'))) {
+            app.log.warn({ message: 'Trying backup with all tables (may exclude problematic ones)', database: db.name });
+            
+            // Essayer de donner les permissions d'abord
+            await tryGrantPostgresPermissions(db);
+            
+            // Lister toutes les tables de la base (pas seulement celles accessibles)
+            try {
+              const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
+              const listClient = new PgClient({
+                host: hostForConnection,
+                port: db.port,
+                user: db.username,
+                password: db.password || '',
+                database: db.database,
+                connectionTimeoutMillis: 5000,
+              });
+              
+              await listClient.connect();
+              const allTablesResult = await listClient.query(`
+                SELECT tablename 
+                FROM pg_tables 
+                WHERE schemaname = 'public' 
+                ORDER BY tablename
+              `);
+              await listClient.end();
+              
+              const allTables = allTablesResult.rows.map(row => row.tablename);
+              
+              if (allTables.length > 0) {
+                // Essayer de faire un dump de toutes les tables
+                // Si certaines échouent, pg_dump continuera avec les autres
+                try {
+                  const pgDumpBase = db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`;
+                  const tableOptions = allTables.map(table => `--table=public.${escapeShell(table)}`).join(' ');
+                  const tableOnlyCmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges ${tableOptions} -f ${escapePath(outPath)}`;
+                  await exec(tableOnlyCmd);
+                  app.log.info({ message: 'Backup completed with all tables', database: db.name, path: outPath, tablesCount: allTables.length });
+                } catch (tableErr: any) {
+                  // Si le dump avec toutes les tables échoue, essayer table par table
+                  app.log.warn({ message: 'Full table dump failed, trying individual tables', database: db.name });
+                  const successfulTables: string[] = [];
+                  const failedTables: string[] = [];
+                  
+                  for (const table of allTables) {
+                    try {
+                      const pgDumpBase = db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`;
+                      const tempPath = `${outPath}.tmp.${table}`;
+                      const singleTableCmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --table=public.${escapeShell(table)} -f ${escapePath(tempPath)}`;
+                      await exec(singleTableCmd);
+                      successfulTables.push(table);
+                      // Ajouter le contenu au fichier principal
+                      await import('fs/promises').then(async fs => {
+                        const content = await fs.readFile(tempPath, 'utf-8');
+                        await fs.appendFile(outPath, content + '\n');
+                        await fs.unlink(tempPath);
+                      });
+                    } catch (singleErr) {
+                      failedTables.push(table);
+                    }
+                  }
+                  
+                  if (successfulTables.length > 0) {
+                    app.log.info({ message: 'Backup completed with partial tables', database: db.name, path: outPath, successful: successfulTables.length, failed: failedTables.length, failedTables });
+                  } else {
+                    // Si toutes les tables échouent avec pg_dump, créer un backup avec le schéma au moins
+                    app.log.warn({ message: 'All pg_dump attempts failed, creating schema-only backup', database: db.name });
+                    
+                    try {
+                      const schemaClient = new PgClient({
+                        host: hostForBackup,
+                        port: db.port,
+                        user: db.username,
+                        password: db.password || '',
+                        database: db.database,
+                        connectionTimeoutMillis: 5000,
+                      });
+                      
+                      await schemaClient.connect();
+                      
+                      // Créer un backup avec le schéma des tables (même sans données)
+                      let backupContent = `-- Backup de ${db.database} à ${new Date().toISOString()}\n`;
+                      backupContent += `-- ATTENTION: Ce backup ne contient que le schéma (structure) des tables.\n`;
+                      backupContent += `-- Les données n'ont pas pu être sauvegardées à cause de permissions insuffisantes.\n\n`;
+                      backupContent += `-- Pour sauvegarder les données, connectez-vous en tant que propriétaire des tables\n`;
+                      backupContent += `-- et exécutez les commandes suivantes:\n`;
+                      backupContent += `-- GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${db.username};\n`;
+                      backupContent += `-- GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ${db.username};\n\n`;
+                      
+                      // Récupérer le schéma de toutes les tables
+                      for (const table of allTables) {
+                        try {
+                          // Utiliser pg_catalog qui est accessible même sans permissions spéciales
+                          const schemaResult = await schemaClient.query(`
+                            SELECT 
+                              a.attname as column_name,
+                              pg_catalog.format_type(a.atttypid, a.atttypmod) as data_type,
+                              a.attnotnull as is_not_null,
+                              pg_get_expr(adbin, adrelid) as column_default
+                            FROM pg_catalog.pg_attribute a
+                            LEFT JOIN pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND a.attnum = ad.adnum
+                            WHERE a.attrelid = $1::regclass
+                            AND a.attnum > 0
+                            AND NOT a.attisdropped
+                            ORDER BY a.attnum
+                          `, [`public.${table}`]);
+                          
+                          if (schemaResult.rows.length > 0) {
+                            backupContent += `-- Table: ${table}\n`;
+                            backupContent += `CREATE TABLE IF NOT EXISTS ${table} (\n`;
+                            const columns = schemaResult.rows.map((col) => {
+                              let colDef = `  ${col.column_name} ${col.data_type}`;
+                              if (col.is_not_null) {
+                                colDef += ' NOT NULL';
+                              }
+                              if (col.column_default) {
+                                colDef += ` DEFAULT ${col.column_default}`;
+                              }
+                              return colDef;
+                            }).join(',\n');
+                            backupContent += columns + '\n);\n\n';
+                            
+                            // Essayer de récupérer le nombre de lignes (peut échouer)
+                            try {
+                              const countResult = await schemaClient.query(`SELECT COUNT(*) as count FROM ${schemaClient.escapeIdentifier(table)}`);
+                              const rowCount = countResult.rows[0]?.count || 0;
+                              backupContent += `-- Nombre de lignes dans ${table}: ${rowCount}\n`;
+                              backupContent += `-- Les données n'ont pas pu être exportées à cause de permissions insuffisantes.\n\n`;
+                            } catch (countErr) {
+                              backupContent += `-- Impossible de compter les lignes (permissions insuffisantes)\n\n`;
+                            }
+                          }
+                        } catch (schemaErr) {
+                          backupContent += `-- Impossible de récupérer le schéma de la table ${table}\n\n`;
+                        }
+                      }
+                      
+                      await schemaClient.end();
+                      
+                      // Écrire le contenu dans le fichier
+                      await import('fs/promises').then(async fs => {
+                        await fs.writeFile(outPath, backupContent);
+                      });
+                      
+                      app.log.info({ message: 'Schema-only backup created', database: db.name, path: outPath, tablesCount: allTables.length });
+                    } catch (schemaErr: any) {
+                      const schemaErrorMsg = schemaErr instanceof Error ? schemaErr.message : String(schemaErr);
+                      throw new Error(`Backup failed: Impossible de créer même un backup de schéma. ${schemaErrorMsg}. L'utilisateur ${db.username} n'a pas les permissions nécessaires. Connectez-vous en tant que propriétaire et exécutez: GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${db.username};`);
+                    }
+                  }
+                }
+              } else {
+                throw new Error(`Backup failed: Aucune table trouvée dans la base de données.`);
+              }
+            } catch (listErr: any) {
+              const listErrorMsg = listErr instanceof Error ? listErr.message : String(listErr);
+              throw new Error(`Backup failed: Impossible de lister les tables. ${listErrorMsg}`);
+            }
+          } else {
+            throw new Error(`Backup failed: ${errorMsg}${stderr ? ` - ${stderr}` : ''}`);
+          }
+        }
       }
       const meta: BackupVersionMeta = {
         id: randomUUID(),
@@ -402,9 +706,17 @@ export async function routes(app: FastifyInstance): Promise<void> {
         return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
       };
 
+      // Échapper le chemin du fichier pour la commande shell
+      const escapePath = (path: string) => {
+        return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
+      };
+
+      // Pour PostgreSQL, utiliser 127.0.0.1 au lieu de localhost pour éviter les problèmes IPv6
+      const hostForBackup = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
+
       const cmd = db.engine === 'mysql'
-        ? `${findMysqldump()} -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${outPath}`
-        : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`) + ` -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p > ${outPath}`;
+        ? `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${escapePath(outPath)}`
+        : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`) + ` -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --lock-wait-timeout=0 -f ${escapePath(outPath)}`;
     try {
       // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
       // Pour activer le mode fake (tests uniquement), définir FAKE_DUMP=1
