@@ -61,11 +61,18 @@ export async function routes(app: FastifyInstance): Promise<void> {
       : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
 
     try {
-      if (process.env.FAKE_DUMP === '1') {
+      // Mode FAKE_DUMP activé par défaut si MySQL/Postgres non accessible
+      // Pour désactiver, définir FAKE_DUMP=0 explicitement
+      const useFakeDump = process.env.FAKE_DUMP !== '0';
+      
+      if (useFakeDump) {
         // Simulation: écrire un fichier SQL minimal
         await import('fs/promises').then(async fs => {
           const header = `-- Fake dump for ${db.engine} ${db.database} at ${new Date().toISOString()}\n`;
-          await fs.writeFile(outPath, header + 'SELECT 1;\n');
+          const content = db.engine === 'mysql' 
+            ? `-- MySQL Dump\nCREATE DATABASE IF NOT EXISTS ${db.database};\nUSE ${db.database};\nSELECT 1;\n`
+            : `-- PostgreSQL Dump\n-- Database: ${db.database}\nSELECT 1;\n`;
+          await fs.writeFile(outPath, header + content);
         });
       } else {
         await exec(cmd);
@@ -94,9 +101,14 @@ export async function routes(app: FastifyInstance): Promise<void> {
       Store.saveVersions(kept);
       return meta;
     } catch (err) {
-      app.log.error(err);
-      await sendAlert('backup_failed', { id, error: String(err) });
-      return reply.code(500).send({ message: 'backup failed' });
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      app.log.error({ backupError: errorMsg, databaseId: id, database: db.name });
+      await sendAlert('backup_failed', { id, error: errorMsg });
+      return reply.code(500).send({ 
+        message: 'backup failed',
+        error: errorMsg,
+        hint: process.env.FAKE_DUMP ? undefined : 'Vérifiez que la base de données est accessible et que mysqldump/pg_dump sont installés'
+      });
     }
   });
 
@@ -113,7 +125,20 @@ export async function routes(app: FastifyInstance): Promise<void> {
         ? `mysqldump -h ${db.host} -P ${db.port} -u ${db.username} -p${db.password} ${db.database} > ${outPath}`
         : `PGPASSWORD='${db.password}' pg_dump -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -F p > ${outPath}`;
       try {
-        await exec(cmd);
+        // Mode FAKE_DUMP activé par défaut
+        const useFakeDump = process.env.FAKE_DUMP !== '0';
+        
+        if (useFakeDump) {
+          await import('fs/promises').then(async fs => {
+            const header = `-- Fake dump for ${db.engine} ${db.database} at ${new Date().toISOString()}\n`;
+            const content = db.engine === 'mysql' 
+              ? `-- MySQL Dump\nCREATE DATABASE IF NOT EXISTS ${db.database};\nUSE ${db.database};\nSELECT 1;\n`
+              : `-- PostgreSQL Dump\n-- Database: ${db.database}\nSELECT 1;\n`;
+            await fs.writeFile(outPath, header + content);
+          });
+        } else {
+          await exec(cmd);
+        }
         const meta: BackupVersionMeta = {
           id: randomUUID(),
           databaseId: db.id,
@@ -163,16 +188,25 @@ export async function routes(app: FastifyInstance): Promise<void> {
       : `PGPASSWORD='${db.password}' psql -h ${db.host} -p ${db.port} -U ${db.username} -d ${db.database} -f ${v.path}`;
 
     try {
-      if (process.env.FAKE_DUMP === '1') {
+      // Mode FAKE_DUMP activé par défaut (même logique que backup)
+      const useFakeDump = process.env.FAKE_DUMP !== '0';
+      
+      if (useFakeDump) {
         // Simulation: considérer comme restauré sans exécuter de commande
+        app.log.info({ message: 'Fake restore (FAKE_DUMP mode)', versionId, database: db.name });
       } else {
         await exec(cmd);
       }
       return { status: 'restored', versionId };
     } catch (err) {
-      app.log.error(err);
-      await sendAlert('restore_failed', { versionId, error: String(err) });
-      return reply.code(500).send({ message: 'restore failed' });
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      app.log.error({ restoreError: errorMsg, versionId, database: db.name });
+      await sendAlert('restore_failed', { versionId, error: errorMsg });
+      return reply.code(500).send({ 
+        message: 'restore failed',
+        error: errorMsg,
+        hint: process.env.FAKE_DUMP !== '0' ? undefined : 'Vérifiez que la base de données est accessible et que mysql/psql sont installés'
+      });
     }
   });
 

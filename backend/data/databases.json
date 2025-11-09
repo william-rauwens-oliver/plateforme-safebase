@@ -97,5 +97,16 @@
     "username": "safebase",
     "password": "safebase",
     "database": "safebase"
+  },
+  {
+    "id": "bbd1aa7c-55d7-4e4a-9ed6-44da5d6dcad7",
+    "createdAt": "2025-11-09T12:46:00.480Z",
+    "name": "Base de donnée",
+    "engine": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "safebase",
+    "password": "Test",
+    "database": "safebase"
   }
 ]
