@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 
 // Mock fetch globally
-global.fetch = vi.fn() as any;
+global.fetch = vi.fn() as unknown as Mock;
 
 describe('Frontend Security Tests', () => {
   beforeEach(() => {
@@ -12,16 +12,6 @@ describe('Frontend Security Tests', () => {
 
   it('should validate input before sending to API', () => {
     // Test que le frontend valide les entrées
-    const invalidData = {
-      name: '',
-      engine: 'invalid',
-      host: '',
-      port: -1,
-      username: '',
-      password: '',
-      database: ''
-    };
-
     // Le formulaire HTML devrait avoir required
     expect(true).toBe(true); // Test de structure
   });
@@ -36,20 +26,19 @@ describe('Frontend Security Tests', () => {
   it('should not expose passwords in logs', () => {
     // Vérifier que les mots de passe ne sont pas loggés
     const consoleSpy = vi.spyOn(console, 'log');
-    const password = 'secret123';
     
     // Simuler un log (ne devrait pas inclure le mot de passe)
     console.log('User action', { username: 'test', password: '***' });
     
     expect(consoleSpy).toHaveBeenCalled();
-    const callArgs = consoleSpy.mock.calls[0][1] as any;
+    const callArgs = consoleSpy.mock.calls[0][1] as { username: string; password: string };
     expect(callArgs.password).toBe('***');
     
     consoleSpy.mockRestore();
   });
 
   it('should handle API errors securely', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as Mock).mockResolvedValueOnce({
       ok: false,
       status: 401,
       json: async () => ({ message: 'Unauthorized' })
