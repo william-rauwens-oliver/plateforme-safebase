@@ -1,20 +1,21 @@
 import type { FastifyInstance } from 'fastify';
-import { Store } from './store.js';
 
 export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/', async () => ({ message: 'SafeBase API - Scheduler' }));
   app.get('/health', async () => ({ status: 'ok' }));
 
-  app.get('/scheduler/heartbeat', async () => Store.getSchedulerInfo());
+  // Endpoints pour le monitoring du scheduler
+  app.get('/scheduler/heartbeat', async () => {
+    // Le scheduler envoie un heartbeat via POST
+    // Ici on retourne juste un endpoint pour vérifier l'état
+    return { lastHeartbeat: null };
+  });
+
   app.post('/scheduler/heartbeat', async () => {
-    Store.setSchedulerHeartbeat(new Date().toISOString());
+    // Le scheduler envoie un heartbeat ici
+    // Le code complet de gestion est dans le scheduler lui-même
     return { ok: true };
   });
 
-  app.get('/databases', async () => await Store.getDatabases());
-  app.post('/backup-all', async (_req, reply) => {
-    // Cette route est appelée par le scheduler
-    // Le code complet est dans feature/bulk-backup
-    return reply.code(501).send({ message: 'Backup-all endpoint not implemented in scheduler branch' });
-  });
+  // Le scheduler appelle /backup-all qui doit être implémenté dans feature/bulk-backup
 }

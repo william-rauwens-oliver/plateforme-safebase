@@ -1,15 +1,9 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { Store } from './store.js';
 import { routes } from './routes.js';
 
-/**
- * Crée et configure le serveur Fastify avec tous les middlewares et routes
- * @returns Instance Fastify configurée
- */
 export async function createServer() {
   const server = Fastify({ logger: true });
-  Store.init();
   const corsOrigin = process.env.CORS_ORIGIN || true;
   await server.register(cors, { origin: corsOrigin as any });
 
@@ -32,8 +26,7 @@ export async function createServer() {
       return reply.code(401).send({ message: 'unauthorized' });
     }
   });
+
   await routes(server);
   return server;
 }
-
-
