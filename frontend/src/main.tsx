@@ -36,7 +36,6 @@ export function usePersistentState<T>(key: string, initial: T) {
     } catch {
       // Ignore localStorage errors (private mode)
     }
-  }
   }, [key, value])
   return [value, setValue] as const
 }
