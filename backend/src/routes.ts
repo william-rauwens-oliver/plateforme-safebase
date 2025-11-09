@@ -87,7 +87,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
         Store.saveVersions(kept);
         results.push({ id: db.id, ok: true });
       } catch (err) {
-        await sendAlert('backup_failed', { id: db.id, error: String(err) });
+        app.log.error({ backupError: String(err), databaseId: db.id, database: db.name });
         results.push({ id: db.id, ok: false });
       }
     }
