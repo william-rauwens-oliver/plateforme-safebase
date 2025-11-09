@@ -54,6 +54,7 @@ Toute la documentation est disponible dans le dossier [`docs/`](docs/README.md) 
 - Tests
 - Soutenance
 - Résolution de problèmes
+- **Présentation** : Diapositives pour la soutenance ([`docs/PRESENTATION.md`](docs/PRESENTATION.md))
 
 ## 🔧 Scripts Utilitaires
 
