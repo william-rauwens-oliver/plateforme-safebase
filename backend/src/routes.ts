@@ -304,8 +304,11 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
     // Trouver mysqldump (MAMP en priorité, sinon système)
     const findMysqldump = () => {
-      const mampPath = '/Applications/MAMP/Library/bin/mysqldump';
-      if (existsSync(mampPath)) return mampPath;
+      // MAMP utilise mysql80 ou mysql57
+      const mamp80 = '/Applications/MAMP/Library/bin/mysql80/bin/mysqldump';
+      const mamp57 = '/Applications/MAMP/Library/bin/mysql57/bin/mysqldump';
+      if (existsSync(mamp80)) return mamp80;
+      if (existsSync(mamp57)) return mamp57;
       return 'mysqldump'; // Fallback sur PATH système
     };
 
