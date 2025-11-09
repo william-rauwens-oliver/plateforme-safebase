@@ -27,9 +27,12 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
         user: db.username,
         password: db.password,
         database: db.database,
-        connectTimeout: 5000, // 5 secondes max
+        connectTimeout: 10000, // 10 secondes max
+        enableKeepAlive: false,
       });
+      // Test réel : ping + requête simple pour vérifier que la base existe
       await connection.ping();
+      await connection.query('SELECT 1');
       await connection.end();
       return { success: true };
     } else {
@@ -40,15 +43,29 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
         user: db.username,
         password: db.password,
         database: db.database,
-        connectionTimeoutMillis: 5000, // 5 secondes max
+        connectionTimeoutMillis: 10000, // 10 secondes max
       });
       await client.connect();
+      // Test réel : requête simple pour vérifier que la base existe
       await client.query('SELECT 1');
       await client.end();
       return { success: true };
     }
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
+    // Messages d'erreur plus clairs selon le type d'erreur
+    if (errorMsg.includes('ECONNREFUSED') || errorMsg.includes('ENOTFOUND') || errorMsg.includes('getaddrinfo')) {
+      return { success: false, error: `Impossible de se connecter au serveur ${db.host}:${db.port}. Vérifiez que le serveur MySQL/PostgreSQL est démarré.` };
+    }
+    if (errorMsg.includes('Access denied') || errorMsg.includes('password authentication failed') || errorMsg.includes('authentication failed')) {
+      return { success: false, error: 'Identifiants incorrects : utilisateur ou mot de passe invalide' };
+    }
+    if (errorMsg.includes('Unknown database') || (errorMsg.includes('database') && errorMsg.includes('does not exist'))) {
+      return { success: false, error: `La base de données "${db.database}" n'existe pas. Créez-la d'abord dans votre serveur.` };
+    }
+    if (errorMsg.includes('ETIMEDOUT') || errorMsg.includes('timeout')) {
+      return { success: false, error: `Timeout : le serveur ${db.host}:${db.port} ne répond pas. Vérifiez qu'il est démarré.` };
+    }
     return { success: false, error: errorMsg };
   }
 }
