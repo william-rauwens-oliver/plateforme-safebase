@@ -16,9 +16,16 @@ Solution complète de gestion de sauvegarde et restauration de bases de données
 ```
 plateforme-safebase/
 ├── backend/          # API Fastify (TypeScript)
+│   ├── src/          # Code source
+│   ├── test/         # Tests unitaires
+│   └── dist/         # Code compilé
 ├── frontend/         # Interface React + Vite
-├── scheduler/        # Scheduler cron pour backups automatiques
-├── docs/             # Documentation complète
+│   └── src/          # Code source
+├── scheduler/         # Scheduler cron pour backups automatiques
+│   └── scripts/      # Scripts de backup
+├── docs/             # Documentation
+│   ├── PRESENTATION.md    # Diaporama de présentation
+│   └── PRESENTATION.pdf   # PDF de présentation
 ├── scripts/          # Scripts utilitaires
 ├── docker-compose.yml
 └── README.md
@@ -27,110 +34,70 @@ plateforme-safebase/
 ## 🚀 Démarrage Rapide
 
 ### Avec Docker (recommandé)
+
 ```bash
 docker compose up --build
 ```
 
-Services:
-- API: `http://localhost:8080`
-- Frontend: `http://localhost:5173`
+**Services disponibles :**
+- **API** : `http://localhost:8080`
+- **Frontend** : `http://localhost:5173`
 
-### Test local sans Docker
+### Installation locale
 
-1. **Backend:**
+#### Backend
+
 ```bash
 cd backend
 npm install
 npm run build
-npm test  # Tests unitaires
-npm run dev  # API sur http://localhost:8080
+npm test        # Tests unitaires
+npm run dev     # API sur http://localhost:8080
 ```
 
-2. **Frontend:**
+**Prérequis :** Le backend nécessite `mysql-client` et `postgresql-client` installés pour les backups.
+
+#### Frontend
+
 ```bash
 cd frontend
 npm install
-npm run dev  # Interface sur http://localhost:5173
+npm run dev     # Interface sur http://localhost:5173
 ```
 
-**Note:** Le backend nécessite `mysql-client` et `postgresql-client` installés pour les backups.
+## 🔌 API REST - Endpoints
 
-## 📚 Documentation
+### Santé et Monitoring
+- `GET /health` - Vérifier l'état de l'API
+- `GET /scheduler/heartbeat` - État du scheduler
+- `POST /scheduler/heartbeat` - Enregistrer un heartbeat
 
-Toute la documentation est disponible dans le dossier [`docs/`](docs/README.md) :
-- Guide de démarrage
-- Architecture
-- Tests
-- Soutenance
-- Résolution de problèmes
-- **Présentation** : Diapositives pour la soutenance ([`docs/PRESENTATION.md`](docs/PRESENTATION.md))
+### Gestion des Bases de Données
+- `GET /databases` - Lister toutes les bases de données
+- `POST /databases` - Ajouter une nouvelle base de données
+- `GET /backups/:id` - Lister les versions d'une base
 
-## 🔧 Scripts Utilitaires
+### Sauvegardes
+- `POST /backup/:id` - Créer une sauvegarde d'une base spécifique
+- `POST /backup-all` - Créer une sauvegarde de toutes les bases
 
-Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
-- Tests fonctionnels
-- Tests scheduler
-- Lancement du projet
-- Correction MAMP
+### Restauration
+- `POST /restore/:versionId` - Restaurer une version spécifique
+- `GET /versions/:versionId/download` - Télécharger un backup
 
-## ⚙️ Variables d'environnement principales
+### Gestion des Versions
+- `POST /versions/:versionId/pin` - Épingler une version
+- `POST /versions/:versionId/unpin` - Désépingler une version
+- `DELETE /versions/:versionId` - Supprimer une version
 
-- API (service api)
-  - `API_KEY`: clé API pour protéger les endpoints (optionnel, définir via variable d'environnement)
-  - `ENCRYPTION_KEY`: clé de chiffrement pour les mots de passe (requis, définir via variable d'environnement)
-  - `CORS_ORIGIN`: origine autorisée pour le frontend (ex: `http://localhost:5173`)
-  - `ALERT_WEBHOOK_URL`: URL webhook (Slack/Teams/HTTP) pour alertes
-  - `RETAIN_PER_DB`: nombre de versions à conserver par base (par défaut 10)
-  - `DATA_DIR`: répertoire de stockage des métadonnées (par défaut `/app/data`)
-  - `BACKUPS_DIR`: répertoire où écrire les dumps (par défaut `/backups`)
+## 📖 Exemples d'utilisation
 
-- Scheduler
-  - `SCHEDULER_API_URL`: URL de l'API (ex: `http://api:8080`)
-  - `API_KEY`: même valeur que le service API si activé (optionnel)
-
-## 🔌 Endpoints principaux
-
-- `GET /health`
-- `GET /databases` / `POST /databases`
-- `POST /backup/:id` / `POST /backup-all`
-- `GET /backups/:id`
-- `POST /restore/:versionId`
-- `POST /versions/:versionId/pin` / `POST /versions/:versionId/unpin`
-- `GET /versions/:versionId/download`
-- `DELETE /versions/:versionId`
-- `GET /scheduler/heartbeat` / `POST /scheduler/heartbeat`
-
-Backups stockés dans le volume `backups`, par base.
-
-## 🧪 Tests
-
-```bash
-# Backend
-cd backend
-npm test
-
-# Frontend
-cd frontend
-npm test
-```
-
-## 🔄 CI/CD
-
-Le projet utilise GitHub Actions pour automatiser les tests et le linting. Voir [`docs/CI-CD.md`](docs/CI-CD.md) pour plus de détails.
-
-## 📖 Exemples d'utilisation de l'API
-
-### 1. Vérifier la santé
+### Vérifier la santé de l'API
 ```bash
 curl http://localhost:8080/health
 ```
 
-### 2. Lister les bases de données
-```bash
-curl http://localhost:8080/databases
-```
-
-### 3. Ajouter une base MySQL
+### Ajouter une base MySQL
 ```bash
 curl -X POST http://localhost:8080/databases \
   -H 'Content-Type: application/json' \
@@ -145,53 +112,108 @@ curl -X POST http://localhost:8080/databases \
   }'
 ```
 
-### 4. Démarrer un backup
+### Créer une sauvegarde
 ```bash
 curl -X POST http://localhost:8080/backup/DATABASE_ID
 ```
 
-### 5. Lister les versions d'une base
-```bash
-curl http://localhost:8080/backups/DATABASE_ID
-```
-
-### 6. Restaurer une version
+### Restaurer une version
 ```bash
 curl -X POST http://localhost:8080/restore/VERSION_ID
 ```
 
 ### Avec API Key (si configuré)
-Ajoutez le header `x-api-key` :
 ```bash
 curl -H "x-api-key: ${API_KEY}" http://localhost:8080/databases
 ```
 
-## 🏗️ Stack
+## ⚙️ Configuration
 
-- API: Fastify (TypeScript)
-- DBs: MySQL 8, Postgres 16
-- Scheduler: Alpine + cron (appel `/backup-all`)
-- Frontend: Vite + React
-- Tests: Vitest
-- CI/CD: GitHub Actions
+### Variables d'environnement - API
 
-## 📊 Conformité
+| Variable | Description | Requis | Défaut |
+|----------|-------------|--------|--------|
+| `API_KEY` | Clé API pour protéger les endpoints | Non | - |
+| `ENCRYPTION_KEY` | Clé de chiffrement pour les mots de passe | **Oui** | - |
+| `CORS_ORIGIN` | Origine autorisée pour le frontend | Non | `http://localhost:5173` |
+| `ALERT_WEBHOOK_URL` | URL webhook pour alertes (Slack/Teams/HTTP) | Non | - |
+| `RETAIN_PER_DB` | Nombre de versions à conserver par base | Non | `10` |
+| `DATA_DIR` | Répertoire de stockage des métadonnées | Non | `/app/data` |
+| `BACKUPS_DIR` | Répertoire où écrire les dumps | Non | `/backups` |
 
-Le projet est **100% conforme** aux consignes. Voir [`docs/analyse/ANALYSE-CONFORMITE-FINALE.md`](docs/analyse/ANALYSE-CONFORMITE-FINALE.md) et [`docs/analyse/ANALYSE-COMPETENCES-COMPLETE.md`](docs/analyse/ANALYSE-COMPETENCES-COMPLETE.md) pour les analyses détaillées.
+### Variables d'environnement - Scheduler
+
+| Variable | Description | Requis | Défaut |
+|----------|-------------|--------|--------|
+| `SCHEDULER_API_URL` | URL de l'API | **Oui** | `http://api:8080` |
+| `API_KEY` | Même valeur que le service API si activé | Non | - |
+
+## 🔧 Scripts Utilitaires
+
+Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
+
+- **`test-fonctionnalites.sh`** - Test complet des fonctionnalités de l'API
+- **`test-scheduler.sh`** - Test du scheduler et des sauvegardes automatiques
+- **`LANCER-PROJET.sh`** - Script pour lancer le projet complet
+- **`changer-mot-de-passe-postgres.sh`** - Changer le mot de passe PostgreSQL
+- **`fix-postgres-permissions.sh`** - Corriger les permissions PostgreSQL
+
+## 🧪 Tests
+
+### Backend
+```bash
+cd backend
+npm test
+```
+
+### Frontend
+```bash
+cd frontend
+npm test
+```
+
+### Tests fonctionnels complets
+```bash
+./scripts/test-fonctionnalites.sh
+```
+
+### Tests du scheduler
+```bash
+./scripts/test-scheduler.sh
+```
+
+## 🏗️ Stack Technique
+
+- **Backend** : Fastify (TypeScript)
+- **Frontend** : React 18 + Vite
+- **Bases de données** : MySQL 8, PostgreSQL 16
+- **Scheduler** : Alpine Linux + cron
+- **Tests** : Vitest
+- **CI/CD** : GitHub Actions
+
+## 📚 Documentation
+
+- **Présentation** : Diapositives pour la soutenance disponibles dans [`docs/PRESENTATION.md`](docs/PRESENTATION.md) et [`docs/PRESENTATION.pdf`](docs/PRESENTATION.pdf)
+- **Sécurité** : Voir [`SECURITE.md`](SECURITE.md) pour les bonnes pratiques de sécurité
+- **Contribution** : Voir [`CONTRIBUTING.md`](CONTRIBUTING.md) pour les guidelines de contribution
+- **Changelog** : Voir [`CHANGELOG.md`](CHANGELOG.md) pour l'historique des changements
+
+## 🔄 CI/CD
+
+Le projet utilise GitHub Actions pour automatiser :
+- Les tests unitaires (backend et frontend)
+- Le linting du code
+- La vérification de la compilation TypeScript
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! Veuillez lire notre [Guide de Contribution](CONTRIBUTING.md) pour plus de détails.
-
-## 📝 Changelog
-
-Voir [CHANGELOG.md](CHANGELOG.md) pour la liste des changements.
+Les contributions sont les bienvenues ! Veuillez lire le [Guide de Contribution](CONTRIBUTING.md) pour plus de détails.
 
 ## 📄 License
 
 Ce projet est un projet éducatif.
 
-## 👥 Auteurs
+## 👥 Auteur
 
 - **William Rauwens-Oliver** - [@william-rauwens-oliver](https://github.com/william-rauwens-oliver)
 
