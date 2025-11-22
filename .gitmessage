@@ -1,0 +1,26 @@
+# <type>(<scope>): <subject>
+#
+# <body>
+#
+# <footer>
+
+# Types:
+# feat: Nouvelle fonctionnalité
+# fix: Correction de bug
+# docs: Documentation uniquement
+# style: Formatage, point-virgule manquant, etc.
+# refactor: Refactoring de code
+# test: Ajout ou modification de tests
+# chore: Tâches de maintenance (build, dépendances, etc.)
+# perf: Amélioration de performance
+# ci: Changements dans CI/CD
+
+# Scope (optionnel):
+# api, backend, frontend, scheduler, docs, ci, etc.
+
+# Exemples:
+# feat(api): ajout de l'endpoint /databases/available
+# fix(backend): correction du chiffrement des mots de passe
+# docs(readme): mise à jour de la documentation d'installation
+# test(frontend): ajout de tests pour le composant App
+
