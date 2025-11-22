@@ -2,181 +2,147 @@
 marp: true
 theme: default
 paginate: true
-header: 'SafeBase'
-footer: 'Présentation'
+header: 'SafeBase - Soutenance'
+footer: 'Présentation du Projet'
 style: |
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap');
-
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+  
   :root {
-    --blue: #3b82f6;
-    --green: #10b981;
-    --orange: #f59e0b;
-    --purple: #8b5cf6;
+    --blue: #2563eb;
+    --green: #059669;
+    --purple: #7c3aed;
+    --orange: #d97706;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   }
-
+  
   section {
-    font-family: 'Inter', system-ui, sans-serif;
-    background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
-    color: #0f172a;
-    padding: 80px;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    padding: 60px 80px;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
 
   h1 {
-    font-size: 4.8rem;
+    font-size: 4em;
     font-weight: 800;
-    letter-spacing: -0.08em;
-    margin: 0 0 20px 0;
-    background: linear-gradient(135deg, var(--blue), var(--purple));
+    background: linear-gradient(to right, var(--blue), var(--purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    margin-bottom: 0.2em;
   }
 
   h2 {
-    font-size: 3rem;
+    font-size: 2.2em;
+    color: var(--text-main);
+    margin-bottom: 0.8em;
     font-weight: 700;
-    margin: 0 0 24px 0;
   }
 
-  p {
-    font-size: 1.4rem;
-    color: #475569;
-    margin: 8px 0;
+  h3 {
+    font-size: 1.4em;
+    color: var(--blue);
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
-  ul {
-    margin: 16px 0 0 0;
-    padding-left: 22px;
-    color: #475569;
-    font-size: 1.4rem;
+  p, li {
+    font-size: 1.2em;
+    line-height: 1.6;
+    color: var(--text-main);
+    margin-bottom: 0.5em;
   }
 
-  li {
-    margin: 8px 0;
+  strong {
+    color: var(--blue);
+    font-weight: 700;
   }
 
-  .tagline {
-    font-size: 1.4rem;
-    color: #64748b;
+  .card {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid var(--blue);
+    margin-bottom: 20px;
   }
+  
+  .card.green { border-color: var(--green); }
+  .card.purple { border-color: var(--purple); }
+  .card.orange { border-color: var(--orange); }
 
   .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 32px;
+    gap: 40px;
+    align-items: start;
   }
-
-  .card {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 28px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-    border: 1px solid #e5e7eb;
-  }
-
-  .badge-row {
-    margin-top: 16px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
+  
   .badge {
+    display: inline-block;
     padding: 8px 16px;
-    border-radius: 999px;
-    font-size: 0.95rem;
+    background: #eff6ff;
+    color: var(--blue);
+    border-radius: 99px;
     font-weight: 600;
-    color: #0f172a;
-    background: #e5f0ff;
+    font-size: 0.9em;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #dbeafe;
   }
 
-  .badge-blue { background: rgba(59, 130, 246, 0.12); color: #1d4ed8; }
-  .badge-green { background: rgba(16, 185, 129, 0.12); color: #047857; }
-  .badge-orange { background: rgba(245, 158, 11, 0.12); color: #c05621; }
-  .badge-purple { background: rgba(139, 92, 246, 0.12); color: #6d28d9; }
-
-  .big-number {
-    font-size: 4.5rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0;
+  code {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: monospace;
+  }
+  
+  .intro-text {
+    font-size: 1.5em;
+    color: var(--text-muted);
+    max-width: 800px;
   }
 
-  .big-number-caption {
-    font-size: 1.2rem;
-    color: #64748b;
-  }
-
-  .center {
-    text-align: center;
-  }
-
-  header, footer {
-    color: #94a3b8;
-    font-size: 0.9rem;
-  }
 ---
 
-<!-- Slide 1 -->
 <!-- _class: lead -->
-<!-- _paginate: false -->
 
 # SafeBase
+## La solution de sauvegarde automatisée
 
-## Plateforme de sauvegarde de bases de données
-
-<p class="tagline">« Parce qu'un DROP DATABASE est vite arrivé... »</p>
-
----
-
-<!-- Slide 2 -->
-
-# Problème & Objectif
-
-- Une erreur ou un DROP peut faire perdre **toutes les données** en quelques secondes.
-- Les sauvegardes manuelles sont **oubliées**, **non testées** ou **mal organisées**.
-- Objectif : avoir une solution **simple** pour sauvegarder, restaurer et gérer l'historique des bases.
+**"Parce qu'un DROP DATABASE est vite arrivé..."**
 
 ---
 
-<!-- Slide 3 -->
-
-# Idée de SafeBase
-
-- **Enregistrer** des bases MySQL / PostgreSQL déjà existantes.
-- **Planifier automatiquement** les sauvegardes avec cron.
-- **Restaurer en 1 clic** une version précédente en cas de problème.
-
----
-
-<!-- Slide 4 -->
-
-# Architecture globale
+# 1. Le Problème
 
 <div class="grid-2">
 
 <div>
 
-- Frontend : interface React + Vite.
-- Backend : API REST en Fastify + TypeScript.
-- Bases de données : MySQL et PostgreSQL.
-- Scheduler : conteneur dédié qui lance les backups périodiques.
+### ⚠️ Les risques
+Les données sont le cœur de l'entreprise. Une perte de données peut être catastrophique :
+- Erreur humaine (suppression accidentelle)
+- Panne système
+- Cyberattaque
 
 </div>
 
-<div class="card">
+<div class="card orange">
 
-```text
-Interface (React)
-      ↓
-API (Fastify)
-      ↓
-MySQL / PostgreSQL
-      ↓
-Scheduler (Cron)
-```
+### 🚫 La gestion manuelle
+Actuellement, faire des backups manuellement est :
+1. **Fastidieux** : Il faut penser à le faire.
+2. **Risqué** : On peut oublier ou se tromper.
+3. **Complexe** : Restaurer demande des compétences techniques.
 
 </div>
 
@@ -184,38 +150,56 @@ Scheduler (Cron)
 
 ---
 
-<!-- Slide 5 -->
+# 2. Notre Solution : SafeBase
 
-# Fonctionnalités principales
+<p class="intro-text">
+SafeBase est une plateforme web complète qui automatise la sécurisation de vos bases de données MySQL et PostgreSQL.
+</p>
 
-- Ajouter une **connexion** à une base existante.
-- Lancer un **backup manuel** ou **toutes les bases**.
-- Voir la **liste des versions** et leur date.
-- **Restaurer**, **télécharger** ou **épingler** une version importante.
+<div class="grid-2">
+
+<div class="card green">
+<strong>✅ Automatisation Totale</strong>
+Fini les oublis. SafeBase sauvegarde vos bases toutes les heures grâce à un planificateur intégré.
+</div>
+
+<div class="card purple">
+<strong>✅ Interface Intuitive</strong>
+Gérez vos sauvegardes, surveillez l'état du système et restaurez vos données en quelques clics, sans ligne de commande.
+</div>
+
+</div>
 
 ---
 
-<!-- Slide 6 -->
+# 3. Architecture Technique
 
-# Interface utilisateur
+Nous avons conçu une architecture moderne et modulaire basée sur Docker.
 
 <div class="grid-2">
 
 <div>
 
-- Une seule page qui regroupe **tout le flux** : ajout, sauvegarde, versions.
-- Design moderne : fond clair, cartes, badges colorés.
-- Statut de l'API, thème clair/sombre, messages de succès/erreur.
+### 🛠️ Backend (API)
+- **Fastify & TypeScript** : Pour une API rapide et typée.
+- **Sécurité** : Validation stricte (Zod) et chiffrement des données sensibles.
+- **Rôle** : Orchestre les backups via `mysqldump` et `pg_dump`.
+
+### 🖥️ Frontend (UI)
+- **React & Vite** : Interface utilisateur réactive.
+- **Expérience** : Tableaux de bord clairs et notifications en temps réel.
 
 </div>
 
-<div class="card">
+<div class="card blue">
 
-- URL : `http://localhost:5173`
-- Action typique :
-  - Configurer l'API URL et la clé.
-  - Enregistrer une base.
-  - Cliquer sur **Backup** puis **Versions**.
+### 🐳 Conteneurisation
+Le projet tourne entièrement sous **Docker** :
+1. `backend` (Node.js)
+2. `frontend` (Nginx/Vite)
+3. `scheduler` (Cron Alpine)
+4. `mysql-db` (Base test)
+5. `postgres-db` (Base test)
 
 </div>
 
@@ -223,46 +207,50 @@ Scheduler (Cron)
 
 ---
 
-<!-- Slide 7 -->
-
-# Sécurité
-
-- **API Key** obligatoire pour appeler l'API.
-- **Validation** des données avec Zod côté backend.
-- **Mots de passe chiffrés** (AES‑256‑GCM) avant stockage.
-- Headers de sécurité : anti‑iframe, anti‑sniff, politique de referer.
-
----
-
-<!-- Slide 8 -->
-
-# Backups automatiques
-
-- Un service `scheduler` dédié dans Docker.
-- Cron lance un script qui appelle `POST /backup-all` toutes les heures.
-- Les fichiers `.sql` sont rangés par base + horodatage.
-- Une **règle de rétention** limite le nombre de versions par base.
-
----
-
-<!-- Slide 9 -->
-
-# Tests & Qualité
+# 4. Fonctionnalités Clés
 
 <div class="grid-2">
 
 <div>
 
-- Tests backend : santé de l'API, sécurité, flux de sauvegarde.
-- Tests frontend : rendu du composant principal, scénarios de base.
-- CI/CD GitHub Actions : lancement des tests et du lint à chaque push.
+### 🔄 Sauvegardes & Versions
+- **Planification** : Backups automatiques horaires.
+- **Historique** : Conservation des 10 dernières versions.
+- **Épinglage** : Protégez ("Pin") des versions importantes pour qu'elles ne soient jamais supprimées.
 
 </div>
 
-<div class="card center">
+<div>
 
-<p class="big-number">100%</p>
-<p class="big-number-caption">des tests passent sur la branche principale</p>
+### ⚡ Restauration Rapide
+- **One-Click Restore** : Restaurez une base de données complète en un seul clic.
+- **Sécurité** : Vérification automatique avant restauration pour éviter les erreurs.
+
+</div>
+
+</div>
+
+---
+
+# 5. Sécurité & Fiabilité
+
+La sécurité a été une priorité tout au long du développement.
+
+<div class="grid-2">
+
+<div class="card purple">
+
+### 🔒 Protection des Données
+- **Chiffrement** : Les mots de passe des bases de données sont chiffrés (AES-256) avant stockage.
+- **Validation** : Toutes les entrées API sont vérifiées avec Zod pour éviter les injections.
+
+</div>
+
+<div class="card green">
+
+### 🛡️ Fiabilité
+- **Tests Unitaires** : Couverture à 100% sur les fonctions critiques (Backend & Frontend).
+- **Monitoring** : Système de "Heartbeat" pour vérifier que le planificateur fonctionne.
 
 </div>
 
@@ -270,46 +258,58 @@ Scheduler (Cron)
 
 ---
 
-<!-- Slide 10 -->
+# 6. Stack Technique
 
-# Stack technique
+Les technologies choisies pour performance et maintenabilité.
 
-<div class="badge-row">
-  <span class="badge badge-blue">Fastify</span>
-  <span class="badge badge-blue">TypeScript</span>
-  <span class="badge badge-blue">Zod</span>
-  <span class="badge badge-green">React</span>
-  <span class="badge badge-green">Vite</span>
-  <span class="badge badge-purple">Docker & Compose</span>
+### Backend
+<span class="badge">Node.js</span> <span class="badge">Fastify</span> <span class="badge">TypeScript</span> <span class="badge">Zod</span> <span class="badge">MySQL/PG Clients</span>
+
+### Frontend
+<span class="badge">React</span> <span class="badge">Vite</span> <span class="badge">CSS Modules</span> <span class="badge">TypeScript</span>
+
+### DevOps
+<span class="badge">Docker</span> <span class="badge">Docker Compose</span> <span class="badge">GitHub Actions (CI)</span> <span class="badge">Shell Scripts</span>
+
+---
+
+# 7. Démonstration
+
+Nous allons maintenant voir le projet en action.
+
+<div class="card blue">
+
+### 🎯 Scénario de démo
+1. **Enregistrement** : Ajout d'une base de données existante dans SafeBase.
+2. **Backup** : Lancement d'une sauvegarde manuelle immédiate.
+3. **Incident** : Suppression volontaire de données (simulation d'erreur).
+4. **Restauration** : Remise en état de la base grâce à SafeBase.
+
 </div>
 
 ---
-
-<!-- Slide 11 -->
-
-# Plan de démonstration
-
-- Lancer les services (Docker ou `npm run dev`).
-- **1.** Ajouter une base MySQL ou PostgreSQL dans l'interface.
-- **2.** Lancer un backup manuel.
-- **3.** Ouvrir la liste des versions et en restaurer une.
-
----
-
-<!-- Slide 12 -->
 
 # Conclusion
 
-- SafeBase apporte une **solution complète** de sauvegarde / restauration.
-- L'interface permet de tout piloter **sans ligne de commande**.
-- Le projet montre des compétences en **frontend, backend et DevOps**.
+SafeBase répond à tous les objectifs du cahier des charges :
+
+1. ✅ **Connexion SGBD** : Support MySQL et PostgreSQL.
+2. ✅ **Automatisation** : Scheduler Cron fiable.
+3. ✅ **Versions** : Gestion complète (Pin/Delete/Download).
+4. ✅ **Interface** : Simple et moderne.
+5. ✅ **Qualité** : Code testé et documenté.
+
+**SafeBase transforme une tâche critique et complexe en une opération simple et sécurisée.**
 
 ---
 
-<!-- Slide 13 -->
+<!-- _class: lead -->
 
-# Questions ?
+# Merci de votre attention
 
-- Documentation : `README.md`, `docs/ARCHITECTURE.md`, `docs/SOUTENANCE.md`.
-- Le dépôt GitHub contient tout le code et la configuration Docker.
+### 📞 Questions / Réponses
 
+<div style="font-size: 0.8em; margin-top: 50px; color: #64748b;">
+Projet réalisé par [Votre Nom]<br>
+Documentation complète disponible sur GitHub
+</div>

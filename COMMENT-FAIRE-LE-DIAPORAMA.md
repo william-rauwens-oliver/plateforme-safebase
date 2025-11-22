@@ -177,3 +177,4 @@ Selon les consignes, tu dois montrer :
 
 **Conclusion :** Le diaporama n'est pas obligatoire, mais c'est un plus. L'essentiel c'est de **montrer le projet qui fonctionne** ! 🎯
 
+
