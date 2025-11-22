@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { BackupVersionMeta, RegisteredDatabase } from './types.js';
+import { Alert, BackupVersionMeta, RegisteredDatabase } from './types.js';
 import { encrypt, decrypt } from './crypto.js';
 
 let dataDir = process.env.DATA_DIR || '/app/data';
@@ -8,6 +8,7 @@ let backupsDir = process.env.BACKUPS_DIR || '/backups';
 let dbsFile = join(dataDir, 'databases.json');
 let versionsFile = join(dataDir, 'versions.json');
 let schedulerFile = join(dataDir, 'scheduler.json');
+let alertsFile = join(dataDir, 'alerts.json');
 
 function ensureDirPath(current: string, fallbackName: string): string {
   try {
@@ -27,6 +28,7 @@ function ensureDirs(): void {
   dbsFile = join(dataDir, 'databases.json');
   versionsFile = join(dataDir, 'versions.json');
   schedulerFile = join(dataDir, 'scheduler.json');
+  alertsFile = join(dataDir, 'alerts.json');
 }
 
 async function readJson<T>(file: string, fallback: T): Promise<T> {
@@ -73,6 +75,7 @@ export const Store = {
     if (!existsSync(dbsFile)) await writeJson(dbsFile, [] as RegisteredDatabase[]);
     if (!existsSync(versionsFile)) writeFileSync(versionsFile, JSON.stringify([], null, 2));
     if (!existsSync(schedulerFile)) writeFileSync(schedulerFile, JSON.stringify({ lastHeartbeat: null as string | null }, null, 2));
+    if (!existsSync(alertsFile)) writeFileSync(alertsFile, JSON.stringify([], null, 2));
   },
   
   async getDatabases(): Promise<RegisteredDatabase[]> {
@@ -107,6 +110,26 @@ export const Store = {
   },
   setSchedulerHeartbeat(isoDate: string): void {
     writeJson(schedulerFile, { lastHeartbeat: isoDate });
+  },
+  getAlerts(): Alert[] {
+    try {
+      if (!existsSync(alertsFile)) return [];
+      const raw = readFileSync(alertsFile, 'utf-8');
+      return JSON.parse(raw) as Alert[];
+    } catch {
+      return [];
+    }
+  },
+  saveAlerts(alerts: Alert[]): void {
+    // Garder seulement les 1000 dernières alertes
+    const sorted = alerts.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+    const limited = sorted.slice(0, 1000);
+    writeFileSync(alertsFile, JSON.stringify(limited, null, 2));
+  },
+  addAlert(alert: Alert): void {
+    const alerts = this.getAlerts();
+    alerts.push(alert);
+    this.saveAlerts(alerts);
   },
   paths: {
     get backupsDir() {

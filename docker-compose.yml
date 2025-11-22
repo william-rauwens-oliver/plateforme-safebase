@@ -21,40 +21,55 @@ services:
       - ./backend:/app
       - api_node_modules:/app/node_modules
       - backups:/backups
-    network_mode: "host"
-    # Note: Utilise les bases de données locales (MAMP MySQL et PostgreSQL Homebrew)
-    # MySQL: localhost:8889 (MAMP) ou localhost:3306 (standard)
-    # PostgreSQL: localhost:5432 (Homebrew)
+    # network_mode: "host"  # Décommenter pour utiliser bases locales (MAMP/Homebrew)
+    # Note: Par défaut, utilise les bases conteneurisées (mysql/postgres)
+    # Pour utiliser des bases locales, décommenter network_mode: "host" ci-dessus
+    # et commenter les services mysql/postgres
+    depends_on:
+      mysql:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
 
-  # MySQL et PostgreSQL sont désactivés - utilisation des bases locales
-  # MySQL: MAMP sur port 8889 (ou 3306 si MySQL standard)
-  # PostgreSQL: Homebrew sur port 5432
-  # mysql:
-  #   image: mysql:8.4
-  #   container_name: safebase-mysql
-  #   restart: unless-stopped
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=rootpassword
-  #     - MYSQL_DATABASE=safebase
-  #     - MYSQL_USER=safebase
-  #     - MYSQL_PASSWORD=safebase
-  #   ports:
-  #     - "3306:3306"
-  #   volumes:
-  #     - mysql_data:/var/lib/mysql
+  # MySQL et PostgreSQL - Activés pour conformité avec les consignes
+  # Pour utiliser des bases locales (MAMP/Homebrew), définir USE_LOCAL_DB=true
+  # et modifier network_mode de l'API à "host"
+  mysql:
+    image: mysql:8.4
+    container_name: safebase-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=safebase
+      - MYSQL_USER=safebase
+      - MYSQL_PASSWORD=safebase
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # postgres:
-  #   image: postgres:16
-  #   container_name: safebase-postgres
-  #   restart: unless-stopped
-  #   environment:
-  #     - POSTGRES_PASSWORD=rootpassword
-  #     - POSTGRES_USER=safebase
-  #     - POSTGRES_DB=safebase
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
+  postgres:
+    image: postgres:16
+    container_name: safebase-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=rootpassword
+      - POSTGRES_USER=safebase
+      - POSTGRES_DB=safebase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U safebase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   scheduler:
     build: ./scheduler
@@ -68,6 +83,8 @@ services:
       - backups:/backups
     depends_on:
       - api
+      - mysql
+      - postgres
 
   frontend:
     build: ./frontend
@@ -83,8 +100,8 @@ services:
       - api
 
 volumes:
-  # mysql_data:  # Désactivé - utilisation MySQL local
-  # postgres_data:  # Désactivé - utilisation PostgreSQL local
+  mysql_data:
+  postgres_data:
   backups:
   api_node_modules:
   frontend_node_modules:

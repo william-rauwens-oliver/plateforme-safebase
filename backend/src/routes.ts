@@ -6,7 +6,7 @@ import { statSync, createReadStream, rmSync, existsSync } from 'fs';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { Store } from './store.js';
-import { BackupVersionMeta, RegisteredDatabase } from './types.js';
+import { Alert, AlertType, BackupVersionMeta, RegisteredDatabase } from './types.js';
 import mysql from 'mysql2/promise';
 import pg from 'pg';
 
@@ -213,7 +213,22 @@ const RegisterSchema = z.object({
 export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/', async () => ({ message: 'SafeBase API - see /health' }));
   app.get('/health', async () => ({ status: 'ok' }));
-  app.get('/scheduler/heartbeat', async () => Store.getSchedulerInfo());
+  app.get('/scheduler/heartbeat', async () => {
+    const info = Store.getSchedulerInfo();
+    // Vérifier si le scheduler est down (pas de heartbeat depuis plus de 2 heures)
+    if (info.lastHeartbeat) {
+      const lastHeartbeat = new Date(info.lastHeartbeat);
+      const now = new Date();
+      const diffHours = (now.getTime() - lastHeartbeat.getTime()) / (1000 * 60 * 60);
+      if (diffHours > 2) {
+        await sendAlert('scheduler_down', {
+          message: `Le scheduler n'a pas envoyé de heartbeat depuis ${Math.round(diffHours * 10) / 10} heures`,
+          lastHeartbeat: info.lastHeartbeat,
+        });
+      }
+    }
+    return info;
+  });
   app.post('/scheduler/heartbeat', async () => {
     Store.setSchedulerHeartbeat(new Date().toISOString());
     return { ok: true };
@@ -346,6 +361,14 @@ export async function routes(app: FastifyInstance): Promise<void> {
       const testResult = await testDatabaseConnection(db);
       if (!testResult.success) {
         app.log.error({ message: 'Database connection failed', database: db.name, error: testResult.error });
+        await sendAlert('database_inaccessible', {
+          databaseId: db.id,
+          databaseName: db.name,
+          error: testResult.error || 'Impossible de se connecter à la base de données',
+          host: db.host,
+          port: db.port,
+          engine: db.engine,
+        });
         return reply.code(400).send({ 
           message: 'Connexion à la base de données échouée',
           error: testResult.error || 'Impossible de se connecter à la base de données',
@@ -607,11 +630,25 @@ export async function routes(app: FastifyInstance): Promise<void> {
       }
       const kept = versions.filter(v => !excess.some(e => e.id === v.id));
       Store.saveVersions(kept);
+      
+      // Alerte de succès
+      await sendAlert('backup_success', {
+        databaseId: db.id,
+        databaseName: db.name,
+        versionId: meta.id,
+        sizeBytes: meta.sizeBytes,
+        engine: db.engine,
+      });
+      
       return meta;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       app.log.error({ backupError: errorMsg, databaseId: id, database: db.name });
-      await sendAlert('backup_failed', { id, error: errorMsg });
+      await sendAlert('backup_failed', {
+        databaseId: id,
+        databaseName: db.name,
+        error: errorMsg,
+      });
       return reply.code(500).send({ 
         message: 'backup failed',
         error: errorMsg,
@@ -692,8 +729,19 @@ export async function routes(app: FastifyInstance): Promise<void> {
         const kept = versions.filter(v => !excess.some(e => e.id === v.id));
         Store.saveVersions(kept);
         results.push({ id: db.id, ok: true });
+        await sendAlert('backup_success', {
+          databaseId: db.id,
+          databaseName: db.name,
+          versionId: meta.id,
+          sizeBytes: meta.sizeBytes,
+          engine: db.engine,
+        });
       } catch (err) {
-        await sendAlert('backup_failed', { id: db.id, error: String(err) });
+        await sendAlert('backup_failed', {
+          databaseId: db.id,
+          databaseName: db.name,
+          error: String(err),
+        });
         results.push({ id: db.id, ok: false });
       }
     }
@@ -792,6 +840,15 @@ export async function routes(app: FastifyInstance): Promise<void> {
         await exec(cmd);
         app.log.info({ message: 'Restore completed', versionId, database: db.name });
       }
+      
+      // Alerte de succès
+      await sendAlert('restore_success', {
+        databaseId: db.id,
+        databaseName: db.name,
+        versionId,
+        path: v.path,
+      });
+      
       return { status: 'restored', versionId };
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
@@ -804,7 +861,13 @@ export async function routes(app: FastifyInstance): Promise<void> {
         stderr,
         command: cmd.replace(/-p'[^']*'/, "-p'***'").replace(/PGPASSWORD='[^']*'/, "PGPASSWORD='***'")
       });
-      await sendAlert('restore_failed', { versionId, error: errorMsg, database: db.name });
+      await sendAlert('restore_failed', {
+        databaseId: db.id,
+        databaseName: db.name,
+        versionId,
+        error: errorMsg,
+        stderr: stderr || undefined,
+      });
       return reply.code(500).send({ 
         message: 'restore failed',
         error: errorMsg,
@@ -856,12 +919,81 @@ export async function routes(app: FastifyInstance): Promise<void> {
     Store.saveVersions(kept);
     return { deleted: true };
   });
+
+  // Endpoints pour les alertes
+  app.get('/alerts', async (req) => {
+    const { type, resolved, limit } = req.query as {
+      type?: AlertType;
+      resolved?: string;
+      limit?: string;
+    };
+    let alerts = Store.getAlerts();
+    
+    if (type) {
+      alerts = alerts.filter(a => a.type === type);
+    }
+    if (resolved !== undefined) {
+      const isResolved = resolved === 'true';
+      alerts = alerts.filter(a => (a.resolved === true) === isResolved);
+    }
+    
+    alerts = alerts.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+    
+    const limitNum = limit ? parseInt(limit, 10) : 100;
+    if (limitNum > 0) {
+      alerts = alerts.slice(0, limitNum);
+    }
+    
+    return { alerts, total: Store.getAlerts().length };
+  });
+
+  app.post('/alerts/:alertId/resolve', async (req, reply) => {
+    const { alertId } = req.params as { alertId: string };
+    const alerts = Store.getAlerts();
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return reply.code(404).send({ message: 'alert not found' });
+    
+    alert.resolved = true;
+    alert.resolvedAt = new Date().toISOString();
+    Store.saveAlerts(alerts);
+    
+    return alert;
+  });
+
+  app.delete('/alerts/:alertId', async (req, reply) => {
+    const { alertId } = req.params as { alertId: string };
+    const alerts = Store.getAlerts();
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return reply.code(404).send({ message: 'alert not found' });
+    
+    const kept = alerts.filter(a => a.id !== alertId);
+    Store.saveAlerts(kept);
+    
+    return { deleted: true };
+  });
 }
-async function sendAlert(type: string, payload: unknown) {
+
+async function sendAlert(type: AlertType, payload: Record<string, unknown>) {
+  const alert: Alert = {
+    id: randomUUID(),
+    type,
+    timestamp: new Date().toISOString(),
+    payload,
+    resolved: false,
+  };
+  
+  // Enregistrer l'alerte dans le store
+  Store.addAlert(alert);
+  
+  // Envoyer le webhook si configuré
   const url = process.env.ALERT_WEBHOOK_URL;
-  if (!url) return;
-  try {
-    const body = JSON.stringify({ type, timestamp: new Date().toISOString(), payload });
-    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-  } catch {}
+  if (url) {
+    try {
+      const body = JSON.stringify({ type, timestamp: alert.timestamp, payload });
+      await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    } catch (err) {
+      // Log l'erreur mais ne pas faire échouer l'opération
+      console.error('Failed to send webhook alert:', err);
+    }
+  }
 }

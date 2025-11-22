@@ -90,6 +90,11 @@ npm run dev     # Interface sur http://localhost:5173
 - `POST /versions/:versionId/unpin` - Désépingler une version
 - `DELETE /versions/:versionId` - Supprimer une version
 
+### Alertes et Surveillance
+- `GET /alerts` - Lister les alertes (filtres: `type`, `resolved`, `limit`)
+- `POST /alerts/:alertId/resolve` - Marquer une alerte comme résolue
+- `DELETE /alerts/:alertId` - Supprimer une alerte
+
 ## Exemples d'utilisation
 
 ### Vérifier la santé de l'API

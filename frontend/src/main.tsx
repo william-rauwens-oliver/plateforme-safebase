@@ -161,8 +161,8 @@ export function App() {
 
   function copyDsn(db: Db) {
     const dsn = db.engine === 'mysql'
-      ? `mysql:
-      : `postgres:
+      ? `mysql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`
+      : `postgres://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`
     navigator.clipboard.writeText(dsn).then(() => pushToast('DSN copié', 'success')).catch(() => {
 
     })
