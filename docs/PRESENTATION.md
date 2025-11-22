@@ -5,29 +5,25 @@ paginate: true
 header: 'SafeBase'
 footer: 'Présentation Projet'
 style: |
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap');
   
   :root {
-    --bg-dark: #0a0a0a;
-    --bg-card: #161616;
-    --bg-elev: #1f1f1f;
-    --text: #ffffff;
-    --text-secondary: #b3b3b3;
-    --text-muted: #737373;
-    --accent-blue: #3b82f6;
-    --accent-green: #10b981;
-    --accent-red: #ef4444;
-    --accent-orange: #f59e0b;
-    --border: #2a2a2a;
+    --blue: #3b82f6;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --purple: #8b5cf6;
+    --pink: #ec4899;
   }
   
   section {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg-dark);
-    color: var(--text);
-    padding: 60px 80px;
-    position: relative;
-    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    color: #1e293b;
+    padding: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   
   section::before {
@@ -38,8 +34,9 @@ style: |
     right: 0;
     bottom: 0;
     background: 
-      radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+      radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
   }
@@ -50,229 +47,248 @@ style: |
   }
   
   h1 {
-    color: var(--text);
-    font-size: 4em;
+    color: #0f172a;
+    font-size: 5em;
     font-weight: 800;
-    letter-spacing: -2px;
-    margin: 0 0 20px 0;
-    line-height: 1.1;
+    letter-spacing: -3px;
+    margin: 0;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   h2 {
-    color: var(--text);
-    font-size: 2.2em;
+    color: #0f172a;
+    font-size: 3em;
     font-weight: 700;
-    letter-spacing: -1px;
-    margin: 0 0 30px 0;
-    line-height: 1.2;
+    letter-spacing: -2px;
+    margin: 0 0 40px 0;
+    line-height: 1.1;
   }
   
   h3 {
-    color: var(--text);
-    font-size: 1.5em;
-    font-weight: 600;
+    color: #0f172a;
+    font-size: 2em;
+    font-weight: 700;
     margin: 0 0 20px 0;
   }
   
   p {
-    color: var(--text-secondary);
-    font-size: 1.1em;
-    line-height: 1.7;
-    margin: 0 0 20px 0;
-  }
-  
-  strong {
-    color: var(--text);
-    font-weight: 600;
-  }
-  
-  ul, ol {
-    color: var(--text-secondary);
-    font-size: 1.1em;
-    line-height: 1.8;
+    color: #475569;
+    font-size: 1.4em;
+    line-height: 1.6;
     margin: 0;
-    padding-left: 30px;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
   }
   
   li {
-    margin: 12px 0;
+    font-size: 1.5em;
+    color: #475569;
+    margin: 20px 0;
+    padding-left: 50px;
+    position: relative;
+  }
+  
+  li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--green);
+    font-weight: 700;
+    font-size: 1.2em;
   }
   
   code {
-    background: var(--bg-elev);
-    color: var(--accent-blue);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-family: 'SF Mono', Monaco, 'Cascadia Mono', monospace;
+    background: #f1f5f9;
+    color: var(--blue);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: 'SF Mono', monospace;
     font-size: 0.9em;
-    border: 1px solid var(--border);
+    border: 2px solid var(--blue);
   }
   
   pre {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
+    background: #0f172a;
+    border-radius: 16px;
+    padding: 30px;
+    margin: 30px 0;
     overflow-x: auto;
-    margin: 20px 0;
   }
   
   pre code {
     background: transparent;
     border: none;
-    padding: 0;
-    color: var(--text-secondary);
-    font-size: 0.95em;
-    line-height: 1.6;
+    color: #e2e8f0;
+    font-size: 1.1em;
   }
   
-  /* Badges et accents colorés */
+  .big-number {
+    font-size: 6em;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin: 0;
+  }
+  
+  .emoji-big {
+    font-size: 4em;
+    display: block;
+    margin: 20px 0;
+  }
+  
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 40px;
+    margin: 20px 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 3px solid;
+  }
+  
+  .card-blue {
+    border-color: var(--blue);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, white 100%);
+  }
+  
+  .card-green {
+    border-color: var(--green);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, white 100%);
+  }
+  
+  .card-purple {
+    border-color: var(--purple);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, white 100%);
+  }
+  
+  .card-orange {
+    border-color: var(--orange);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, white 100%);
+  }
+  
   .badge {
     display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: 600;
-    letter-spacing: 0.3px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 1.2em;
+    font-weight: 700;
+    margin: 10px;
   }
   
   .badge-blue {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent-blue);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: var(--blue);
+    color: white;
   }
   
   .badge-green {
-    background: rgba(16, 185, 129, 0.15);
-    color: var(--accent-green);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: var(--green);
+    color: white;
   }
   
-  .badge-red {
-    background: rgba(239, 68, 68, 0.15);
-    color: var(--accent-red);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+  .badge-purple {
+    background: var(--purple);
+    color: white;
   }
   
   .badge-orange {
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--accent-orange);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    background: var(--orange);
+    color: white;
   }
   
-  /* Titre de page avec accent coloré */
-  .title-accent {
-    display: inline-block;
-    width: 6px;
-    height: 60px;
-    background: linear-gradient(180deg, var(--accent-blue) 0%, var(--accent-green) 100%);
-    border-radius: 3px;
-    margin-right: 20px;
-    vertical-align: middle;
+  .badge-red {
+    background: var(--red);
+    color: white;
   }
   
-  /* Cards modernes */
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    margin: 20px 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  }
-  
-  /* Grid moderne */
   .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin: 30px 0;
+    gap: 30px;
+    margin: 40px 0;
   }
   
   .grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin: 30px 0;
-  }
-  
-  /* Accent coloré pour les listes */
-  ul li::marker {
-    color: var(--accent-blue);
-  }
-  
-  /* Highlight coloré */
-  .highlight-blue {
-    color: var(--accent-blue);
-    font-weight: 600;
-  }
-  
-  .highlight-green {
-    color: var(--accent-green);
-    font-weight: 600;
-  }
-  
-  /* Séparateur avec couleur */
-  hr {
-    border: none;
-    height: 2px;
-    background: linear-gradient(90deg, transparent 0%, var(--accent-blue) 50%, transparent 100%);
+    gap: 30px;
     margin: 40px 0;
   }
   
-  /* Header et footer */
-  header {
-    color: var(--text-muted);
-    font-size: 0.85em;
-    font-weight: 500;
+  .highlight-blue {
+    color: var(--blue);
+    font-weight: 700;
   }
   
-  footer {
-    color: var(--text-muted);
-    font-size: 0.85em;
-    font-weight: 500;
+  .highlight-green {
+    color: var(--green);
+    font-weight: 700;
   }
   
-  /* Emoji plus grand */
-  section[data-marpit-pagination]::before {
-    font-size: 1.2em;
+  .highlight-purple {
+    color: var(--purple);
+    font-weight: 700;
+  }
+  
+  header, footer {
+    color: #94a3b8;
+    font-size: 0.9em;
   }
 ---
 
 <!-- _class: lead -->
 <!-- _paginate: false -->
 
-# <span class="title-accent"></span>SafeBase
+# SafeBase
 
-## Plateforme de Sauvegarde Automatisée
+## 💾 Plateforme de Sauvegarde Automatisée
 
 **Parce qu'un DROP DATABASE est vite arrivé...**
 
-**SafeBase, I'll be back(up)** 💾
-
 ---
 
-# <span class="title-accent"></span>🎯 Objectif du Projet
-
-Développer une **plateforme complète** de sauvegarde automatisée pour :
+# 🎯 Objectif
 
 <div class="grid-2">
 
 <div>
 
-- ✅ Bases de données **MySQL** et **PostgreSQL**
-- ✅ API REST sécurisée
-- ✅ Interface utilisateur moderne
-- ✅ Scheduler automatisé (cron)
+<span class="emoji-big">💾</span>
+
+**Sauvegarder** automatiquement vos bases de données
 
 </div>
 
 <div>
 
-- ✅ Gestion des versions de backups
-- ✅ Tests unitaires
-- ✅ Conteneurisation Docker
-- ✅ Monitoring et alertes
+<span class="emoji-big">🔄</span>
+
+**Restaurer** en cas de problème
+
+</div>
+
+<div>
+
+<span class="emoji-big">📦</span>
+
+**Gérer** les versions de backups
+
+</div>
+
+<div>
+
+<span class="emoji-big">🔒</span>
+
+**Sécuriser** vos données
 
 </div>
 
@@ -280,101 +296,71 @@ Développer une **plateforme complète** de sauvegarde automatisée pour :
 
 ---
 
-# <span class="title-accent"></span>🏗️ Architecture Technique
+# 🏗️ Architecture
 
-## 5 Composants Docker
+<div class="grid-3">
 
-<div class="grid-2">
+<div class="card card-blue">
 
-<div class="card">
+<span class="emoji-big">⚙️</span>
 
-**Backend (API)**
-<span class="badge badge-blue">Fastify + TypeScript</span>
-
-API REST performante
+**Backend**
+Fastify + TypeScript
 
 </div>
 
-<div class="card">
+<div class="card card-green">
+
+<span class="emoji-big">🎨</span>
 
 **Frontend**
-<span class="badge badge-green">React + Vite</span>
-
-Interface utilisateur moderne
+React + Vite
 
 </div>
 
-<div class="card">
+<div class="card card-purple">
 
-**MySQL**
-<span class="badge badge-orange">Base de test</span>
+<span class="emoji-big">🐳</span>
 
-Support MySQL natif
-
-</div>
-
-<div class="card">
-
-**PostgreSQL**
-<span class="badge badge-blue">Base de test</span>
-
-Support PostgreSQL natif
+**Docker**
+5 services
 
 </div>
-
-</div>
-
-<div class="card" style="margin-top: 20px;">
-
-**Scheduler**
-<span class="badge badge-green">Alpine + Cron</span>
-
-Automatisation des backups horaires
 
 </div>
 
 ---
 
-# <span class="title-accent"></span>📊 Vue d'ensemble
-
-<div style="text-align: center; margin: 40px 0;">
+# 📊 Vue d'ensemble
 
 ```
 Frontend (React) 
-    ↓ HTTP REST API
+    ↓
 Backend (Fastify)
     ↓
-MySQL (mysqldump) | PostgreSQL (pg_dump)
+MySQL | PostgreSQL
     ↓
-Scheduler (Cron - Backups horaires)
+Scheduler (Cron)
 ```
 
-</div>
-
-<div style="text-align: center; margin-top: 30px;">
-
-<span class="badge badge-blue">TypeScript</span> pour la sécurité de types
-
-<span class="badge badge-green">Architecture REST</span> avec séparation des couches
-
-</div>
+<span class="badge badge-blue">TypeScript</span>
+<span class="badge badge-green">REST API</span>
+<span class="badge badge-purple">Docker</span>
 
 ---
 
-# <span class="title-accent"></span>🔌 API REST
+# 🔌 API REST
 
-## <span class="highlight-blue">13 Endpoints</span> Documentés
+<span class="big-number">13</span>
+
+## Endpoints
 
 <div class="grid-2">
 
 <div>
 
-### Gestion des Bases
 - `GET /databases`
 - `POST /databases`
-- `GET /databases/available`
-
-### Backups
 - `POST /backup/:id`
 - `POST /backup-all`
 - `GET /backups/:id`
@@ -383,16 +369,11 @@ Scheduler (Cron - Backups horaires)
 
 <div>
 
-### Restauration & Versions
 - `POST /restore/:versionId`
-- `POST /versions/:versionId/pin`
-- `POST /versions/:versionId/unpin`
-- `GET /versions/:versionId/download`
-- `DELETE /versions/:versionId`
-
-### Monitoring
+- `POST /versions/:id/pin`
+- `GET /versions/:id/download`
+- `DELETE /versions/:id`
 - `GET /health`
-- `GET /scheduler/heartbeat`
 
 </div>
 
@@ -400,33 +381,54 @@ Scheduler (Cron - Backups horaires)
 
 ---
 
-# <span class="title-accent"></span>🎨 Interface Utilisateur
+# 🎨 Interface
+
+<div class="card card-green">
+
+<span class="emoji-big">✨</span>
+
+**Design moderne**
+
+- Gradient et glassmorphism
+- Animations fluides
+- Responsive
+- Thème clair/sombre
+
+</div>
+
+**http://localhost:5173**
+
+---
+
+# 🔐 Sécurité
 
 <div class="grid-2">
 
-<div>
+<div class="card card-blue">
 
-## Design Moderne
-
-- ✅ <span class="highlight-blue">Gradient</span> noir avec glassmorphism
-- ✅ <span class="highlight-green">Badges</span> et icônes (🐬 MySQL, 🐘 PostgreSQL)
-- ✅ <span class="highlight-blue">Animations</span> et transitions fluides
-- ✅ <span class="highlight-green">États</span> de chargement
-- ✅ <span class="highlight-blue">Design responsive</span>
+**API Key**
+Protection des endpoints
 
 </div>
 
-<div class="card">
+<div class="card card-green">
 
-**URL d'accès :**
+**Chiffrement**
+AES-256-GCM
 
-<span class="badge badge-blue" style="font-size: 1.2em; padding: 12px 20px; margin: 10px 0; display: block; text-align: center;">
-http://localhost:5173
-</span>
+</div>
 
-**Thème :**
-- Mode sombre (par défaut)
-- Mode clair disponible
+<div class="card card-purple">
+
+**Validation**
+Zod pour toutes les entrées
+
+</div>
+
+<div class="card card-orange">
+
+**Headers**
+Sécurisés
 
 </div>
 
@@ -434,39 +436,27 @@ http://localhost:5173
 
 ---
 
-# <span class="title-accent"></span>🔐 Sécurité
+# ⚙️ Fonctionnalités
 
 <div class="grid-2">
 
-<div>
+<div class="card card-green">
 
-## Mesures Implémentées
+<span class="emoji-big">⏰</span>
 
-1. <span class="badge badge-blue">API Key</span> - Protection des endpoints
-2. <span class="badge badge-green">CORS</span> - Configuré pour le frontend
-3. <span class="badge badge-blue">Headers sécurisés</span>
-4. <span class="badge badge-green">Validation Zod</span> - Toutes les entrées
-5. <span class="badge badge-blue">Chiffrement AES-256-GCM</span>
-6. <span class="badge badge-orange">Alertes Webhook</span>
-7. <span class="badge badge-green">Rétention</span> - 10 versions max
+**Backup Automatique**
+
+Toutes les heures via cron
 
 </div>
 
-<div class="card">
+<div class="card card-blue">
 
-**Headers sécurisés :**
+<span class="emoji-big">📌</span>
 
-```http
-X-Frame-Options: DENY
-Referrer-Policy: no-referrer
-X-Content-Type-Options: nosniff
-```
+**Gestion Versions**
 
-**Chiffrement :**
-
-Mots de passe chiffrés avec **AES-256-GCM** avant stockage
-
-Clé gérée via variable d'environnement
+Pin, Download, Restore
 
 </div>
 
@@ -474,107 +464,51 @@ Clé gérée via variable d'environnement
 
 ---
 
-# <span class="title-accent"></span>⚙️ Fonctionnalités Avancées
+# 🧪 Tests
 
-<div class="grid-2">
+<div class="card card-green">
 
-<div class="card">
+<span class="big-number">100%</span>
 
-## <span class="highlight-green">Backup Automatique</span>
+## Tests passent
 
-- Scheduler exécute les backups **toutes les heures**
-- Configurable via crontab
-- Heartbeat pour monitorer l'activité
-- Support MAMP MySQL
-
-</div>
-
-<div class="card">
-
-## <span class="highlight-blue">Gestion des Versions</span>
-
-- **Pin/Unpin** - Protéger des versions importantes
-- **Download** - Télécharger un backup
-- **Politique de rétention** - 10 versions par défaut
-- Versions épinglées jamais supprimées
-
-</div>
+- Health check
+- API Key
+- Scheduler
+- Intégration
 
 </div>
 
 ---
 
-# <span class="title-accent"></span>🧪 Tests et Qualité
-
-<div class="grid-2">
-
-<div>
-
-## Tests Unitaires
-
-**Backend :**
-```bash
-cd backend
-npm test
-```
-
-**Frontend :**
-```bash
-cd frontend
-npm test
-```
-
-</div>
-
-<div class="card">
-
-## Résultats
-
-- ✅ <span class="badge badge-green">Health check</span>
-- ✅ <span class="badge badge-blue">Protection API Key</span>
-- ✅ <span class="badge badge-green">Scheduler heartbeat</span>
-- ✅ <span class="badge badge-blue">Tests d'intégration</span>
-- ✅ <span class="badge badge-green">Tests de sécurité</span>
-
-**<span class="highlight-green">100% des tests passent</span>** ✓
-
-</div>
-
-</div>
-
----
-
-# <span class="title-accent"></span>💻 Stack Technique
+# 💻 Stack
 
 <div class="grid-3">
 
-<div class="card">
+<div class="card card-blue">
 
-## Backend
-
-- <span class="badge badge-blue">Fastify</span> - Framework performant
-- <span class="badge badge-green">TypeScript</span> - Typage statique
-- <span class="badge badge-blue">Zod</span> - Validation
-
-</div>
-
-<div class="card">
-
-## Frontend
-
-- <span class="badge badge-green">React</span> - Framework UI
-- <span class="badge badge-blue">Vite</span> - Build tool rapide
-- <span class="badge badge-green">TypeScript</span> - Typage
+**Backend**
+Fastify
+TypeScript
+Zod
 
 </div>
 
-<div class="card">
+<div class="card card-green">
 
-## DevOps
+**Frontend**
+React
+Vite
+TypeScript
 
-- <span class="badge badge-orange">Docker</span> - Conteneurisation
-- <span class="badge badge-blue">Docker Compose</span> - Orchestration
-- <span class="badge badge-green">Alpine Linux</span> - Image légère
+</div>
+
+<div class="card card-purple">
+
+**DevOps**
+Docker
+Compose
+Alpine
 
 </div>
 
@@ -582,25 +516,36 @@ npm test
 
 ---
 
-# <span class="title-accent"></span>📈 Statistiques du Projet
+# 📈 Statistiques
 
 <div class="grid-2">
 
 <div>
 
-- ✅ <span class="highlight-blue">13 endpoints REST</span> documentés
-- ✅ <span class="highlight-green">5 services Docker</span> orchestrés
-- ✅ <span class="highlight-blue">100% des tests</span> passent
-- ✅ <span class="highlight-green">Support</span> MySQL + PostgreSQL
+<span class="big-number">13</span>
+Endpoints REST
 
 </div>
 
 <div>
 
-- ✅ <span class="highlight-blue">Automatisation</span> complète via cron
-- ✅ <span class="highlight-green">Sécurité</span> : API Key + headers
-- ✅ <span class="highlight-blue">Monitoring</span> : heartbeat + alertes
-- ✅ <span class="highlight-green">Chiffrement</span> AES-256-GCM
+<span class="big-number">5</span>
+Services Docker
+
+</div>
+
+<div>
+
+<span class="big-number">2</span>
+Bases supportées
+MySQL + PostgreSQL
+
+</div>
+
+<div>
+
+<span class="big-number">100%</span>
+Tests passent
 
 </div>
 
@@ -608,43 +553,34 @@ npm test
 
 ---
 
-# <span class="title-accent"></span>🎓 Compétences Démontrées
+# 🎓 Compétences
 
 <div class="grid-3">
 
-<div class="card">
+<div class="card card-blue">
 
-## Backend
-
-- ✅ Architecture REST propre
-- ✅ Sécurité (API Key, validation)
-- ✅ Tests unitaires
-- ✅ Code TypeScript typé
-- ✅ Gestion d'erreurs
+**Backend**
+REST API
+Sécurité
+Tests
 
 </div>
 
-<div class="card">
+<div class="card card-green">
 
-## Frontend
-
-- ✅ Interface React moderne
-- ✅ Design responsive
-- ✅ Intégration API
-- ✅ Gestion d'état
-- ✅ UX optimisée
+**Frontend**
+React
+Responsive
+UX
 
 </div>
 
-<div class="card">
+<div class="card card-purple">
 
-## DevOps
-
-- ✅ Docker & Docker Compose
-- ✅ Orchestration de services
-- ✅ Volumes persistants
-- ✅ CI/CD avec GitHub Actions
-- ✅ Documentation complète
+**DevOps**
+Docker
+CI/CD
+Monitoring
 
 </div>
 
@@ -652,80 +588,71 @@ npm test
 
 ---
 
-# <span class="title-accent"></span>🚀 Démonstration
+# 🚀 Démonstration
 
-<div class="grid-2">
+<div class="card card-green">
 
-<div class="card">
+**URLs**
 
-## URLs d'accès
+- API : http://localhost:8080
+- Frontend : http://localhost:5173
 
-- <span class="badge badge-blue">API</span> : http://localhost:8080
-- <span class="badge badge-green">Frontend</span> : http://localhost:5173
-- <span class="badge badge-blue">Health</span> : http://localhost:8080/health
+**Actions**
 
-</div>
-
-<div class="card">
-
-## Fonctionnalités à montrer
-
-1. Ajouter une base de données
-2. Créer un backup manuel
-3. Gérer les versions (pin/unpin)
-4. Restaurer une version
-
-</div>
+1. Ajouter une base
+2. Créer un backup
+3. Gérer les versions
+4. Restaurer
 
 </div>
 
 ---
 
-# <span class="title-accent"></span>🔄 Flux de Données
+# 🔄 Flux
 
 <div class="grid-2">
 
-<div class="card">
+<div class="card card-blue">
 
-## Ajout d'une base
-
+**Backup**
 ```
-Frontend → POST /databases 
-→ Validation → Store → JSON
-```
-
-</div>
-
-<div class="card">
-
-## Backup
-
-```
-API → mysqldump/pg_dump 
-→ Fichier SQL → Store
+API → mysqldump/pg_dump
+→ Fichier SQL
 ```
 
 </div>
 
-<div class="card">
+<div class="card card-green">
 
-## Restauration
-
+**Restore**
 ```
-API → mysql/psql < backup.sql 
+API → mysql/psql
 → Base restaurée
 ```
 
 </div>
 
-<div class="card">
+</div>
 
-## Scheduler
+---
 
-```
-Cron (1h) → backup_all.sh 
-→ POST /backup-all
-```
+# 🎯 Points Forts
+
+<div class="grid-2">
+
+<div>
+
+1. <span class="highlight-blue">Complétude</span>
+2. <span class="highlight-green">Sécurité</span>
+3. <span class="highlight-purple">Automatisation</span>
+
+</div>
+
+<div>
+
+4. <span class="highlight-blue">Flexibilité</span>
+5. <span class="highlight-green">Modernité</span>
+6. <span class="highlight-purple">Maintenabilité</span>
 
 </div>
 
@@ -733,31 +660,23 @@ Cron (1h) → backup_all.sh
 
 ---
 
-# <span class="title-accent"></span>📝 Stockage des Données
+# 🔮 Évolutions
 
 <div class="grid-2">
 
-<div class="card">
+<div>
 
-## Format JSON (file-based)
-
-- **databases.json** - Liste des bases
-- **versions.json** - Métadonnées des backups
-- **scheduler.json** - État du scheduler
+- Base relationnelle
+- Authentification
+- Compression
 
 </div>
 
-<div class="card">
+<div>
 
-## Structure des backups
-
-```
-backups/
-  └── {database-id}/
-      └── {database-name}_{timestamp}.sql
-```
-
-**Simple et efficace pour un MVP**
+- Chiffrement backups
+- Dashboard métriques
+- Notifications
 
 </div>
 
@@ -765,140 +684,34 @@ backups/
 
 ---
 
-# <span class="title-accent"></span>🎯 Points Forts
+# 🎉 Conclusion
 
-<div class="grid-2">
+<div class="card card-green">
 
-<div>
+<span class="emoji-big">✅</span>
 
-1. <span class="highlight-blue">Complétude</span> - Solution end-to-end fonctionnelle
-2. <span class="highlight-green">Sécurité</span> - API Key, validation, headers sécurisés
-3. <span class="highlight-blue">Automatisation</span> - Scheduler avec cron
+**SafeBase**
 
-</div>
+Solution complète et opérationnelle
 
-<div>
-
-4. <span class="highlight-green">Flexibilité</span> - Support MySQL + PostgreSQL
-5. <span class="highlight-blue">Modernité</span> - Design à la pointe
-6. <span class="highlight-green">Maintenabilité</span> - Code testé et documenté
-
-</div>
+- Répond au cahier des charges
+- Prête pour la production
+- Code testé et documenté
 
 </div>
 
 ---
 
-# <span class="title-accent"></span>🔮 Évolutions Futures
+# 📞 Questions ?
 
-<div class="grid-2">
+<div class="card card-blue">
 
-<div>
+**Documentation**
 
-1. <span class="badge badge-blue">Base de données relationnelle</span> - Migrer de JSON vers PostgreSQL
-2. <span class="badge badge-green">Authentification utilisateurs</span> - Système de login/roles
-3. <span class="badge badge-blue">Compression</span> - Gzip des backups
+- README.md
+- docs/ARCHITECTURE.md
+- docs/SOUTENANCE.md
 
-</div>
-
-<div>
-
-4. <span class="badge badge-green">Chiffrement</span> - Chiffrer les backups sensibles
-5. <span class="badge badge-blue">Monitoring</span> - Dashboard avec métriques
-6. <span class="badge badge-green">Notifications</span> - Email/SMS en plus des webhooks
-
-</div>
-
-</div>
-
----
-
-# <span class="title-accent"></span>❓ Questions & Réponses
-
-<div class="grid-2">
-
-<div class="card">
-
-## Pourquoi Fastify plutôt qu'Express ?
-
-**R:** Fastify est plus performant et offre une meilleure validation native.
-
-</div>
-
-<div class="card">
-
-## Pourquoi stocker en JSON ?
-
-**R:** Simplification pour le MVP. Une vraie base serait le prochain pas.
-
-</div>
-
-<div class="card">
-
-## Sécurité des mots de passe ?
-
-**R:** Chiffrés avec AES-256-GCM avant stockage. Clé via variable d'environnement.
-
-</div>
-
-</div>
-
----
-
-# <span class="title-accent"></span>🎉 Conclusion
-
-## SafeBase est une solution complète et opérationnelle
-
-<div class="grid-2">
-
-<div>
-
-- ✅ Répond à tous les objectifs du cahier des charges
-- ✅ Prête pour la production avec des améliorations possibles
-
-</div>
-
-<div>
-
-- ✅ Code testé, documenté et maintenable
-- ✅ Architecture moderne et scalable
-
-</div>
-
-</div>
-
-<div style="text-align: center; margin-top: 40px;">
-
-**<span class="highlight-blue">Merci pour votre attention !</span>** 🙏
-
-</div>
-
----
-
-# <span class="title-accent"></span>📞 Contact & Ressources
-
-<div class="grid-2">
-
-<div class="card">
-
-## Documentation
-
-- **README.md** - Documentation technique
-- **docs/SOUTENANCE.md** - Guide de soutenance
-- **docs/ARCHITECTURE.md** - Architecture détaillée
-
-</div>
-
-<div class="card">
-
-## Démarrage
-
-```bash
-./scripts/LANCER-PROJET.sh
-```
-
-**Questions ?** 💬
-
-</div>
+**Merci !** 🙏
 
 </div>
