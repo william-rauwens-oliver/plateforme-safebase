@@ -218,12 +218,6 @@ Ce projet est un projet éducatif.
 - **William Rauwens-Oliver** - [@william-rauwens-oliver](https://github.com/william-rauwens-oliver)
 - **Chaima**
 
-## Remerciements
-
-- Fastify pour l'excellent framework API
-- React pour l'interface utilisateur
-- Tous les contributeurs open source
-
 ---
 
 Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile !
