@@ -1,0 +1,24 @@
+[
+  {
+    "id": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+    "createdAt": "2025-11-22T22:28:33.509Z",
+    "name": "Base De Donnée MySQL",
+    "engine": "mysql",
+    "host": "127.0.0.1",
+    "port": 8889,
+    "username": "root",
+    "password": "2DVhbIRY7kgtgxoNOWj27Q==:GXRtr71tQ1x8y841/NQnJsPDtd7yc+9r4KeMQnLeeYs=:4Az8cw==:PlpKtB43CeI0+l5iutrd6A==",
+    "database": "finance-flow"
+  },
+  {
+    "id": "eadafcab-2e0a-4b76-99a2-074b110222c6",
+    "createdAt": "2025-11-22T22:28:54.901Z",
+    "name": "Base De Donnée PostgreSQL",
+    "engine": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "OK3Q8eVAjBDwnbsINh0Egw==:kklX7/N0W3ZBL+TAkWfbMY6s1tb8D8IUnFC68wiIiDs=:Sbo51Q==:ZUYRRtSYzXBmOvEreLZUnQ==",
+    "database": "fittracker"
+  }
+]

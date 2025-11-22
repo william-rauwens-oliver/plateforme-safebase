@@ -1,0 +1,208 @@
+[
+  {
+    "id": "3ac348e5-5895-409f-b06d-8c824c70ca5b",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T22:33:30.300Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "versionId": "d3882ec9-7b84-46c9-9eb6-472d8f4eb273",
+      "sizeBytes": 8339,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "28278c05-b639-4308-bb8d-90ca79570457",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:31:29.392Z",
+    "payload": {
+      "databaseId": "eadafcab-2e0a-4b76-99a2-074b110222c6",
+      "databaseName": "Base De Donnée PostgreSQL",
+      "error": "Backup failed: Command failed: PGPASSWORD='root' pg_dump -h 127.0.0.1 -p 5432 -U postgres -d fittracker -F p --no-owner --no-privileges -f /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/eadafcab-2e0a-4b76-99a2-074b110222c6/Base De Donnée PostgreSQL_2025-11-22T22-31-29-378Z.sql\npg_dump: error: too many command-line arguments (first is \"De\")\nTry \"pg_dump --help\" for more information.\n - pg_dump: error: too many command-line arguments (first is \"De\")\nTry \"pg_dump --help\" for more information.\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "13a490f8-0529-41ef-aa09-2e9ed3b6e351",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:31:28.372Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-31-28-311Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "72e70037-f6c0-479f-80ce-45e61d7b94b9",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:31:11.880Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-31-11-827Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "601936e8-a891-409a-bb4c-4f168ac7d61b",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:43.416Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-29-43-372Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "3a7e9af4-efac-4d24-a079-68c6d944befc",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:19.611Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-29-19-559Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "edb03891-5451-4ad8-a072-de65ba6aac57",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:18.916Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-29-18-868Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "a666a46b-cd56-4a75-83c8-8cb58a2e6572",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:09.865Z",
+    "payload": {
+      "databaseId": "eadafcab-2e0a-4b76-99a2-074b110222c6",
+      "databaseName": "Base De Donnée PostgreSQL",
+      "error": "Backup failed: Command failed: PGPASSWORD='root' pg_dump -h 127.0.0.1 -p 5432 -U postgres -d fittracker -F p --no-owner --no-privileges -f /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/eadafcab-2e0a-4b76-99a2-074b110222c6/Base De Donnée PostgreSQL_2025-11-22T22-29-09-853Z.sql\npg_dump: error: too many command-line arguments (first is \"De\")\nTry \"pg_dump --help\" for more information.\n - pg_dump: error: too many command-line arguments (first is \"De\")\nTry \"pg_dump --help\" for more information.\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "b2b6b7e5-1d6c-4d55-9897-092d69d85e6f",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:09.706Z",
+    "payload": {
+      "databaseId": "eadafcab-2e0a-4b76-99a2-074b110222c6",
+      "databaseName": "Base De Donnée PostgreSQL",
+      "error": "Backup failed: Command failed: PGPASSWORD='root' pg_dump -h 127.0.0.1 -p 5432 -U postgres -d fittracker -F p --no-owner --no-privileges -f /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/eadafcab-2e0a-4b76-99a2-074b110222c6/Base De Donnée PostgreSQL_2025-11-22T22-29-09-693Z.sql\npg_dump: error: too many command-line arguments (first is \"De\")\nTry \"pg_dump --help\" for more information.\n - pg_dump: error: too many command-line arguments (first is \"De\")\nTry \"pg_dump --help\" for more information.\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "0f6c986c-e042-48f1-9e77-b8d31b98eff1",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:09.061Z",
+    "payload": {
+      "databaseId": "eadafcab-2e0a-4b76-99a2-074b110222c6",
+      "databaseName": "Base De Donnée PostgreSQL",
+      "error": "Backup failed: Command failed: PGPASSWORD='root' pg_dump -h 127.0.0.1 -p 5432 -U postgres -d fittracker -F p --no-owner --no-privileges -f /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/eadafcab-2e0a-4b76-99a2-074b110222c6/Base De Donnée PostgreSQL_2025-11-22T22-29-09-023Z.sql\npg_dump: error: too many command-line arguments (first is \"De\")\nTry \"pg_dump --help\" for more information.\n - pg_dump: error: too many command-line arguments (first is \"De\")\nTry \"pg_dump --help\" for more information.\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "70ae57ae-472e-4378-be67-602727a81ef3",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:08.101Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-29-08-048Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "02adb35a-508d-4785-9c2b-e6ef59f02183",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:07.901Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-29-07-858Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "c49349fd-fe0c-4804-9c79-9cf122fffc48",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:07.226Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-29-07-182Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "0ea017fb-9d7d-409c-9c3f-14d397743180",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T22:29:05.714Z",
+    "payload": {
+      "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
+      "databaseName": "Base De Donnée MySQL",
+      "error": "Backup failed: Command failed: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump -h 127.0.0.1 -P 8889 -u root -p'root' finance-flow > /Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-29-05-634Z.sql\nmysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n - mysqldump: [Warning] Using a password on the command line interface can be insecure.\nmysqldump: Couldn't find table: \"De\"\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "eb462201-4b1f-4559-8299-fb0e2da215df",
+    "type": "restore_success",
+    "timestamp": "2025-11-22T21:34:12.862Z",
+    "payload": {
+      "databaseId": "2b0c698a-f73a-464f-ab4e-bda0100c8392",
+      "databaseName": "TestBAse2",
+      "versionId": "caec8e97-9b82-4a36-aa53-089ad4f8703b",
+      "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/2b0c698a-f73a-464f-ab4e-bda0100c8392/TestBAse2_2025-11-22T21-34-06-737Z.sql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "48ca2808-5cb5-4bc9-990d-e8a78b71bcaa",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:34:07.088Z",
+    "payload": {
+      "databaseId": "2b0c698a-f73a-464f-ab4e-bda0100c8392",
+      "databaseName": "TestBAse2",
+      "versionId": "caec8e97-9b82-4a36-aa53-089ad4f8703b",
+      "sizeBytes": 1682,
+      "engine": "postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "313e7042-6201-4266-818b-c8a21bec1a69",
+    "type": "restore_success",
+    "timestamp": "2025-11-22T21:33:42.165Z",
+    "payload": {
+      "databaseId": "aa682ace-0292-46fb-85ba-f5474289fde0",
+      "databaseName": "TestBase",
+      "versionId": "caef89f8-7959-40bc-80bb-0f2479092d55",
+      "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/aa682ace-0292-46fb-85ba-f5474289fde0/TestBase_2025-11-22T21-33-31-988Z.sql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "43e3f10d-3259-46ae-a7d0-2f669233201f",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:33:32.098Z",
+    "payload": {
+      "databaseId": "aa682ace-0292-46fb-85ba-f5474289fde0",
+      "databaseName": "TestBase",
+      "versionId": "caef89f8-7959-40bc-80bb-0f2479092d55",
+      "sizeBytes": 8339,
+      "engine": "mysql"
+    },
+    "resolved": false
+  }
+]
