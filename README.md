@@ -217,7 +217,7 @@ Ce projet est un projet éducatif.
 ## Auteurs
 
 - **William Rauwens-Oliver** - [@william-rauwens-oliver](https://github.com/william-rauwens-oliver)
-- **Chaima**
+- **Chaima BEN FARHAT**
 
 ---
 
