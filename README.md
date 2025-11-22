@@ -1,4 +1,4 @@
-# 🛡️ SafeBase Platform
+# SafeBase Platform
 
 [![CI/CD](https://github.com/william-rauwens-oliver/plateforme-safebase/actions/workflows/ci.yml/badge.svg)](https://github.com/william-rauwens-oliver/plateforme-safebase/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -11,7 +11,7 @@
 
 Solution complète de gestion de sauvegarde et restauration de bases de données MySQL & PostgreSQL avec API REST, scheduler automatique et interface utilisateur moderne.
 
-## 📁 Structure du Projet
+## Structure du Projet
 
 ```
 plateforme-safebase/
@@ -31,7 +31,7 @@ plateforme-safebase/
 └── README.md
 ```
 
-## 🚀 Démarrage Rapide
+## Démarrage Rapide
 
 ### Avec Docker (recommandé)
 
@@ -65,7 +65,7 @@ npm install
 npm run dev     # Interface sur http://localhost:5173
 ```
 
-## 🔌 API REST - Endpoints
+## API REST - Endpoints
 
 ### Santé et Monitoring
 - `GET /health` - Vérifier l'état de l'API
@@ -90,7 +90,7 @@ npm run dev     # Interface sur http://localhost:5173
 - `POST /versions/:versionId/unpin` - Désépingler une version
 - `DELETE /versions/:versionId` - Supprimer une version
 
-## 📖 Exemples d'utilisation
+## Exemples d'utilisation
 
 ### Vérifier la santé de l'API
 ```bash
@@ -127,7 +127,7 @@ curl -X POST http://localhost:8080/restore/VERSION_ID
 curl -H "x-api-key: ${API_KEY}" http://localhost:8080/databases
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 ### Variables d'environnement - API
 
@@ -148,7 +148,7 @@ curl -H "x-api-key: ${API_KEY}" http://localhost:8080/databases
 | `SCHEDULER_API_URL` | URL de l'API | **Oui** | `http://api:8080` |
 | `API_KEY` | Même valeur que le service API si activé | Non | - |
 
-## 🔧 Scripts Utilitaires
+## Scripts Utilitaires
 
 Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
 
@@ -158,7 +158,7 @@ Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
 - **`changer-mot-de-passe-postgres.sh`** - Changer le mot de passe PostgreSQL
 - **`fix-postgres-permissions.sh`** - Corriger les permissions PostgreSQL
 
-## 🧪 Tests
+## Tests
 
 ### Backend
 ```bash
@@ -182,7 +182,7 @@ npm test
 ./scripts/test-scheduler.sh
 ```
 
-## 🏗️ Stack Technique
+## Stack Technique
 
 - **Backend** : Fastify (TypeScript)
 - **Frontend** : React 18 + Vite
@@ -191,33 +191,34 @@ npm test
 - **Tests** : Vitest
 - **CI/CD** : GitHub Actions
 
-## 📚 Documentation
+## Documentation
 
 - **Présentation** : Diapositives pour la soutenance disponibles dans [`docs/PRESENTATION.md`](docs/PRESENTATION.md) et [`docs/PRESENTATION.pdf`](docs/PRESENTATION.pdf)
 - **Sécurité** : Voir [`SECURITE.md`](SECURITE.md) pour les bonnes pratiques de sécurité
 - **Contribution** : Voir [`CONTRIBUTING.md`](CONTRIBUTING.md) pour les guidelines de contribution
 - **Changelog** : Voir [`CHANGELOG.md`](CHANGELOG.md) pour l'historique des changements
 
-## 🔄 CI/CD
+## CI/CD
 
 Le projet utilise GitHub Actions pour automatiser :
 - Les tests unitaires (backend et frontend)
 - Le linting du code
 - La vérification de la compilation TypeScript
 
-## 🤝 Contribution
+## Contribution
 
 Les contributions sont les bienvenues ! Veuillez lire le [Guide de Contribution](CONTRIBUTING.md) pour plus de détails.
 
-## 📄 License
+## License
 
 Ce projet est un projet éducatif.
 
-## 👥 Auteur
+## Auteurs
 
 - **William Rauwens-Oliver** - [@william-rauwens-oliver](https://github.com/william-rauwens-oliver)
+- **Chaima**
 
-## 🙏 Remerciements
+## Remerciements
 
 - Fastify pour l'excellent framework API
 - React pour l'interface utilisateur
@@ -225,4 +226,4 @@ Ce projet est un projet éducatif.
 
 ---
 
-⭐ Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile !
+Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile !
