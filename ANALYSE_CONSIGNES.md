@@ -1,7 +1,7 @@
 # Analyse des Consignes - Plateforme SafeBase
 
-> **Date d'analyse :** 2025-01-09  
-> **Version du projet :** Analyse complète consigne par consigne
+> **Date d'analyse :** 2025-01-22  
+> **Version du projet :** Analyse complète consigne par consigne - Vérification approfondie
 
 ## 📋 Objectif du Projet
 
@@ -516,18 +516,26 @@
 - ✅ Optimisations (chiffrement, validation, gestion d'erreurs)
 
 **Concevoir et mettre en place une base de données :**
-- ⚠️ **Pas de base de données relationnelle** - Le projet utilise des fichiers JSON pour le stockage
-  - **Fichiers :** `databases.json`, `versions.json`, `alerts.json`, `scheduler.json`
-  - **Stockage :** `/app/data/` (configurable via `DATA_DIR`)
-- ✅ **Schéma MCD/MLD/MPD :** Documenté dans `docs/PRESENTATION.md` (slides 9-14)
-  - **MCD :** Entités `RegisteredDatabase` et `BackupVersionMeta` avec relations
+- ✅ **Base de données relationnelle PostgreSQL** - Le projet utilise PostgreSQL comme base principale
+  - **Schéma SQL :** `backend/src/schema.sql` - Schéma relationnel complet avec tables, contraintes, index
+  - **Tables :** `registered_databases`, `backup_versions`, `alerts`, `scheduler_info`
+  - **Relations :** Foreign keys avec `ON DELETE CASCADE` (ligne 33-34 de `schema.sql`)
+  - **Fallback :** Système de fallback vers fichiers JSON si PostgreSQL n'est pas disponible (`store-fallback.ts`)
+- ✅ **Schéma MCD/MLD/MPD :** Documenté et implémenté
+  - **MCD :** Entités `RegisteredDatabase` et `BackupVersionMeta` avec relations (documenté dans `docs/PRESENTATION.md`)
   - **MLD :** Structures TypeScript définies dans `backend/src/types.ts`
-  - **MPD :** Implémentation file-based avec fichiers JSON
+  - **MPD :** Implémentation PostgreSQL avec schéma SQL complet (`schema.sql`)
+    - Contraintes CHECK pour `engine` (mysql|postgres) et `type` d'alerte
+    - Index pour optimiser les performances (lignes 20-21, 39-42, 59-62 de `schema.sql`)
+    - Fonction PL/pgSQL pour nettoyage automatique des alertes (lignes 78-88)
 - ✅ **Intégrité et sécurité :** 
-  - Chiffrement des mots de passe (AES-256-GCM)
-  - Validation des données avec Zod
-  - Gestion des relations (suppression en cascade)
-- ✅ **Backup de la base de données :** Fichiers JSON sauvegardés via volumes Docker (`api_node_modules`, `backups`)
+  - Chiffrement des mots de passe (AES-256-GCM) avant stockage dans PostgreSQL
+  - Validation des données avec Zod avant insertion
+  - Gestion des relations (suppression en cascade via FOREIGN KEY)
+  - Contraintes d'unicité (`unique_name`, `unique_path`)
+- ✅ **Backup de la base de données :** 
+  - Volumes Docker persistants pour PostgreSQL (`postgres_data`)
+  - Fichiers JSON sauvegardés via volumes Docker en mode fallback
 
 **Développer des composants d'accès aux données :**
 - ✅ Requêtes SQL via mysql2 et pg (pour les backups)
@@ -587,10 +595,11 @@
    - Endpoints API pour consulter, résoudre et supprimer les alertes
    - Alertes supplémentaires : `scheduler_down`, `database_inaccessible`, `backup_success`, `restore_success`
    - Détection automatique du scheduler down
-3. ✅ **CI/CD :** Workflow GitHub Actions créé (`.github/workflows/ci.yml`)
-   - Tests backend et frontend
-   - Build Docker
-   - Linting automatique
+3. ⚠️ **CI/CD :** Workflow GitHub Actions **MANQUANT** (badge présent dans README mais fichier absent)
+   - **Recommandation :** Créer `.github/workflows/ci.yml` pour :
+     - Tests backend et frontend (Vitest)
+     - Build Docker
+     - Linting automatique
 
 ### 📝 Recommandations Finales
 
@@ -612,9 +621,10 @@
    - **Action :** Créer `.github/workflows/ci.yml` pour automatiser tests et build
 
 2. **Base de données relationnelle :**
-   - **État :** Utilisation de fichiers JSON (conforme au besoin mais pas une vraie BDD relationnelle)
-   - **Note :** Les schémas MCD/MLD/MPD sont documentés dans la présentation, mais l'implémentation est file-based
-   - **Acceptable :** Pour ce projet, le stockage JSON est suffisant et fonctionnel
+   - **État :** ✅ **CONFORME** - Base de données PostgreSQL relationnelle implémentée
+   - **Schéma :** `backend/src/schema.sql` avec tables, contraintes, index, foreign keys
+   - **Fallback :** Système de fallback vers JSON si PostgreSQL n'est pas disponible (bonne pratique)
+   - **Note :** Le projet utilise une vraie base de données relationnelle PostgreSQL avec schéma complet
 
 3. **Tests E2E :**
    - **État :** Tests unitaires et d'intégration présents
@@ -634,6 +644,7 @@ Le projet est **entièrement conforme** aux 7 consignes principales. Toutes les 
 
 ---
 
-*Analyse effectuée le : 2025-01-09*
+*Analyse effectuée le : 2025-01-22*
 *Version du projet analysée : Commit actuel*
+*Dernière vérification : Analyse approfondie de chaque consigne avec vérification du code source*
 

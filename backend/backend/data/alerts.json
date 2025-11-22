@@ -1,5 +1,461 @@
 [
   {
+    "id": "dd37f81c-3b8c-48d0-9149-b2bd2e47cddc",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:16:34.737Z",
+    "payload": {
+      "databaseId": "e6399ce3-e116-4656-bf3b-de7da4683c3e",
+      "databaseName": "TEST_Integration",
+      "versionId": "6c8e825f-c3c4-4610-9ccc-052285d19656",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "17771771-38aa-4497-a1bb-4b2f5f035cf3",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:16:34.675Z",
+    "payload": {
+      "databaseId": "e6399ce3-e116-4656-bf3b-de7da4683c3e",
+      "databaseName": "TEST_Integration",
+      "versionId": "7e549eff-5940-49a5-894b-59312d75c1ae",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "ea250b92-bc16-4f85-93f3-3199fa116142",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:16:34.642Z",
+    "payload": {
+      "databaseId": "e6399ce3-e116-4656-bf3b-de7da4683c3e",
+      "databaseName": "TEST_Integration",
+      "versionId": "47f0f5fa-cc22-4fb2-a8ad-796ab71c9701",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "c69d2c03-d834-4bc8-bee4-1d9480e9e031",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:16:34.641Z",
+    "payload": {
+      "databaseId": "ef78d584-0499-468f-a101-535a6e799f9b",
+      "databaseName": "TEST_DB2_1763846188381",
+      "versionId": "520ca433-b69d-445a-987d-9efe9222e15d",
+      "sizeBytes": 108,
+      "engine": "postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "7eae6a86-db62-4ecc-86f5-bffd2dada44f",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:16:34.640Z",
+    "payload": {
+      "databaseId": "168265b2-6420-4598-b149-521b1a1392f4",
+      "databaseName": "TEST_Store_1763846188284",
+      "versionId": "94c4c7fb-5e55-4b44-8009-b4b0fac7250d",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "820f727a-dc6a-43e9-8ff0-58061c415be3",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:16:34.640Z",
+    "payload": {
+      "databaseId": "f294041d-e4d4-4868-8ee3-1f8987e42771",
+      "databaseName": "TEST_DB1_1763846188381",
+      "versionId": "1c8f9611-a241-4a36-8cd2-d2134318c74e",
+      "sizeBytes": 129,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "4202ea8b-11e1-412b-bd20-6284ad4b1282",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:16:34.639Z",
+    "payload": {
+      "databaseId": "f6b801c9-6bcc-45ae-b156-6608545a58f7",
+      "databaseName": "testbase",
+      "versionId": "0edf1765-591f-44bf-b094-4a64bc94be94",
+      "sizeBytes": 150,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "8dbc60ca-ab59-4307-8a95-19098756a0ee",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:16:34.629Z",
+    "payload": {
+      "databaseId": "9c108ff9-491d-4d50-9676-69603cbfbe4c",
+      "databaseName": "testbase",
+      "versionId": "5de29f66-4304-43d8-b317-41da79b1bc83",
+      "sizeBytes": 150,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "d7bcd910-4511-4c7a-b47c-5832d4d257dc",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T21:16:28.535Z",
+    "payload": {
+      "databaseId": "adc02b6a-a0ee-4a56-83bb-a840969c8b50"
+    },
+    "resolved": true,
+    "resolvedAt": "2025-11-22T21:16:28.535Z"
+  },
+  {
+    "id": "2867992f-1d5c-42cb-8fc8-4054a9af9054",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T21:16:28.534Z",
+    "payload": {
+      "databaseId": "aabb8027-eae3-408a-9c64-f81be6c708c5",
+      "databaseName": "test-db",
+      "error": "Test error"
+    },
+    "resolved": false
+  },
+  {
+    "id": "6e077fe8-a518-4b99-946d-a1987fcfca50",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:14:36.469Z",
+    "payload": {
+      "databaseId": "e26b1b0a-b151-43ea-a51a-45cdd33c206b",
+      "databaseName": "TEST_Integration",
+      "versionId": "cf59fa99-dcc0-48ff-8462-9eed93f78aec",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "ee4055e9-cff3-42ef-a78d-825dfeb66485",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:14:36.407Z",
+    "payload": {
+      "databaseId": "e26b1b0a-b151-43ea-a51a-45cdd33c206b",
+      "databaseName": "TEST_Integration",
+      "versionId": "6985949e-c7f6-4e40-858a-266fab818c17",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "9bf00949-ca52-41f7-9478-8b0a38c90411",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:14:36.373Z",
+    "payload": {
+      "databaseId": "3ab22364-6305-4ec6-9117-cf80b4dcb175",
+      "databaseName": "TEST_DB2_1763846070000",
+      "versionId": "976d39df-61d3-41b4-b39d-3f6384bef54f",
+      "sizeBytes": 108,
+      "engine": "postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "61dad076-160e-43c6-9cc7-0c7f9b4bef91",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:14:36.373Z",
+    "payload": {
+      "databaseId": "e26b1b0a-b151-43ea-a51a-45cdd33c206b",
+      "databaseName": "TEST_Integration",
+      "versionId": "7f36076a-7734-461d-9db9-9f6dfb2cf99e",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "9d10d829-187d-4837-b619-7df7b5e37fe8",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:14:36.372Z",
+    "payload": {
+      "databaseId": "f556636f-b893-4b05-b670-e9083a5f8ff8",
+      "databaseName": "TEST_DB1_1763846070000",
+      "versionId": "f1535257-4a16-4ee3-8fab-4b74e4c1f9be",
+      "sizeBytes": 129,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "2c14e653-c339-44ac-9e1a-cd60e4af33d1",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:14:36.371Z",
+    "payload": {
+      "databaseId": "26de34cb-f623-42d8-b412-5ac8957d40c5",
+      "databaseName": "TEST_Store_1763846069908",
+      "versionId": "a57e917c-7581-48fe-9768-381b55450887",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "6bcbb17a-12ff-4329-a03b-d4b6dea9fb0f",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:14:36.370Z",
+    "payload": {
+      "databaseId": "f6b801c9-6bcc-45ae-b156-6608545a58f7",
+      "databaseName": "testbase",
+      "versionId": "ee1a8ce0-ec5e-47cb-8636-9ce02904e37d",
+      "sizeBytes": 150,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "47355a2c-9f3e-426a-bd17-0c646940bf11",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T21:14:36.360Z",
+    "payload": {
+      "databaseId": "9c108ff9-491d-4d50-9676-69603cbfbe4c",
+      "databaseName": "testbase",
+      "versionId": "028f6a03-77b5-4d6d-a7d3-293b9d7528ef",
+      "sizeBytes": 150,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "2bc16b75-baad-4808-a0e1-72de23d0d9bb",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T21:14:30.158Z",
+    "payload": {
+      "databaseId": "c5b2869a-6b3a-4c65-af9f-e1955aae01b6"
+    },
+    "resolved": true,
+    "resolvedAt": "2025-11-22T21:14:30.158Z"
+  },
+  {
+    "id": "f679fb23-0c2a-4fa6-bf72-4f3d7d180c60",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T21:14:30.157Z",
+    "payload": {
+      "databaseId": "b0267007-d4d9-46ae-87c3-87ad85686d3b",
+      "databaseName": "test-db",
+      "error": "Test error"
+    },
+    "resolved": false
+  },
+  {
+    "id": "61ff2d7a-81df-4fab-8b7d-9da1bbc88808",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.896Z",
+    "payload": {
+      "databaseId": "b50ee49b-31c4-45e6-9821-8a1db801a1a3",
+      "databaseName": "TEST_Integration",
+      "versionId": "32a16661-cf59-4cc9-980f-ac974e692d9e",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "1f491175-27f4-452b-8e65-0bfc41c7ce95",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.751Z",
+    "payload": {
+      "databaseId": "b50ee49b-31c4-45e6-9821-8a1db801a1a3",
+      "databaseName": "TEST_Integration",
+      "versionId": "8991f5ad-e206-4e7a-bd28-aa4eb6fc0928",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "2c4e8fd1-2afe-4cb9-a115-f35d91e4be5d",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.709Z",
+    "payload": {
+      "databaseId": "b50ee49b-31c4-45e6-9821-8a1db801a1a3",
+      "databaseName": "TEST_Integration",
+      "versionId": "ab99a165-3e6f-4fb2-8057-9166748979f0",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "8ff0c6cf-86dd-4194-8d5a-9265b0d5c97f",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.706Z",
+    "payload": {
+      "databaseId": "147cee79-3c26-4a3b-9dc2-05d11a518d75",
+      "databaseName": "TEST_DB2_1763844234253",
+      "versionId": "47af0be5-11dc-49fa-b162-472b99800bca",
+      "sizeBytes": 108,
+      "engine": "postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "2ffb8d7d-7321-481c-9c3e-d9868a89185b",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.705Z",
+    "payload": {
+      "databaseId": "1c9c1d4c-c0a8-4bc2-a543-f0b126a9c73d",
+      "databaseName": "TEST_DB1_1763844234253",
+      "versionId": "9f68d179-0927-4993-8f50-6c2df48ede8c",
+      "sizeBytes": 129,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "1b771ba3-1990-41e4-a485-15a4ec56ba05",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.704Z",
+    "payload": {
+      "databaseId": "8fb6773c-ab12-46eb-9f43-af8673752182",
+      "databaseName": "TEST_Store_1763844234056",
+      "versionId": "c06c904a-ddeb-4204-87a4-4752a778bdce",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "49f97613-ce38-4ceb-90ee-7d30459d3918",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.702Z",
+    "payload": {
+      "databaseId": "05ca2e00-4c63-46c6-9474-d42123a98240",
+      "databaseName": "TEST_DB2_1763844223361",
+      "versionId": "d0dd7a3b-806b-480a-8847-74c237698851",
+      "sizeBytes": 108,
+      "engine": "postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "6fffea0c-6f68-4d0b-928e-d5c6a1ebe480",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.701Z",
+    "payload": {
+      "databaseId": "528acc64-02ff-4493-a9cf-60ace6216621",
+      "databaseName": "TEST_DB1_1763844223361",
+      "versionId": "835fdcba-a0cb-4a5d-b8bb-44f359f52ee6",
+      "sizeBytes": 129,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "e5fcd30f-9f8d-4b63-b83c-3585cb8934a2",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.699Z",
+    "payload": {
+      "databaseId": "94a62bfd-cfb4-4ef4-be1a-a5eb53fad8b5",
+      "databaseName": "TEST_Store_1763844223269",
+      "versionId": "78df2c88-c713-4735-92d3-6c3c546dfd14",
+      "sizeBytes": 126,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "bcd8996c-139b-444b-a42b-a202ca19f7a7",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.697Z",
+    "payload": {
+      "databaseId": "f6b801c9-6bcc-45ae-b156-6608545a58f7",
+      "databaseName": "testbase",
+      "versionId": "3dc8f2ad-8b1e-4c5d-a7f3-6a817701127b",
+      "sizeBytes": 150,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "eedd180d-ecb6-49ce-b3aa-aa1bcb305c1b",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T20:44:00.681Z",
+    "payload": {
+      "databaseId": "9c108ff9-491d-4d50-9676-69603cbfbe4c",
+      "databaseName": "testbase",
+      "versionId": "0527c7ca-d6eb-4dd7-81c4-578a13741818",
+      "sizeBytes": 150,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "078433a1-7672-4de1-b0b7-fb49b3276237",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T20:43:54.474Z",
+    "payload": {
+      "databaseId": "46d84bb0-ae32-46ba-b6df-81bc260dfb21"
+    },
+    "resolved": true,
+    "resolvedAt": "2025-11-22T20:43:54.474Z"
+  },
+  {
+    "id": "aa77f851-7032-47c3-a86d-e5874fe1a07a",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T20:43:54.473Z",
+    "payload": {
+      "databaseId": "8560e8e9-9c25-4a08-96ba-96644a7a6731",
+      "databaseName": "test-db",
+      "error": "Test error"
+    },
+    "resolved": false
+  },
+  {
+    "id": "53cb9ac2-2313-418c-8819-a626adb36273",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T20:43:43.553Z",
+    "payload": {
+      "databaseId": "0c7f2864-81d6-4fae-b7f2-b43c646bf992"
+    },
+    "resolved": true,
+    "resolvedAt": "2025-11-22T20:43:43.553Z"
+  },
+  {
+    "id": "3aa53431-1832-4f54-940f-8a83419eab43",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T20:43:43.552Z",
+    "payload": {
+      "databaseId": "f6931ff4-e2dd-456b-93aa-21425ca7e9cd",
+      "databaseName": "test-db",
+      "error": "Test error"
+    },
+    "resolved": false
+  },
+  {
+    "id": "169f4336-f772-44c0-a13b-892166e52218",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T20:41:59.953Z",
+    "payload": {
+      "databaseId": "c918c01d-c3c9-4f68-9638-a86b76818204"
+    },
+    "resolved": true,
+    "resolvedAt": "2025-11-22T20:41:59.953Z"
+  },
+  {
+    "id": "0a99d06d-2cf3-4970-87b5-0f745e31b7f4",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T20:41:59.952Z",
+    "payload": {
+      "databaseId": "05b6ae00-80cd-4d8a-b1f8-5ad760fa6885",
+      "databaseName": "test-db",
+      "error": "Test error"
+    },
+    "resolved": false
+  },
+  {
     "id": "5392fa97-d083-445e-b6c6-128dbcbf4695",
     "type": "backup_success",
     "timestamp": "2025-11-22T18:56:44.399Z",

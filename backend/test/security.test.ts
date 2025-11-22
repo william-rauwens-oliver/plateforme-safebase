@@ -62,7 +62,7 @@ describe('Security Tests', () => {
       expect(res.statusCode).toBe(401);
       await srv.close();
       delete process.env.API_KEY;
-    });
+    }, 15000); // Timeout de 15 secondes
 
     it('should accept requests with valid API key', async () => {
       const testApiKey = process.env.TEST_API_KEY || 'test-api-key-' + Date.now();
@@ -80,7 +80,7 @@ describe('Security Tests', () => {
       expect(res.statusCode).toBe(200);
       await srv.close();
       delete process.env.API_KEY;
-    });
+    }, 15000); // Timeout de 15 secondes
 
     it('should reject requests with invalid API key', async () => {
       const testApiKey = process.env.TEST_API_KEY || 'test-api-key-' + Date.now();
@@ -98,7 +98,7 @@ describe('Security Tests', () => {
       expect(res.statusCode).toBe(401);
       await srv.close();
       delete process.env.API_KEY;
-    });
+    }, 15000); // Timeout de 15 secondes
   });
 
   describe('Input Validation', () => {

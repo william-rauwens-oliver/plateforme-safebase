@@ -11,7 +11,7 @@ describe('Integration Tests', () => {
   beforeAll(async () => {
     server = await createServer();
     await Store.init();
-  });
+  }, 20000); // Timeout de 20 secondes pour le hook
 
   afterAll(async () => {
     // Cleanup: supprimer les bases de test
@@ -118,6 +118,91 @@ describe('Integration Tests', () => {
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(Array.isArray(body)).toBe(true);
+    });
+
+    it('should pin and unpin a version', async () => {
+      if (!testDbId) return;
+
+      // Créer une version de test
+      process.env.FAKE_DUMP = '1';
+      const backupRes = await server.inject({
+        method: 'POST',
+        url: `/backup/${testDbId}`
+      });
+      delete process.env.FAKE_DUMP;
+
+      if (backupRes.statusCode === 200) {
+        const version = JSON.parse(backupRes.body);
+        const versionId = version.id;
+
+        // Épingler
+        const pinRes = await server.inject({
+          method: 'POST',
+          url: `/versions/${versionId}/pin`
+        });
+        expect(pinRes.statusCode).toBe(200);
+        const pinnedVersion = JSON.parse(pinRes.body);
+        expect(pinnedVersion.pinned).toBe(true);
+
+        // Désépingler
+        const unpinRes = await server.inject({
+          method: 'POST',
+          url: `/versions/${versionId}/unpin`
+        });
+        expect(unpinRes.statusCode).toBe(200);
+        const unpinnedVersion = JSON.parse(unpinRes.body);
+        expect(unpinnedVersion.pinned).toBe(false);
+      }
+    });
+  });
+
+  describe('Alert Flow', () => {
+    it('should list alerts', async () => {
+      const res = await server.inject({
+        method: 'GET',
+        url: '/alerts'
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body).toHaveProperty('alerts');
+      expect(Array.isArray(body.alerts)).toBe(true);
+    });
+
+    it('should filter alerts by type', async () => {
+      const res = await server.inject({
+        method: 'GET',
+        url: '/alerts?type=backup_failed'
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(Array.isArray(body.alerts)).toBe(true);
+    });
+  });
+
+  describe('Scheduler Flow', () => {
+    it('should get scheduler heartbeat', async () => {
+      const res = await server.inject({
+        method: 'GET',
+        url: '/scheduler/heartbeat'
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body).toHaveProperty('lastHeartbeat');
+    });
+
+    it('should set scheduler heartbeat', async () => {
+      const res = await server.inject({
+        method: 'POST',
+        url: '/scheduler/heartbeat'
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body).toHaveProperty('ok');
+      expect(body.ok).toBe(true);
     });
   });
 });

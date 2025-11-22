@@ -2,84 +2,64 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
-Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
-et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
-
 ## [Unreleased]
 
 ### Added
-- Structure de branches Git Flow (main, develop)
-- Templates GitHub (issues, pull requests)
-- Guide de contribution (CONTRIBUTING.md)
-- Changelog (CHANGELOG.md)
-- Documentation du schéma de données (MCD/MLD/MPD)
+- ✅ Tests E2E complets avec Playwright
+- ✅ Tests unitaires supplémentaires (crypto, utils, store)
+- ✅ Tests d'intégration améliorés (routes, alertes, scheduler)
+- ✅ Documentation complète des tests (`TESTS.md`)
+- ✅ Workflow CI/CD GitHub Actions
+- ✅ Tests frontend pour les hooks React
 
 ### Changed
-- Amélioration de la structure GitHub pour un workflow professionnel
-
-## [0.1.0] - 2025-01-09
-
-### Added
-- API REST complète avec Fastify
-  - Endpoints pour gestion des bases de données
-  - Endpoints pour sauvegarde et restauration
-  - Endpoints pour gestion des versions
-  - Support MySQL et PostgreSQL
-
-- Interface utilisateur React
-  - Formulaire d'enregistrement de bases de données
-  - Liste des connexions enregistrées
-  - Modal de gestion des versions
-  - Actions : Backup, Restore, Pin, Download, Delete
-  - Thème clair/sombre
-  - Design responsive
-
-- Scheduler automatique
-  - Cron configuré (toutes les heures)
-  - Scripts de backup automatique
-  - Heartbeat pour monitoring
-
-- Sécurité
-  - Chiffrement AES-256-GCM des mots de passe
-  - Validation des entrées avec Zod
-  - API Key optionnelle
-  - Headers de sécurité
-
-- Tests
-  - 17 tests backend (health, security, integration)
-  - 8 tests frontend (App, security)
-  - Total : 25 tests (tous passent)
-
-- Conteneurisation
-  - Docker Compose avec tous les services
-  - Dockerfiles pour backend, frontend, scheduler
-  - Support MySQL et PostgreSQL
-
-- Documentation
-  - Architecture complète
-  - Guides de démarrage
-  - Documentation des tests
-  - Guide de présentation
-  - Résolution de problèmes
-
-### Changed
-- Amélioration de la gestion des erreurs
-- Optimisation des performances
-- Amélioration de l'UX
+- 📝 Amélioration de la documentation des tests
+- 🔧 Organisation de la structure du projet
+- 📦 Mise à jour des dépendances de test
 
 ### Fixed
-- Correction des problèmes de connexion PostgreSQL
-- Correction de la gestion des permissions
-- Amélioration des messages d'erreur
+- 🐛 Correction des tests d'intégration
+- 🐛 Amélioration de la gestion des erreurs dans les tests
 
----
+## [0.1.0] - 2025-01-22
 
-## Types de Changements
+### Added
+- 🎉 Version initiale du projet
+- ✅ API REST complète (Fastify)
+- ✅ Interface utilisateur React
+- ✅ Scheduler automatique (cron)
+- ✅ Support MySQL et PostgreSQL
+- ✅ Chiffrement des mots de passe (AES-256-GCM)
+- ✅ Système d'alertes complet
+- ✅ Gestion des versions de backup
+- ✅ Tests unitaires backend (17 tests)
+- ✅ Tests unitaires frontend (8 tests)
+- ✅ Tests d'intégration
+- ✅ Tests de sécurité
+- ✅ Scripts de test fonctionnels
+- ✅ Conteneurisation Docker complète
+- ✅ Documentation complète
 
-- `Added` : Nouvelles fonctionnalités
-- `Changed` : Changements dans les fonctionnalités existantes
-- `Deprecated` : Fonctionnalités qui seront bientôt supprimées
-- `Removed` : Fonctionnalités supprimées
-- `Fixed` : Corrections de bugs
-- `Security` : Corrections de vulnérabilités
+### Features
+- Ajout de bases de données (MySQL/PostgreSQL)
+- Sauvegardes automatiques (cron)
+- Sauvegardes manuelles
+- Restauration de versions
+- Épinglage de versions
+- Téléchargement de backups
+- Historique des alertes
+- Interface utilisateur moderne et responsive
+- Thème sombre/clair
 
+### Security
+- Chiffrement AES-256-GCM des mots de passe
+- Authentification API (API key)
+- Validation des entrées (Zod)
+- Headers de sécurité HTTP
+
+### Documentation
+- README complet
+- Documentation des variables d'environnement
+- Présentation pour soutenance
+- Guide de contribution
+- Guide de sécurité

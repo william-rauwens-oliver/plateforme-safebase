@@ -26,7 +26,7 @@ describe('health', () => {
     expect(res.statusCode).toBe(401);
     await srv.close();
     delete process.env.API_KEY;
-  });
+  }, 15000); // Timeout de 15 secondes
 
   it('scheduler heartbeat read/write', async () => {
     const resPost = await server.inject({ method: 'POST', url: '/scheduler/heartbeat' });

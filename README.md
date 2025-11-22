@@ -165,27 +165,46 @@ Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
 
 ## Tests
 
-### Backend
+### Tests Unitaires et d'Intégration
+
+#### Backend
 ```bash
 cd backend
 npm test
 ```
 
-### Frontend
+#### Frontend
 ```bash
 cd frontend
 npm test
 ```
 
-### Tests fonctionnels complets
+### Tests E2E (End-to-End)
+
 ```bash
-./scripts/test-fonctionnalites.sh
+cd e2e
+npm install
+npm test
 ```
 
-### Tests du scheduler
+Options E2E :
+- `npm run test:ui` - Interface graphique
+- `npm run test:headed` - Mode visible
+- `npm run test:debug` - Mode debug
+
+### Tests Fonctionnels (Scripts Shell)
+
 ```bash
+# Tests fonctionnels complets
+./scripts/test-fonctionnalites.sh
+
+# Tests du scheduler
 ./scripts/test-scheduler.sh
 ```
+
+### Documentation Complète
+
+Voir [`TESTS.md`](TESTS.md) pour la documentation complète des tests.
 
 ## Stack Technique
 
@@ -201,6 +220,7 @@ npm test
 - **Présentation** : Diapositives pour la soutenance disponibles dans [`docs/PRESENTATION.md`](docs/PRESENTATION.md) et [`docs/PRESENTATION.pdf`](docs/PRESENTATION.pdf)
 - **Sécurité** : Voir [`SECURITY.md`](SECURITY.md) pour la politique de sécurité
 - **Variables d'environnement** : Voir [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) pour la configuration
+- **Tests** : Voir [`TESTS.md`](TESTS.md) pour la documentation complète des tests
 - **Contribution** : Voir [`CONTRIBUTING.md`](CONTRIBUTING.md) pour les guidelines de contribution
 - **Changelog** : Voir [`CHANGELOG.md`](CHANGELOG.md) pour l'historique des changements
 
