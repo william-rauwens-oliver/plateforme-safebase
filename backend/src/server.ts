@@ -2,6 +2,10 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { routes } from './routes.js';
 
+/**
+ * Crée et configure le serveur Fastify avec tous les middlewares et routes
+ * @returns Instance Fastify configurée
+ */
 export async function createServer() {
   const server = Fastify({ logger: true });
   const corsOrigin = process.env.CORS_ORIGIN || true;

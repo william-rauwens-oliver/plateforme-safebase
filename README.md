@@ -1,14 +1,30 @@
-# SafeBase Platform
+# 🛡️ SafeBase Platform
 
-Solution de sauvegarde/restauration MySQL & Postgres avec API REST, scheduler et frontend.
+[![CI/CD](https://github.com/william-rauwens-oliver/plateforme-safebase/actions/workflows/ci.yml/badge.svg)](https://github.com/william-rauwens-oliver/plateforme-safebase/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20-green)](https://nodejs.org/)
+[![Fastify](https://img.shields.io/badge/Fastify-4.28-green)](https://fastify.dev/)
+[![React](https://img.shields.io/badge/React-18.3-blue)](https://reactjs.org/)
 
-## Stack
-- API: Fastify (TypeScript)
-- DBs: MySQL 8, Postgres 16
-- Scheduler: Alpine + cron (appel `/backup-all`)
-- Frontend: Vite + React
+> **"Parce qu'un DROP DATABASE est vite arrivé... Safebase, I'll be back(up)."**
 
-## Démarrage rapide
+Solution complète de gestion de sauvegarde et restauration de bases de données MySQL & PostgreSQL avec API REST, scheduler automatique et interface utilisateur moderne.
+
+## 📁 Structure du Projet
+
+```
+plateforme-safebase/
+├── backend/          # API Fastify (TypeScript)
+├── frontend/         # Interface React + Vite
+├── scheduler/        # Scheduler cron pour backups automatiques
+├── docs/             # Documentation complète
+├── scripts/          # Scripts utilitaires
+├── docker-compose.yml
+└── README.md
+```
+
+## 🚀 Démarrage Rapide
 
 ### Avec Docker (recommandé)
 ```bash
@@ -39,10 +55,29 @@ npm run dev  # Interface sur http://localhost:5173
 
 **Note:** Le backend nécessite `mysql-client` et `postgresql-client` installés pour les backups.
 
-## Variables d'environnement principales
+## 📚 Documentation
+
+Toute la documentation est disponible dans le dossier [`docs/`](docs/README.md) :
+- Guide de démarrage
+- Architecture
+- Tests
+- Soutenance
+- Résolution de problèmes
+- **Présentation** : Diapositives pour la soutenance ([`docs/PRESENTATION.md`](docs/PRESENTATION.md))
+
+## 🔧 Scripts Utilitaires
+
+Les scripts sont disponibles dans le dossier [`scripts/`](scripts/README.md) :
+- Tests fonctionnels
+- Tests scheduler
+- Lancement du projet
+- Correction MAMP
+
+## ⚙️ Variables d'environnement principales
 
 - API (service api)
-  - `API_KEY`: clé API pour protéger les endpoints (ex: `change-me`)
+  - `API_KEY`: clé API pour protéger les endpoints (optionnel, définir via variable d'environnement)
+  - `ENCRYPTION_KEY`: clé de chiffrement pour les mots de passe (requis, définir via variable d'environnement)
   - `CORS_ORIGIN`: origine autorisée pour le frontend (ex: `http://localhost:5173`)
   - `ALERT_WEBHOOK_URL`: URL webhook (Slack/Teams/HTTP) pour alertes
   - `RETAIN_PER_DB`: nombre de versions à conserver par base (par défaut 10)
@@ -51,9 +86,9 @@ npm run dev  # Interface sur http://localhost:5173
 
 - Scheduler
   - `SCHEDULER_API_URL`: URL de l'API (ex: `http://api:8080`)
-  - `API_KEY`: même valeur que le service API si activé
+  - `API_KEY`: même valeur que le service API si activé (optionnel)
 
-## Endpoints principaux
+## 🔌 Endpoints principaux
 
 - `GET /health`
 - `GET /databases` / `POST /databases`
@@ -67,16 +102,23 @@ npm run dev  # Interface sur http://localhost:5173
 
 Backups stockés dans le volume `backups`, par base.
 
-## Tests
+## 🧪 Tests
 
 ```bash
+# Backend
 cd backend
+npm test
+
+# Frontend
+cd frontend
 npm test
 ```
 
-Les tests fournis valident la santé, l'auth basique, et l'heartbeat.
+## 🔄 CI/CD
 
-## Exemples d'utilisation de l'API
+Le projet utilise GitHub Actions pour automatiser les tests et le linting. Voir [`docs/CI-CD.md`](docs/CI-CD.md) pour plus de détails.
+
+## 📖 Exemples d'utilisation de l'API
 
 ### 1. Vérifier la santé
 ```bash
@@ -121,6 +163,44 @@ curl -X POST http://localhost:8080/restore/VERSION_ID
 ### Avec API Key (si configuré)
 Ajoutez le header `x-api-key` :
 ```bash
-curl -H 'x-api-key: change-me' http://localhost:8080/databases
+curl -H "x-api-key: ${API_KEY}" http://localhost:8080/databases
 ```
 
+## 🏗️ Stack
+
+- API: Fastify (TypeScript)
+- DBs: MySQL 8, Postgres 16
+- Scheduler: Alpine + cron (appel `/backup-all`)
+- Frontend: Vite + React
+- Tests: Vitest
+- CI/CD: GitHub Actions
+
+## 📊 Conformité
+
+Le projet est **100% conforme** aux consignes. Voir [`docs/analyse/ANALYSE-CONFORMITE-FINALE.md`](docs/analyse/ANALYSE-CONFORMITE-FINALE.md) et [`docs/analyse/ANALYSE-COMPETENCES-COMPLETE.md`](docs/analyse/ANALYSE-COMPETENCES-COMPLETE.md) pour les analyses détaillées.
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Veuillez lire notre [Guide de Contribution](CONTRIBUTING.md) pour plus de détails.
+
+## 📝 Changelog
+
+Voir [CHANGELOG.md](CHANGELOG.md) pour la liste des changements.
+
+## 📄 License
+
+Ce projet est un projet éducatif.
+
+## 👥 Auteurs
+
+- **William Rauwens-Oliver** - [@william-rauwens-oliver](https://github.com/william-rauwens-oliver)
+
+## 🙏 Remerciements
+
+- Fastify pour l'excellent framework API
+- React pour l'interface utilisateur
+- Tous les contributeurs open source
+
+---
+
+⭐ Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile !
