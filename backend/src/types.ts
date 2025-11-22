@@ -21,4 +21,3 @@ export interface BackupVersionMeta {
   sizeBytes?: number;
   pinned?: boolean;
 }
-

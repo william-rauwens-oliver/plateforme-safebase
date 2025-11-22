@@ -20,12 +20,6 @@ type Version = {
   pinned?: boolean
 }
 
-/**
- * Hook personnalisé pour gérer un état persistant dans localStorage
- * @param key - Clé de stockage dans localStorage
- * @param initial - Valeur initiale si aucune valeur n'est trouvée
- * @returns Tuple [value, setValue] similaire à useState
- */
 function usePersistentState<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(() => {
     try {
@@ -39,7 +33,7 @@ function usePersistentState<T>(key: string, initial: T) {
     try { 
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
-      // Ignore localStorage errors (private mode)
+
     }
   }, [key, value])
   return [value, setValue] as const
@@ -54,11 +48,6 @@ interface ImportMeta {
   env?: ImportMetaEnv;
 }
 
-/**
- * Composant principal de l'application SafeBase
- * Gère l'interface utilisateur complète pour la gestion des bases de données
- * @returns Composant React de l'application
- */
 export function App() {
   const [config, setConfig] = usePersistentState('safebase-config', {
     apiUrl: (import.meta as ImportMeta).env?.VITE_API_URL || 'http://localhost:8080',
@@ -98,20 +87,14 @@ export function App() {
   useEffect(() => {
     checkHealth()
     refresh()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [config.apiUrl, config.apiKey, headers])
 
-  /**
-   * Vérifie l'état de santé de l'API
-   */
   function checkHealth() {
     setHealth('pending')
     fetch(`${config.apiUrl}/health`).then(r => r.json()).then(() => setHealth('ok')).catch(() => setHealth('down'))
   }
 
-  /**
-   * Rafraîchit la liste des connexions enregistrées depuis l'API
-   */
   function refresh() {
     setIsLoadingList(true)
     fetch(`${config.apiUrl}/databases`, { headers })
@@ -121,10 +104,6 @@ export function App() {
       .finally(() => setIsLoadingList(false))
   }
 
-  /**
-   * Soumet le formulaire d'enregistrement d'une nouvelle connexion à une base de données
-   * @param e - Événement de soumission du formulaire
-   */
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -136,7 +115,7 @@ export function App() {
       })
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
-        // Afficher le message d'erreur détaillé du backend
+
         const errorMsg = errorData.error || errorData.message || 'Erreur lors de la création'
         const hint = errorData.hint ? `\n\n${errorData.hint}` : ''
         throw new Error(`${errorMsg}${hint}`)
@@ -182,17 +161,13 @@ export function App() {
 
   function copyDsn(db: Db) {
     const dsn = db.engine === 'mysql'
-      ? `mysql://${db.username}:${encodeURIComponent(db.password)}@${db.host}:${db.port}/${db.database}`
-      : `postgres://${db.username}:${encodeURIComponent(db.password)}@${db.host}:${db.port}/${db.database}`
+      ? `mysql:
+      : `postgres:
     navigator.clipboard.writeText(dsn).then(() => pushToast('DSN copié', 'success')).catch(() => {
-      // Ignore clipboard errors
+
     })
   }
 
-  /**
-   * Supprime une base de données et toutes ses sauvegardes
-   * @param id - ID de la base de données à supprimer
-   */
   async function deleteDatabase(id: string) {
     const db = dbs.find(d => d.id === id);
     if (!db) return;
@@ -224,7 +199,7 @@ export function App() {
   async function openVersions(db: Db) {
     try {
       const items = await fetch(`${config.apiUrl}/backups/${db.id}`, { headers }).then(r => r.json())
-      // Trier : épinglées en premier, puis par date (plus récent d'abord)
+
       const sorted = items.sort((a: Version, b: Version) => {
         if (a.pinned && !b.pinned) return -1;
         if (!a.pinned && b.pinned) return 1;
@@ -254,7 +229,7 @@ export function App() {
           }
           const data = await res.json()
           pushToast('Restauration réussie', 'success')
-          // Recharger les versions après une restauration réussie
+
           const items = await fetch(`${config.apiUrl}/backups/${versionsModal.db.id}`, { headers }).then(r => r.json())
           const sorted = items.sort((a: Version, b: Version) => {
             if (a.pinned && !b.pinned) return -1;
@@ -281,9 +256,9 @@ export function App() {
         await fetch(`${config.apiUrl}/versions/${vid}`, { method: 'DELETE', headers })
         pushToast('Version supprimée', 'success')
       }
-      // Recharger les versions après pin/unpin/delete
+
       const items = await fetch(`${config.apiUrl}/backups/${versionsModal.db.id}`, { headers }).then(r => r.json())
-      // Trier : épinglées en premier, puis par date (plus récent d'abord)
+
       const sorted = items.sort((a: Version, b: Version) => {
         if (a.pinned && !b.pinned) return -1;
         if (!a.pinned && b.pinned) return 1;
@@ -298,7 +273,7 @@ export function App() {
   function pushToast(text: string, type: 'success'|'error'|'info' = 'info') {
     const id = Math.random().toString(36).slice(2)
     setToasts(ts => [...ts, { id, text, type }])
-    // Garder les erreurs plus longtemps pour qu'elles soient lisibles
+
     const duration = type === 'error' ? 8000 : 3500
     setTimeout(() => {
       setToasts(ts => ts.filter(t => t.id !== id))
@@ -353,15 +328,15 @@ export function App() {
             <div className="form-col-6">
               <select value={form.engine} onChange={e => {
                 const newEngine = e.target.value as 'mysql' | 'postgres';
-                // Mettre à jour les valeurs par défaut selon le moteur (bases locales)
+
                 if (newEngine === 'mysql') {
-                  // MAMP MySQL par défaut
+
                   setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: '', password: '', database: '' });
                 } else {
-                  // PostgreSQL Homebrew par défaut
+
                   setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: '', database: '' });
                 }
-                setAvailableDatabases([]); // Réinitialiser la liste
+                setAvailableDatabases([]);
               }}>
                 <option value="mysql">MySQL</option>
                 <option value="postgres">PostgreSQL</option>
@@ -404,7 +379,7 @@ export function App() {
                     const res = await fetch(`${config.apiUrl}/databases/available?${params}`, { headers });
                     if (!res.ok) {
                       const errorData = await res.json().catch(() => ({}));
-                      // Utiliser le message utilisateur si disponible, sinon l'erreur technique
+
                       throw new Error(errorData.message || errorData.error || 'Erreur lors de la récupération');
                     }
                     const data = await res.json();
@@ -537,7 +512,7 @@ export function App() {
         </div>
       )}
 
-      {/* Toasts */}
+      {}
       <div className="toast-container" aria-live="polite">
         {toasts.map(t => (
           <div key={t.id} className={`toast ${t.type || 'info'}`}>

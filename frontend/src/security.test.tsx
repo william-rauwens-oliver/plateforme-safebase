@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 
-// Mock fetch globally
 global.fetch = vi.fn() as unknown as Mock;
 
 describe('Frontend Security Tests', () => {
@@ -11,23 +10,21 @@ describe('Frontend Security Tests', () => {
   });
 
   it('should validate input before sending to API', () => {
-    // Test que le frontend valide les entrées
-    // Le formulaire HTML devrait avoir required
-    expect(true).toBe(true); // Test de structure
+
+    expect(true).toBe(true);
   });
 
   it('should escape special characters in passwords', () => {
     const specialChars = "test'password\"with$special&chars";
-    // Le frontend devrait échapper ces caractères avant envoi
+
     const escaped = specialChars.replace(/'/g, "\\'");
     expect(escaped).toContain("\\'");
   });
 
   it('should not expose passwords in logs', () => {
-    // Vérifier que les mots de passe ne sont pas loggés
+
     const consoleSpy = vi.spyOn(console, 'log');
     
-    // Simuler un log (ne devrait pas inclure le mot de passe)
     console.log('User action', { username: 'test', password: '***' });
     
     expect(consoleSpy).toHaveBeenCalled();
@@ -49,7 +46,6 @@ describe('Frontend Security Tests', () => {
     
     expect(response.ok).toBe(false);
     expect(data.message).toBe('Unauthorized');
-    // Ne devrait pas exposer de détails sensibles
+
   });
 });
-

@@ -13,11 +13,6 @@ import pg from 'pg';
 const exec = promisify(execCb);
 const { Client: PgClient } = pg;
 
-/**
- * Teste la connexion à une base de données MySQL ou PostgreSQL
- * @param db - Base de données à tester
- * @returns Résultat du test avec succès ou message d'erreur
- */
 async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success: boolean; error?: string }> {
   try {
     if (db.engine === 'mysql') {
@@ -27,58 +22,52 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
         user: db.username,
         password: db.password,
         database: db.database,
-        connectTimeout: 10000, // 10 secondes max
+        connectTimeout: 10000,
         enableKeepAlive: false,
       });
-      // Test réel : ping + requête simple pour vérifier que la base existe
+
       await connection.ping();
       await connection.query('SELECT 1');
       await connection.end();
       return { success: true };
     } else {
-      // PostgreSQL
-      // Forcer l'authentification par mot de passe en utilisant TCP/IP
-      // Utiliser 127.0.0.1 au lieu de localhost pour éviter le socket Unix
+
       const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
       
       const client = new PgClient({
         host: hostForConnection,
         port: db.port,
         user: db.username,
-        password: db.password || '', // Permettre mot de passe vide
+        password: db.password || '',
         database: db.database,
-        connectionTimeoutMillis: 10000, // 10 secondes max
+        connectionTimeoutMillis: 10000,
       });
       
       try {
         await client.connect();
       } catch (connectErr) {
-        // Si la connexion échoue, c'est probablement une erreur d'authentification
+
         const errorMsg = connectErr instanceof Error ? connectErr.message : String(connectErr);
         if (errorMsg.includes('password authentication failed') || errorMsg.includes('authentication failed')) {
           return { success: false, error: 'Identifiants incorrects : utilisateur ou mot de passe invalide' };
         }
-        throw connectErr; // Relancer pour traitement normal
+        throw connectErr;
       }
       
-      // Test réel : requête simple pour vérifier que la base existe ET que l'authentification fonctionne
       const result = await client.query('SELECT current_user, current_database(), has_database_privilege($1, $2, $3) as can_connect', [db.username, db.database, 'CONNECT']);
       
-      // Vérifier que l'utilisateur connecté correspond bien à celui demandé
       const connectedUser = result.rows[0]?.current_user;
       if (connectedUser !== db.username) {
         await client.end();
         return { success: false, error: `Utilisateur connecté (${connectedUser}) ne correspond pas à l'utilisateur demandé (${db.username})` };
       }
       
-      // Vérifier que la base de données existe et que l'utilisateur a les droits
       const connectedDb = result.rows[0]?.current_database;
       if (connectedDb !== db.database) {
         await client.end();
         return { success: false, error: `Base de données connectée (${connectedDb}) ne correspond pas à celle demandée (${db.database})` };
       }
       
-      // Test supplémentaire : essayer une opération qui nécessite des privilèges
       try {
         await client.query('SELECT pg_backend_pid()');
       } catch (privErr) {
@@ -91,7 +80,7 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
     }
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    // Messages d'erreur plus clairs selon le type d'erreur
+
     if (errorMsg.includes('ECONNREFUSED') || errorMsg.includes('ENOTFOUND') || errorMsg.includes('getaddrinfo')) {
       return { success: false, error: `Impossible de se connecter au serveur ${db.host}:${db.port}. Vérifiez que le serveur MySQL/PostgreSQL est démarré.` };
     }
@@ -108,13 +97,8 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
   }
 }
 
-/**
- * Essaie de donner les permissions nécessaires pour PostgreSQL avant un backup
- * @param db - Base de données PostgreSQL
- * @returns true si les permissions ont été données (ou si l'utilisateur est superuser)
- */
 async function tryGrantPostgresPermissions(db: RegisteredDatabase): Promise<boolean> {
-  if (db.engine !== 'postgres') return true; // Pas nécessaire pour MySQL
+  if (db.engine !== 'postgres') return true;
   
   try {
     const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
@@ -129,12 +113,11 @@ async function tryGrantPostgresPermissions(db: RegisteredDatabase): Promise<bool
     
     await client.connect();
     
-    // Vérifier si l'utilisateur est superuser
     const superCheck = await client.query('SELECT usesuper FROM pg_user WHERE usename = current_user');
     const isSuper = superCheck.rows[0]?.usesuper === true;
     
     if (isSuper) {
-      // Si superuser, donner les permissions directement
+
       try {
         await client.query('GRANT SELECT ON ALL TABLES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
         await client.query('GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
@@ -147,15 +130,13 @@ async function tryGrantPostgresPermissions(db: RegisteredDatabase): Promise<bool
         return false;
       }
     } else {
-      // Si pas superuser, essayer de trouver le propriétaire de la base et utiliser SET ROLE
+
       try {
         const dbOwnerResult = await client.query('SELECT pg_catalog.pg_get_userbyid(datdba) as owner FROM pg_database WHERE datname = current_database()');
         const dbOwner = dbOwnerResult.rows[0]?.owner;
         
         if (dbOwner && dbOwner !== db.username) {
-          // Essayer de se connecter en tant que propriétaire (nécessite que l'utilisateur actuel puisse SET ROLE)
-          // Mais cela nécessite généralement d'être membre du rôle, donc on essaie juste de donner les permissions
-          // avec l'utilisateur actuel (peut échouer si pas propriétaire)
+
           try {
             await client.query('GRANT SELECT ON ALL TABLES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
             await client.query('GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
@@ -166,7 +147,7 @@ async function tryGrantPostgresPermissions(db: RegisteredDatabase): Promise<bool
             return false;
           }
         } else {
-          // L'utilisateur est le propriétaire, donner les permissions
+
           try {
             await client.query('GRANT SELECT ON ALL TABLES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
             await client.query('GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ' + client.escapeIdentifier(db.username));
@@ -183,16 +164,11 @@ async function tryGrantPostgresPermissions(db: RegisteredDatabase): Promise<bool
       }
     }
   } catch (err) {
-    // En cas d'erreur de connexion, on continue quand même
+
     return false;
   }
 }
 
-/**
- * Liste les tables accessibles dans une base PostgreSQL
- * @param db - Base de données PostgreSQL
- * @returns Liste des noms de tables accessibles
- */
 async function listAccessiblePostgresTables(db: RegisteredDatabase): Promise<string[]> {
   if (db.engine !== 'postgres') return [];
   
@@ -209,8 +185,6 @@ async function listAccessiblePostgresTables(db: RegisteredDatabase): Promise<str
     
     await client.connect();
     
-    // Lister les tables où l'utilisateur a les permissions SELECT
-    // Utiliser current_user au lieu de db.username pour éviter les problèmes de permissions
     const result = await client.query(`
       SELECT tablename 
       FROM pg_tables 
@@ -226,23 +200,16 @@ async function listAccessiblePostgresTables(db: RegisteredDatabase): Promise<str
   }
 }
 
-/**
- * Schéma de validation Zod pour l'enregistrement d'une base de données
- */
 const RegisterSchema = z.object({
   name: z.string().min(1, 'Le nom est requis'),
   engine: z.enum(['mysql', 'postgres'], { errorMap: () => ({ message: 'Le moteur doit être mysql ou postgres' }) }),
   host: z.string().min(1, 'L\'hôte est requis'),
   port: z.number().int().positive('Le port doit être un nombre positif'),
   username: z.string().min(1, 'L\'utilisateur est requis'),
-  password: z.string(), // Permettre mot de passe vide pour PostgreSQL
+  password: z.string(),
   database: z.string().min(1, 'Le nom de la base de données est requis'),
 });
 
-/**
- * Définit toutes les routes de l'API SafeBase
- * @param app - Instance Fastify
- */
 export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/', async () => ({ message: 'SafeBase API - see /health' }));
   app.get('/health', async () => ({ status: 'ok' }));
@@ -254,10 +221,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.get('/databases', async () => await Store.getDatabases());
 
-  /**
-   * Liste les bases de données disponibles sur un serveur MySQL ou PostgreSQL
-   * @param query - Paramètres : engine, host, port, username, password
-   */
   app.get('/databases/available', async (req, reply) => {
     const { engine, host, port, username, password } = req.query as {
       engine?: string;
@@ -283,7 +246,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
     try {
       if (engine === 'mysql') {
-        // Convertir localhost en 127.0.0.1 pour MySQL (comme PostgreSQL)
+
         const hostForConnection = host === 'localhost' ? '127.0.0.1' : host;
         const connection = await mysql.createConnection({
           host: hostForConnection,
@@ -295,20 +258,20 @@ export async function routes(app: FastifyInstance): Promise<void> {
         });
         const [rows] = await connection.query('SHOW DATABASES');
         await connection.end();
-        // Filtrer les bases système
+
         const databases = (rows as Array<{ Database: string }>)
           .map(row => row.Database)
           .filter(db => !['information_schema', 'performance_schema', 'mysql', 'sys'].includes(db));
         return { databases };
       } else {
-        // PostgreSQL
+
         const hostForConnection = host === 'localhost' ? '127.0.0.1' : host;
         const client = new PgClient({
           host: hostForConnection,
           port: Number(port),
           user: username,
           password: password || '',
-          database: 'postgres', // Se connecter à postgres pour lister les bases
+          database: 'postgres',
           connectionTimeoutMillis: 10000,
         });
         await client.connect();
@@ -323,7 +286,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
       const errorMsg = err instanceof Error ? err.message : String(err);
       app.log.error({ message: 'Failed to list databases', error: errorMsg, engine, host, port });
       
-      // Messages d'erreur plus clairs selon le type d'erreur
       let userMessage = 'Impossible de lister les bases de données';
       if (errorMsg.includes('ECONNREFUSED') || errorMsg.includes('ENOTFOUND') || errorMsg.includes('getaddrinfo')) {
         userMessage = `Impossible de se connecter au serveur ${host}:${port}. Vérifiez que le serveur MySQL/PostgreSQL est démarré (MAMP pour MySQL, service PostgreSQL pour Postgres).`;
@@ -346,28 +308,25 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const db = all.find(d => d.id === id);
     if (!db) return reply.code(404).send({ message: 'database not found' });
     
-    // Supprimer aussi toutes les versions de backup associées
     const versions = Store.getVersions();
     const versionsToDelete = versions.filter(v => v.databaseId === id);
     for (const v of versionsToDelete) {
       try {
         rmSync(v.path, { force: true });
       } catch {
-        // Ignore si le fichier n'existe pas
+
       }
     }
     const keptVersions = versions.filter(v => v.databaseId !== id);
     Store.saveVersions(keptVersions);
     
-    // Supprimer le dossier de backup
     try {
       const backupDir = join(Store.paths.backupsDir, id);
       rmSync(backupDir, { recursive: true, force: true });
     } catch {
-      // Ignore si le dossier n'existe pas
+
     }
     
-    // Supprimer la base de la liste
     const kept = all.filter(d => d.id !== id);
     await Store.saveDatabases(kept);
     return { deleted: true, id };
@@ -380,9 +339,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const now = new Date().toISOString();
     const db: RegisteredDatabase = { id: randomUUID(), createdAt: now, ...body };
     
-    // Vérifier la connexion avant d'enregistrer
-    // La validation est TOUJOURS activée par défaut
-    // Pour la désactiver (mode test uniquement), définir VALIDATE_CONNECTION=0 explicitement
     const skipValidation = process.env.VALIDATE_CONNECTION === '0';
     
     if (!skipValidation) {
@@ -416,55 +372,46 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const filename = `${db.name}_${ts}.${db.engine === 'mysql' ? 'sql' : 'sql'}`;
     const outPath = join(Store.paths.backupsDir, db.id, filename);
 
-    // ensure per-db dir exists
     await import('fs/promises').then(async fs => {
       await fs.mkdir(join(Store.paths.backupsDir, db.id), { recursive: true });
     });
 
-    // Trouver mysqldump (MAMP en priorité, sinon système)
     const findMysqldump = () => {
-      // MAMP utilise mysql80 ou mysql57
+
       const mamp80 = '/Applications/MAMP/Library/bin/mysql80/bin/mysqldump';
       const mamp57 = '/Applications/MAMP/Library/bin/mysql57/bin/mysqldump';
       if (existsSync(mamp80)) return mamp80;
       if (existsSync(mamp57)) return mamp57;
-      return 'mysqldump'; // Fallback sur PATH système
+      return 'mysqldump';
     };
 
-    // Échapper le mot de passe pour la commande shell
     const escapeShell = (str: string) => {
       return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
     };
 
-    // Échapper le chemin du fichier pour la commande shell
     const escapePath = (path: string) => {
       return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
     };
 
-    // Pour PostgreSQL, utiliser 127.0.0.1 au lieu de localhost pour éviter les problèmes IPv6
     const hostForBackup = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
 
-    // Pour PostgreSQL, utiliser une approche qui gère les permissions : d'abord essayer avec --exclude-table-data pour les tables problématiques
-    // Si cela échoue, utiliser --schema-only pour au moins sauvegarder le schéma
     let cmd: string;
     if (db.engine === 'mysql') {
       cmd = `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${escapePath(outPath)}`;
     } else {
-      // PostgreSQL : utiliser une approche qui gère les permissions
-      // D'abord essayer avec les options standard, puis fallback sur schema-only si nécessaire
+
       const pgDumpBase = db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`;
-      // Essayer d'abord sans exclusion (pour les bases avec bonnes permissions)
+
       cmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges -f ${escapePath(outPath)}`;
     }
 
     try {
-      // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
-      // Pour activer le mode fake (tests uniquement), définir FAKE_DUMP=1
+
       const useFakeDump = process.env.FAKE_DUMP === '1';
       
       if (useFakeDump) {
         app.log.warn({ message: 'Using FAKE_DUMP mode (testing only)', database: db.name });
-        // Simulation: écrire un fichier SQL minimal
+
         await import('fs/promises').then(async fs => {
           const header = `-- Fake dump for ${db.engine} ${db.database} at ${new Date().toISOString()}\n`;
           const content = db.engine === 'mysql' 
@@ -482,14 +429,11 @@ export async function routes(app: FastifyInstance): Promise<void> {
           const stderr = execErr?.stderr || '';
           app.log.error({ message: 'Backup command failed', database: db.name, engine: db.engine, error: errorMsg, stderr });
           
-          // Pour PostgreSQL avec erreurs de permissions, utiliser une approche qui liste toutes les tables et essaie de les sauvegarder
           if (db.engine === 'postgres' && (stderr.includes('permission denied') || errorMsg.includes('permission denied'))) {
             app.log.warn({ message: 'Trying backup with all tables (may exclude problematic ones)', database: db.name });
             
-            // Essayer de donner les permissions d'abord
             await tryGrantPostgresPermissions(db);
             
-            // Lister toutes les tables de la base (pas seulement celles accessibles)
             try {
               const hostForConnection = db.host === 'localhost' ? '127.0.0.1' : db.host;
               const listClient = new PgClient({
@@ -513,8 +457,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
               const allTables = allTablesResult.rows.map(row => row.tablename);
               
               if (allTables.length > 0) {
-                // Essayer de faire un dump de toutes les tables
-                // Si certaines échouent, pg_dump continuera avec les autres
+
                 try {
                   const pgDumpBase = db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`;
                   const tableOptions = allTables.map(table => `--table=public.${escapeShell(table)}`).join(' ');
@@ -522,7 +465,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
                   await exec(tableOnlyCmd);
                   app.log.info({ message: 'Backup completed with all tables', database: db.name, path: outPath, tablesCount: allTables.length });
                 } catch (tableErr: any) {
-                  // Si le dump avec toutes les tables échoue, essayer table par table
+
                   app.log.warn({ message: 'Full table dump failed, trying individual tables', database: db.name });
                   const successfulTables: string[] = [];
                   const failedTables: string[] = [];
@@ -534,7 +477,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
                       const singleTableCmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --table=public.${escapeShell(table)} -f ${escapePath(tempPath)}`;
                       await exec(singleTableCmd);
                       successfulTables.push(table);
-                      // Ajouter le contenu au fichier principal
+
                       await import('fs/promises').then(async fs => {
                         const content = await fs.readFile(tempPath, 'utf-8');
                         await fs.appendFile(outPath, content + '\n');
@@ -548,7 +491,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
                   if (successfulTables.length > 0) {
                     app.log.info({ message: 'Backup completed with partial tables', database: db.name, path: outPath, successful: successfulTables.length, failed: failedTables.length, failedTables });
                   } else {
-                    // Si toutes les tables échouent avec pg_dump, créer un backup avec le schéma au moins
+
                     app.log.warn({ message: 'All pg_dump attempts failed, creating schema-only backup', database: db.name });
                     
                     try {
@@ -563,7 +506,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
                       
                       await schemaClient.connect();
                       
-                      // Créer un backup avec le schéma des tables (même sans données)
                       let backupContent = `-- Backup de ${db.database} à ${new Date().toISOString()}\n`;
                       backupContent += `-- ATTENTION: Ce backup ne contient que le schéma (structure) des tables.\n`;
                       backupContent += `-- Les données n'ont pas pu être sauvegardées à cause de permissions insuffisantes.\n\n`;
@@ -572,10 +514,9 @@ export async function routes(app: FastifyInstance): Promise<void> {
                       backupContent += `-- GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${db.username};\n`;
                       backupContent += `-- GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO ${db.username};\n\n`;
                       
-                      // Récupérer le schéma de toutes les tables
                       for (const table of allTables) {
                         try {
-                          // Utiliser pg_catalog qui est accessible même sans permissions spéciales
+
                           const schemaResult = await schemaClient.query(`
                             SELECT 
                               a.attname as column_name,
@@ -605,7 +546,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
                             }).join(',\n');
                             backupContent += columns + '\n);\n\n';
                             
-                            // Essayer de récupérer le nombre de lignes (peut échouer)
                             try {
                               const countResult = await schemaClient.query(`SELECT COUNT(*) as count FROM ${schemaClient.escapeIdentifier(table)}`);
                               const rowCount = countResult.rows[0]?.count || 0;
@@ -622,7 +562,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
                       
                       await schemaClient.end();
                       
-                      // Écrire le contenu dans le fichier
                       await import('fs/promises').then(async fs => {
                         await fs.writeFile(outPath, backupContent);
                       });
@@ -658,7 +597,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
       const versions = Store.getVersions();
       versions.push(meta);
       Store.saveVersions(versions);
-      // Retention policy: keep max N versions per DB (env RETAIN_PER_DB, default 10)
+
       const retain = Number(process.env.RETAIN_PER_DB || 10);
       const perDb = versions.filter(v => v.databaseId === db.id)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -691,35 +630,31 @@ export async function routes(app: FastifyInstance): Promise<void> {
       await import('fs/promises').then(async fs => {
         await fs.mkdir(join(Store.paths.backupsDir, db.id), { recursive: true });
       });
-      // Trouver mysqldump (MAMP en priorité, sinon système)
+
       const findMysqldump = () => {
-        // MAMP utilise mysql80 ou mysql57
+
         const mamp80 = '/Applications/MAMP/Library/bin/mysql80/bin/mysqldump';
         const mamp57 = '/Applications/MAMP/Library/bin/mysql57/bin/mysqldump';
         if (existsSync(mamp80)) return mamp80;
         if (existsSync(mamp57)) return mamp57;
-        return 'mysqldump'; // Fallback sur PATH système
+        return 'mysqldump';
       };
 
-      // Échapper le mot de passe pour la commande shell
       const escapeShell = (str: string) => {
         return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
       };
 
-      // Échapper le chemin du fichier pour la commande shell
       const escapePath = (path: string) => {
         return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
       };
 
-      // Pour PostgreSQL, utiliser 127.0.0.1 au lieu de localhost pour éviter les problèmes IPv6
       const hostForBackup = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
 
       const cmd = db.engine === 'mysql'
         ? `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${escapePath(outPath)}`
         : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`) + ` -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --lock-wait-timeout=0 -f ${escapePath(outPath)}`;
     try {
-      // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
-      // Pour activer le mode fake (tests uniquement), définir FAKE_DUMP=1
+
       const useFakeDump = process.env.FAKE_DUMP === '1';
       
       if (useFakeDump) {
@@ -746,7 +681,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
         const versions = Store.getVersions();
         versions.push(meta);
         Store.saveVersions(versions);
-        // retention per DB
+
         const retain = Number(process.env.RETAIN_PER_DB || 10);
         const perDb = versions.filter(v => v.databaseId === db.id)
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -768,12 +703,12 @@ export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/backups/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
     const versions = Store.getVersions().filter(v => v.databaseId === id);
-    // Trier : épinglées en premier, puis par date (plus récent d'abord)
+
     return versions.sort((a, b) => {
-      // Si une est épinglée et l'autre non, l'épinglée vient en premier
+
       if (a.pinned && !b.pinned) return -1;
       if (!a.pinned && b.pinned) return 1;
-      // Sinon, trier par date (plus récent d'abord)
+
       return b.createdAt.localeCompare(a.createdAt);
     });
   });
@@ -783,7 +718,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const v = Store.getVersions().find(x => x.id === versionId);
     if (!v) return reply.code(404).send({ message: 'version not found' });
     
-    // Vérifier que le fichier de backup existe
     if (!existsSync(v.path)) {
       app.log.error({ message: 'Backup file not found', versionId, path: v.path });
       return reply.code(404).send({ 
@@ -793,7 +727,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
       });
     }
     
-    // Vérifier si le fichier a été modifié depuis le backup (optionnel, pour information)
     const fileStats = statSync(v.path);
     const backupDate = new Date(v.createdAt);
     const fileModifiedDate = fileStats.mtime;
@@ -814,26 +747,22 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const db = allDbs.find(d => d.id === v.databaseId);
     if (!db) return reply.code(404).send({ message: 'database not found' });
 
-    // Échapper le mot de passe pour la commande shell
     const escapeShell = (str: string) => {
       return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
     };
 
-    // Échapper le chemin du fichier pour la commande shell
     const escapePath = (path: string) => {
       return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
     };
 
-    // Pour MySQL, utiliser le client MAMP si disponible
     const findMysql = () => {
       const mamp80 = '/Applications/MAMP/Library/bin/mysql80/bin/mysql';
       const mamp57 = '/Applications/MAMP/Library/bin/mysql57/bin/mysql';
       if (existsSync(mamp80)) return mamp80;
       if (existsSync(mamp57)) return mamp57;
-      return 'mysql'; // Fallback sur PATH système
+      return 'mysql';
     };
 
-    // Pour PostgreSQL, utiliser 127.0.0.1 au lieu de localhost
     const hostForRestore = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
 
     const escapedPath = escapePath(v.path);
@@ -842,11 +771,11 @@ export async function routes(app: FastifyInstance): Promise<void> {
       : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' psql` : `psql`) + ` -h ${escapeShell(hostForRestore)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -f ${escapedPath}`;
 
     try {
-      // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
+
       const useFakeDump = process.env.FAKE_DUMP === '1';
       
       if (useFakeDump) {
-        // Simulation: considérer comme restauré sans exécuter de commande
+
         app.log.info({ message: 'Fake restore (FAKE_DUMP mode)', versionId, database: db.name });
       } else {
         app.log.info({ 
@@ -859,8 +788,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
           fileModified: fileWasModified ? 'Oui (le fichier a été modifié depuis le backup)' : 'Non',
           note: 'La restauration utilise le contenu actuel du fichier SQL'
         });
-        // La commande mysql/psql lit le fichier directement depuis le disque au moment de l'exécution
-        // Donc si le fichier a été modifié, il utilisera le contenu modifié
+
         await exec(cmd);
         app.log.info({ message: 'Restore completed', versionId, database: db.name });
       }
@@ -888,7 +816,6 @@ export async function routes(app: FastifyInstance): Promise<void> {
     }
   });
 
-  // Version management
   app.post('/versions/:versionId/pin', async (req, reply) => {
     const { versionId } = req.params as { versionId: string };
     const versions = Store.getVersions();
@@ -938,5 +865,3 @@ async function sendAlert(type: string, payload: unknown) {
     await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
   } catch {}
 }
-
-

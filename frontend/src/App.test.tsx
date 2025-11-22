@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 
-// Mock fetch globally
 global.fetch = vi.fn() as unknown as Mock;
 
 describe('SafeBase App - Tests unitaires', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock localStorage
+
     Storage.prototype.getItem = vi.fn(() => null);
     Storage.prototype.setItem = vi.fn();
   });
@@ -91,4 +90,3 @@ describe('SafeBase App - Tests unitaires', () => {
     expect(['mysql', 'postgres']).toContain(db.engine);
   });
 });
-
