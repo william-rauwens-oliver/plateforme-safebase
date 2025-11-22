@@ -1,0 +1,41 @@
+name: Branch Protection
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  check-branch:
+    name: Check Branch Rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check branch name
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "✅ Branch principale détectée"
+          elif [[ "${{ github.head_ref }}" =~ ^(feature|fix|docs|refactor|chore|test)/.+ ]]; then
+            echo "✅ Nom de branche valide: ${{ github.head_ref }}"
+          else
+            echo "❌ Nom de branche invalide. Utilisez: feature/, fix/, docs/, refactor/, chore/, ou test/"
+            exit 1
+          fi
+
+      - name: Check commit message format
+        if: github.event_name == 'push'
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if [[ "$COMMIT_MSG" =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci)(\(.+\))?: ]]; then
+            echo "✅ Format de commit valide"
+          else
+            echo "❌ Format de commit invalide. Utilisez: type(scope): description"
+            echo "Types: feat, fix, docs, style, refactor, test, chore, perf, ci"
+            exit 1
+          fi
+

@@ -6,7 +6,7 @@ if [ -n "${API_KEY:-}" ]; then
   API_KEY_HEADER="-H x-api-key:${API_KEY}"
 fi
 echo "[$(date -Is)] triggering backup-all at $API_URL"
-if ! curl -sS -X POST "$API_URL/backup-all" -H 'Content-Type: application/json' ${API_KEY_HEADER}; then
+if ! curl -sS -X POST "$API_URL/backup-all" ${API_KEY_HEADER}; then
   echo "backup-all request failed"
 fi
 echo "[$(date -Is)] sending heartbeat"
