@@ -1,0 +1,103 @@
+[
+  {
+    "id": "5392fa97-d083-445e-b6c6-128dbcbf4695",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T18:56:44.399Z",
+    "payload": {
+      "databaseId": "68e47260-7f07-4ba6-9b64-4521d1f7f67a",
+      "databaseName": "testbase2",
+      "versionId": "98ec0195-4f45-4b60-a4ed-3f51f0a2f6ac",
+      "sizeBytes": 1682,
+      "engine": "postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "c7dc06ad-6689-403c-8dd8-696249f3710c",
+    "type": "restore_success",
+    "timestamp": "2025-11-22T18:56:22.197Z",
+    "payload": {
+      "databaseId": "9c108ff9-491d-4d50-9676-69603cbfbe4c",
+      "databaseName": "testbase",
+      "versionId": "83be6e14-2371-49ed-9edf-7acc45296a08",
+      "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/9c108ff9-491d-4d50-9676-69603cbfbe4c/testbase_2025-11-22T18-56-17-796Z.sql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "92b79c4f-01da-436d-b735-87fba8128ea3",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T18:56:17.901Z",
+    "payload": {
+      "databaseId": "9c108ff9-491d-4d50-9676-69603cbfbe4c",
+      "databaseName": "testbase",
+      "versionId": "83be6e14-2371-49ed-9edf-7acc45296a08",
+      "sizeBytes": 42185,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "b6c26051-3471-4df6-9aec-86a2753b94dd",
+    "type": "backup_success",
+    "timestamp": "2025-11-22T18:46:29.466Z",
+    "payload": {
+      "databaseId": "9c108ff9-491d-4d50-9676-69603cbfbe4c",
+      "databaseName": "testbase",
+      "versionId": "e348106f-ab70-4bd6-9087-a5aecaef1359",
+      "sizeBytes": 42185,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "9c291265-3572-4fc4-a883-0d8a0c0dcd36",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T18:44:44.086Z",
+    "payload": {
+      "databaseId": "59eec986-0112-45da-ac14-cc930236613b",
+      "databaseName": "testbase",
+      "error": "getaddrinfo ENOTFOUND postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "dab577bc-5350-4581-9bce-8cd52559d826",
+    "type": "backup_failed",
+    "timestamp": "2025-11-22T18:44:42.785Z",
+    "payload": {
+      "databaseId": "59eec986-0112-45da-ac14-cc930236613b",
+      "databaseName": "testbase",
+      "error": "getaddrinfo ENOTFOUND postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "ebdc3074-bb03-41c8-ab46-6df2a4801143",
+    "type": "database_inaccessible",
+    "timestamp": "2025-11-22T18:43:46.994Z",
+    "payload": {
+      "databaseId": "5ba61380-39be-446f-bf61-8350cbda175a",
+      "databaseName": "test-db",
+      "error": "Impossible de se connecter à la base de données",
+      "host": "localhost",
+      "port": 3306,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "62559862-f4f3-4b91-8c40-2ce4d12aa097",
+    "type": "database_inaccessible",
+    "timestamp": "2025-11-22T18:43:39.587Z",
+    "payload": {
+      "databaseId": "0e7b0ead-bd93-4804-9b17-64167c9a77f3",
+      "databaseName": "test-db",
+      "error": "Impossible de se connecter à la base de données",
+      "host": "localhost",
+      "port": 3306,
+      "engine": "mysql"
+    },
+    "resolved": false
+  }
+]

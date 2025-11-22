@@ -1,0 +1,10 @@
+[
+  {
+    "id": "e348106f-ab70-4bd6-9087-a5aecaef1359",
+    "databaseId": "9c108ff9-491d-4d50-9676-69603cbfbe4c",
+    "createdAt": "2025-11-22T18:46:29.465Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/9c108ff9-491d-4d50-9676-69603cbfbe4c/testbase_2025-11-22T18-46-29-373Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 42185
+  }
+]

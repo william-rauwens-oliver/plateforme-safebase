@@ -1,21 +1,17 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { Alert, BackupVersionMeta, RegisteredDatabase } from './types.js';
-import { encrypt, decrypt } from './crypto.js';
+import * as db from './db.js';
+import { StoreFallback } from './store-fallback.js';
 
-let dataDir = process.env.DATA_DIR || '/app/data';
 let backupsDir = process.env.BACKUPS_DIR || '/backups';
-let dbsFile = join(dataDir, 'databases.json');
-let versionsFile = join(dataDir, 'versions.json');
-let schedulerFile = join(dataDir, 'scheduler.json');
-let alertsFile = join(dataDir, 'alerts.json');
+let usePostgres = true; // Flag pour savoir si on utilise PostgreSQL ou le fallback
 
 function ensureDirPath(current: string, fallbackName: string): string {
   try {
     if (!existsSync(current)) mkdirSync(current, { recursive: true });
     return current;
   } catch (err) {
-
     const fallback = join(process.cwd(), fallbackName);
     if (!existsSync(fallback)) mkdirSync(fallback, { recursive: true });
     return fallback;
@@ -23,114 +19,183 @@ function ensureDirPath(current: string, fallbackName: string): string {
 }
 
 function ensureDirs(): void {
-  dataDir = ensureDirPath(dataDir, 'data');
   backupsDir = ensureDirPath(backupsDir, 'backups');
-  dbsFile = join(dataDir, 'databases.json');
-  versionsFile = join(dataDir, 'versions.json');
-  schedulerFile = join(dataDir, 'scheduler.json');
-  alertsFile = join(dataDir, 'alerts.json');
-}
-
-async function readJson<T>(file: string, fallback: T): Promise<T> {
-  try {
-    if (!existsSync(file)) return fallback;
-    const raw = readFileSync(file, 'utf-8');
-    const parsed = JSON.parse(raw) as T;
-    
-    if (Array.isArray(parsed) && parsed.length > 0 && 'password' in (parsed[0] as any)) {
-      const decrypted = await Promise.all(
-        (parsed as RegisteredDatabase[]).map(async (db) => ({
-          ...db,
-          password: await decrypt(db.password)
-        }))
-      );
-      return decrypted as T;
-    }
-    
-    return parsed;
-  } catch {
-    return fallback;
-  }
-}
-
-async function writeJson(file: string, data: unknown): Promise<void> {
-
-  if (Array.isArray(data) && data.length > 0 && 'password' in (data[0] as any)) {
-    const encrypted = await Promise.all(
-      (data as RegisteredDatabase[]).map(async (db) => ({
-        ...db,
-        password: await encrypt(db.password)
-      }))
-    );
-    writeFileSync(file, JSON.stringify(encrypted, null, 2));
-  } else {
-    writeFileSync(file, JSON.stringify(data, null, 2));
-  }
 }
 
 export const Store = {
-  
   async init(): Promise<void> {
     ensureDirs();
-    if (!existsSync(dbsFile)) await writeJson(dbsFile, [] as RegisteredDatabase[]);
-    if (!existsSync(versionsFile)) writeFileSync(versionsFile, JSON.stringify([], null, 2));
-    if (!existsSync(schedulerFile)) writeFileSync(schedulerFile, JSON.stringify({ lastHeartbeat: null as string | null }, null, 2));
-    if (!existsSync(alertsFile)) writeFileSync(alertsFile, JSON.stringify([], null, 2));
+    // Initialiser le schéma PostgreSQL avec gestion d'erreurs
+    // Ne pas bloquer le démarrage si PostgreSQL n'est pas disponible
+    try {
+      await db.initDatabase();
+      usePostgres = true;
+      console.log('✅ Mode PostgreSQL activé');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      console.warn('⚠️  PostgreSQL non disponible, utilisation du mode fallback (fichiers JSON)');
+      console.warn(`   Erreur: ${errorMsg}`);
+      console.warn('💡 Pour utiliser PostgreSQL, démarrez-le et configurez DB_HOST, DB_PORT, etc.');
+      usePostgres = false;
+      // Initialiser le fallback
+      await StoreFallback.init();
+      console.log('✅ Mode fallback (JSON) activé');
+    }
   },
   
   async getDatabases(): Promise<RegisteredDatabase[]> {
-    return await readJson<RegisteredDatabase[]>(dbsFile, []);
+    if (usePostgres) {
+      try {
+        return await db.getDatabases();
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+        return await StoreFallback.getDatabases();
+      }
+    }
+    return await StoreFallback.getDatabases();
   },
   
   async saveDatabases(dbs: RegisteredDatabase[]): Promise<void> {
-    await writeJson(dbsFile, dbs);
+    if (usePostgres) {
+      try {
+        await db.saveDatabases(dbs);
+        return;
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+      }
+    }
+    await StoreFallback.saveDatabases(dbs);
   },
   
   getVersions(): BackupVersionMeta[] {
-    try {
-      if (!existsSync(versionsFile)) return [];
-      const raw = readFileSync(versionsFile, 'utf-8');
-      return JSON.parse(raw) as BackupVersionMeta[];
-    } catch {
-      return [];
-    }
+    // Cette méthode est synchrone dans routes.ts, on doit la rendre async
+    // Pour compatibilité, on retourne un tableau vide et on utilisera asyncGetVersions
+    return [];
   },
   
-  saveVersions(v: BackupVersionMeta[]): void {
-    writeFileSync(versionsFile, JSON.stringify(v, null, 2));
-  },
-  getSchedulerInfo(): { lastHeartbeat: string | null } {
-    try {
-      if (!existsSync(schedulerFile)) return { lastHeartbeat: null };
-      const raw = readFileSync(schedulerFile, 'utf-8');
-      return JSON.parse(raw) as { lastHeartbeat: string | null };
-    } catch {
-      return { lastHeartbeat: null };
+  async asyncGetVersions(): Promise<BackupVersionMeta[]> {
+    if (usePostgres) {
+      try {
+        return await db.asyncGetVersions();
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+        return await StoreFallback.asyncGetVersions();
+      }
     }
+    return await StoreFallback.asyncGetVersions();
   },
-  setSchedulerHeartbeat(isoDate: string): void {
-    writeJson(schedulerFile, { lastHeartbeat: isoDate });
-  },
-  getAlerts(): Alert[] {
-    try {
-      if (!existsSync(alertsFile)) return [];
-      const raw = readFileSync(alertsFile, 'utf-8');
-      return JSON.parse(raw) as Alert[];
-    } catch {
-      return [];
+  
+  async saveVersions(v: BackupVersionMeta[]): Promise<void> {
+    if (usePostgres) {
+      try {
+        await db.saveVersions(v);
+        return;
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+      }
     }
+    await StoreFallback.saveVersions(v);
   },
-  saveAlerts(alerts: Alert[]): void {
-    // Garder seulement les 1000 dernières alertes
-    const sorted = alerts.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-    const limited = sorted.slice(0, 1000);
-    writeFileSync(alertsFile, JSON.stringify(limited, null, 2));
+  
+  async addVersion(version: BackupVersionMeta): Promise<void> {
+    if (usePostgres) {
+      try {
+        const { addVersion } = await import('./db.js');
+        await addVersion(version);
+        return;
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+      }
+    }
+    // En mode fallback, récupérer toutes les versions, ajouter la nouvelle, et sauvegarder
+    const versions = await StoreFallback.asyncGetVersions();
+    versions.push(version);
+    await StoreFallback.saveVersions(versions);
   },
-  addAlert(alert: Alert): void {
-    const alerts = this.getAlerts();
-    alerts.push(alert);
-    this.saveAlerts(alerts);
+  
+  async getSchedulerInfo(): Promise<{ lastHeartbeat: string | null }> {
+    if (usePostgres) {
+      try {
+        return await db.getSchedulerInfo();
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+        return await StoreFallback.getSchedulerInfo();
+      }
+    }
+    return await StoreFallback.getSchedulerInfo();
   },
+  
+  async setSchedulerHeartbeat(isoDate: string): Promise<void> {
+    if (usePostgres) {
+      try {
+        await db.setSchedulerHeartbeat(isoDate);
+        return;
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+      }
+    }
+    await StoreFallback.setSchedulerHeartbeat(isoDate);
+  },
+  
+  async getAlerts(filters?: { type?: string; resolved?: boolean; limit?: number }): Promise<Alert[]> {
+    if (usePostgres) {
+      try {
+        return await db.getAlerts(filters);
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+        return await StoreFallback.getAlerts(filters);
+      }
+    }
+    return await StoreFallback.getAlerts(filters);
+  },
+  
+  async addAlert(alert: Alert): Promise<void> {
+    if (usePostgres) {
+      try {
+        await db.addAlert(alert);
+        return;
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+      }
+    }
+    await StoreFallback.addAlert(alert);
+  },
+  
+  async resolveAlert(alertId: string): Promise<void> {
+    if (usePostgres) {
+      try {
+        await db.resolveAlert(alertId);
+        return;
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+      }
+    }
+    await StoreFallback.resolveAlert(alertId);
+  },
+  
+  async deleteAlert(alertId: string): Promise<void> {
+    if (usePostgres) {
+      try {
+        await db.deleteAlert(alertId);
+        return;
+      } catch (err) {
+        console.warn('Erreur PostgreSQL, basculement vers fallback:', err);
+        usePostgres = false;
+      }
+    }
+    await StoreFallback.deleteAlert(alertId);
+  },
+  
   paths: {
     get backupsDir() {
       return backupsDir;

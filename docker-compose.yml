@@ -17,6 +17,12 @@ services:
       - RETAIN_PER_DB=10
       # ENCRYPTION_KEY: Définir via variable d'environnement ou .env file
       # Exemple: ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
+      # Connexion PostgreSQL pour la base de données relationnelle
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=safebase
+      - DB_USER=safebase
+      - DB_PASSWORD=safebase
     volumes:
       - ./backend:/app
       - api_node_modules:/app/node_modules

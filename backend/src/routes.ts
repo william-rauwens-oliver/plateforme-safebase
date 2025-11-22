@@ -214,7 +214,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
   app.get('/', async () => ({ message: 'SafeBase API - see /health' }));
   app.get('/health', async () => ({ status: 'ok' }));
   app.get('/scheduler/heartbeat', async () => {
-    const info = Store.getSchedulerInfo();
+    const info = await Store.getSchedulerInfo();
     // Vérifier si le scheduler est down (pas de heartbeat depuis plus de 2 heures)
     if (info.lastHeartbeat) {
       const lastHeartbeat = new Date(info.lastHeartbeat);
@@ -230,7 +230,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
     return info;
   });
   app.post('/scheduler/heartbeat', async () => {
-    Store.setSchedulerHeartbeat(new Date().toISOString());
+    await Store.setSchedulerHeartbeat(new Date().toISOString());
     return { ok: true };
   });
 
@@ -323,7 +323,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const db = all.find(d => d.id === id);
     if (!db) return reply.code(404).send({ message: 'database not found' });
     
-    const versions = Store.getVersions();
+    const versions = await Store.asyncGetVersions();
     const versionsToDelete = versions.filter(v => v.databaseId === id);
     for (const v of versionsToDelete) {
       try {
@@ -333,7 +333,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
       }
     }
     const keptVersions = versions.filter(v => v.databaseId !== id);
-    Store.saveVersions(keptVersions);
+    await Store.saveVersions(keptVersions);
     
     try {
       const backupDir = join(Store.paths.backupsDir, id);
@@ -354,7 +354,8 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const now = new Date().toISOString();
     const db: RegisteredDatabase = { id: randomUUID(), createdAt: now, ...body };
     
-    const skipValidation = process.env.VALIDATE_CONNECTION === '0';
+    // En mode fallback (sans PostgreSQL), on peut désactiver la validation pour tester
+    const skipValidation = process.env.VALIDATE_CONNECTION === '0' || process.env.USE_FALLBACK === '1';
     
     if (!skipValidation) {
       app.log.info({ message: 'Testing database connection', database: db.name, host: db.host, port: db.port, engine: db.engine });
@@ -377,13 +378,25 @@ export async function routes(app: FastifyInstance): Promise<void> {
       }
       app.log.info({ message: 'Database connection successful', database: db.name });
     } else {
-      app.log.warn({ message: 'Skipping database connection validation (VALIDATE_CONNECTION=0)', database: db.name });
+      app.log.warn({ message: 'Skipping database connection validation', database: db.name });
     }
     
-    const all = await Store.getDatabases();
-    all.push(db);
-    await Store.saveDatabases(all);
-    return db;
+    // Sauvegarder la base de données (Store gère automatiquement PostgreSQL ou fallback)
+    try {
+      const all = await Store.getDatabases();
+      all.push(db);
+      await Store.saveDatabases(all);
+      app.log.info({ message: 'Database saved successfully', database: db.name, id: db.id });
+      return db;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      app.log.error({ message: 'Error saving database', error: errorMsg, database: db.name });
+      return reply.code(500).send({
+        message: 'Erreur lors de la sauvegarde',
+        error: errorMsg,
+        hint: 'Vérifiez les logs du serveur pour plus de détails'
+      });
+    }
   });
 
   app.post('/backup/:id', async (req, reply) => {
@@ -617,9 +630,12 @@ export async function routes(app: FastifyInstance): Promise<void> {
       };
       const s = statSync(outPath);
       meta.sizeBytes = s.size;
-      const versions = Store.getVersions();
-      versions.push(meta);
-      Store.saveVersions(versions);
+      
+      // Utiliser Store.addVersion qui gère automatiquement PostgreSQL ou fallback
+      await Store.addVersion(meta);
+      
+      // Récupérer toutes les versions pour le nettoyage
+      const versions = await Store.asyncGetVersions();
 
       const retain = Number(process.env.RETAIN_PER_DB || 10);
       const perDb = versions.filter(v => v.databaseId === db.id)
@@ -629,7 +645,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
         try { rmSync(ex.path, { force: true }); } catch {}
       }
       const kept = versions.filter(v => !excess.some(e => e.id === v.id));
-      Store.saveVersions(kept);
+      await Store.saveVersions(kept);
       
       // Alerte de succès
       await sendAlert('backup_success', {
@@ -715,9 +731,12 @@ export async function routes(app: FastifyInstance): Promise<void> {
         };
         const s = statSync(outPath);
         meta.sizeBytes = s.size;
-        const versions = Store.getVersions();
-        versions.push(meta);
-        Store.saveVersions(versions);
+        
+        // Utiliser Store.addVersion qui gère automatiquement PostgreSQL ou fallback
+        await Store.addVersion(meta);
+        
+        // Récupérer toutes les versions pour le nettoyage
+        const versions = await Store.asyncGetVersions();
 
         const retain = Number(process.env.RETAIN_PER_DB || 10);
         const perDb = versions.filter(v => v.databaseId === db.id)
@@ -727,7 +746,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
           try { rmSync(ex.path, { force: true }); } catch {}
         }
         const kept = versions.filter(v => !excess.some(e => e.id === v.id));
-        Store.saveVersions(kept);
+        await Store.saveVersions(kept);
         results.push({ id: db.id, ok: true });
         await sendAlert('backup_success', {
           databaseId: db.id,
@@ -750,7 +769,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.get('/backups/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
-    const versions = Store.getVersions().filter(v => v.databaseId === id);
+    const versions = (await Store.asyncGetVersions()).filter(v => v.databaseId === id);
 
     return versions.sort((a, b) => {
 
@@ -763,7 +782,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.post('/restore/:versionId', async (req, reply) => {
     const { versionId } = req.params as { versionId: string };
-    const v = Store.getVersions().find(x => x.id === versionId);
+    const v = (await Store.asyncGetVersions()).find(x => x.id === versionId);
     if (!v) return reply.code(404).send({ message: 'version not found' });
     
     if (!existsSync(v.path)) {
@@ -881,27 +900,27 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.post('/versions/:versionId/pin', async (req, reply) => {
     const { versionId } = req.params as { versionId: string };
-    const versions = Store.getVersions();
+    const versions = await Store.asyncGetVersions();
     const v = versions.find(x => x.id === versionId);
     if (!v) return reply.code(404).send({ message: 'version not found' });
     v.pinned = true;
-    Store.saveVersions(versions);
+    await Store.saveVersions(versions);
     return v;
   });
 
   app.post('/versions/:versionId/unpin', async (req, reply) => {
     const { versionId } = req.params as { versionId: string };
-    const versions = Store.getVersions();
+    const versions = await Store.asyncGetVersions();
     const v = versions.find(x => x.id === versionId);
     if (!v) return reply.code(404).send({ message: 'version not found' });
     v.pinned = false;
-    Store.saveVersions(versions);
+    await Store.saveVersions(versions);
     return v;
   });
 
   app.get('/versions/:versionId/download', async (req, reply) => {
     const { versionId } = req.params as { versionId: string };
-    const v = Store.getVersions().find(x => x.id === versionId);
+    const v = (await Store.asyncGetVersions()).find(x => x.id === versionId);
     if (!v) return reply.code(404).send({ message: 'version not found' });
     reply.header('Content-Type', 'application/sql');
     reply.header('Content-Disposition', `attachment; filename="${v.path.split('/').pop()}"`);
@@ -910,13 +929,13 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
   app.delete('/versions/:versionId', async (req, reply) => {
     const { versionId } = req.params as { versionId: string };
-    const versions = Store.getVersions();
+    const versions = await Store.asyncGetVersions();
     const v = versions.find(x => x.id === versionId);
     if (!v) return reply.code(404).send({ message: 'version not found' });
     if (v.pinned) return reply.code(400).send({ message: 'version is pinned' });
     try { rmSync(v.path, { force: true }); } catch {}
     const kept = versions.filter(x => x.id !== versionId);
-    Store.saveVersions(kept);
+    await Store.saveVersions(kept);
     return { deleted: true };
   });
 
@@ -927,47 +946,40 @@ export async function routes(app: FastifyInstance): Promise<void> {
       resolved?: string;
       limit?: string;
     };
-    let alerts = Store.getAlerts();
     
-    if (type) {
-      alerts = alerts.filter(a => a.type === type);
-    }
-    if (resolved !== undefined) {
-      const isResolved = resolved === 'true';
-      alerts = alerts.filter(a => (a.resolved === true) === isResolved);
-    }
-    
-    alerts = alerts.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-    
+    const isResolved = resolved !== undefined ? resolved === 'true' : undefined;
     const limitNum = limit ? parseInt(limit, 10) : 100;
-    if (limitNum > 0) {
-      alerts = alerts.slice(0, limitNum);
-    }
     
-    return { alerts, total: Store.getAlerts().length };
+    const alerts = await Store.getAlerts({
+      type,
+      resolved: isResolved,
+      limit: limitNum,
+    });
+    
+    const allAlerts = await Store.getAlerts();
+    
+    return { alerts, total: allAlerts.length };
   });
 
   app.post('/alerts/:alertId/resolve', async (req, reply) => {
     const { alertId } = req.params as { alertId: string };
-    const alerts = Store.getAlerts();
+    const alerts = await Store.getAlerts();
     const alert = alerts.find(a => a.id === alertId);
     if (!alert) return reply.code(404).send({ message: 'alert not found' });
     
-    alert.resolved = true;
-    alert.resolvedAt = new Date().toISOString();
-    Store.saveAlerts(alerts);
+    await Store.resolveAlert(alertId);
     
-    return alert;
+    const updatedAlert = (await Store.getAlerts()).find(a => a.id === alertId);
+    return updatedAlert || alert;
   });
 
   app.delete('/alerts/:alertId', async (req, reply) => {
     const { alertId } = req.params as { alertId: string };
-    const alerts = Store.getAlerts();
+    const alerts = await Store.getAlerts();
     const alert = alerts.find(a => a.id === alertId);
     if (!alert) return reply.code(404).send({ message: 'alert not found' });
     
-    const kept = alerts.filter(a => a.id !== alertId);
-    Store.saveAlerts(kept);
+    await Store.deleteAlert(alertId);
     
     return { deleted: true };
   });
@@ -983,7 +995,7 @@ async function sendAlert(type: AlertType, payload: Record<string, unknown>) {
   };
   
   // Enregistrer l'alerte dans le store
-  Store.addAlert(alert);
+  await Store.addAlert(alert);
   
   // Envoyer le webhook si configuré
   const url = process.env.ALERT_WEBHOOK_URL;

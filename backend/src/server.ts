@@ -5,7 +5,7 @@ import { routes } from './routes.js';
 
 export async function createServer() {
   const server = Fastify({ logger: true });
-  Store.init();
+  await Store.init();
   const corsOrigin = process.env.CORS_ORIGIN || true;
   await server.register(cors, { origin: corsOrigin as any });
 

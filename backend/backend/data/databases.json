@@ -1,0 +1,24 @@
+[
+  {
+    "id": "9c108ff9-491d-4d50-9676-69603cbfbe4c",
+    "createdAt": "2025-11-22T18:46:27.791Z",
+    "name": "testbase",
+    "engine": "mysql",
+    "host": "127.0.0.1",
+    "port": 8889,
+    "username": "root",
+    "password": "9/gnJdFnhlMHZ/Gkc46BFA==:CDzXo8YxeG/g8mx1lnbBfmN7Sxt6HbmiKKTv5kf//Yk=:659kSA==:oNxWpKq4L80TEZ2+iWFhdg==",
+    "database": "parcNational"
+  },
+  {
+    "id": "f6b801c9-6bcc-45ae-b156-6608545a58f7",
+    "createdAt": "2025-11-22T18:56:14.342Z",
+    "name": "testbase",
+    "engine": "mysql",
+    "host": "127.0.0.1",
+    "port": 8889,
+    "username": "root",
+    "password": "QkwHT2pACVbYC1xLrRLY5Q==:uzBcRwqB3GQCnCwVGwdo/TYgDdxRpU3x5OXGFHs7by8=:9YZYbw==:Rda4NJhXB7cdMzfUveWk+Q==",
+    "database": "parcNational"
+  }
+]
