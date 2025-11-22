@@ -83,6 +83,7 @@ Scheduler (Cron - Backups horaires)
 ## Gestion des Bases
 - `GET /databases` - Liste des bases
 - `POST /databases` - Ajouter une base
+- `GET /databases/available` - Bases disponibles (MySQL/PostgreSQL)
 
 ## Backups
 - `POST /backup/:id` - Backup d'une base
@@ -92,7 +93,13 @@ Scheduler (Cron - Backups horaires)
 ## Restauration & Versions
 - `POST /restore/:versionId` - Restaurer
 - `POST /versions/:versionId/pin` - Épingler
+- `POST /versions/:versionId/unpin` - Désépingler
 - `GET /versions/:versionId/download` - Télécharger
+- `DELETE /versions/:versionId` - Supprimer
+
+## Monitoring
+- `GET /health` - Santé de l'API
+- `GET /scheduler/heartbeat` - État du scheduler
 
 ---
 
@@ -121,8 +128,9 @@ Scheduler (Cron - Backups horaires)
    - `Referrer-Policy: no-referrer`
    - `X-Content-Type-Options: nosniff`
 4. **Validation** - Zod pour toutes les entrées
-5. **Alertes** - Webhook en cas d'échec
-6. **Rétention** - Limite l'espace disque (10 versions)
+5. **Chiffrement** - Mots de passe chiffrés (AES-256-GCM)
+6. **Alertes** - Webhook en cas d'échec
+7. **Rétention** - Limite l'espace disque (10 versions)
 
 ---
 
@@ -147,8 +155,15 @@ Scheduler (Cron - Backups horaires)
 
 ## Tests Unitaires
 
+**Backend :**
 ```bash
 cd backend
+npm test
+```
+
+**Frontend :**
+```bash
+cd frontend
 npm test
 ```
 
@@ -156,6 +171,8 @@ npm test
 - ✅ Health check
 - ✅ Protection API Key
 - ✅ Scheduler heartbeat
+- ✅ Tests d'intégration
+- ✅ Tests de sécurité
 
 **100% des tests passent** ✓
 
@@ -304,7 +321,7 @@ backups/
 **R:** Simplification pour le MVP. Une vraie base serait le prochain pas.
 
 ## Comment gérez-vous la sécurité des mots de passe ?
-**R:** Actuellement stockés en clair dans la config. En production, chiffrement ou secrets Docker.
+**R:** Les mots de passe sont chiffrés avec AES-256-GCM avant stockage. La clé de chiffrement est gérée via variable d'environnement.
 
 ---
 
