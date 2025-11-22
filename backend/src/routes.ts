@@ -422,21 +422,23 @@ export async function routes(app: FastifyInstance): Promise<void> {
     };
 
     const escapeShell = (str: string) => {
-      return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
+      // Échapper les guillemets simples et entourer avec des guillemets simples
+      return `'${str.replace(/'/g, "'\\''")}'`;
     };
 
     const escapePath = (path: string) => {
-      return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
+      // Échapper les guillemets simples et entourer avec des guillemets simples
+      return `'${path.replace(/'/g, "'\\''")}'`;
     };
 
     const hostForBackup = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
 
     let cmd: string;
     if (db.engine === 'mysql') {
-      cmd = `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${escapePath(outPath)}`;
+      cmd = `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} ${escapeShell(db.database)} > ${escapePath(outPath)}`;
     } else {
 
-      const pgDumpBase = db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`;
+      const pgDumpBase = db.password ? `PGPASSWORD=${escapeShell(db.password)} pg_dump` : `pg_dump`;
 
       cmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges -f ${escapePath(outPath)}`;
     }
@@ -495,8 +497,8 @@ export async function routes(app: FastifyInstance): Promise<void> {
               if (allTables.length > 0) {
 
                 try {
-                  const pgDumpBase = db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`;
-                  const tableOptions = allTables.map(table => `--table=public.${escapeShell(table)}`).join(' ');
+                  const pgDumpBase = db.password ? `PGPASSWORD=${escapeShell(db.password)} pg_dump` : `pg_dump`;
+                  const tableOptions = allTables.map(table => `--table=public.${table.replace(/'/g, "'\\''")}`).join(' ');
                   const tableOnlyCmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges ${tableOptions} -f ${escapePath(outPath)}`;
                   await exec(tableOnlyCmd);
                   app.log.info({ message: 'Backup completed with all tables', database: db.name, path: outPath, tablesCount: allTables.length });
@@ -508,9 +510,9 @@ export async function routes(app: FastifyInstance): Promise<void> {
                   
                   for (const table of allTables) {
                     try {
-                      const pgDumpBase = db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`;
+                      const pgDumpBase = db.password ? `PGPASSWORD=${escapeShell(db.password)} pg_dump` : `pg_dump`;
                       const tempPath = `${outPath}.tmp.${table}`;
-                      const singleTableCmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --table=public.${escapeShell(table)} -f ${escapePath(tempPath)}`;
+                      const singleTableCmd = `${pgDumpBase} -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --table=public.${table.replace(/'/g, "'\\''")} -f ${escapePath(tempPath)}`;
                       await exec(singleTableCmd);
                       successfulTables.push(table);
 
@@ -621,6 +623,11 @@ export async function routes(app: FastifyInstance): Promise<void> {
           }
         }
       }
+      // Vérifier que le fichier de backup existe
+      if (!existsSync(outPath)) {
+        throw new Error(`Le fichier de backup n'a pas été créé : ${outPath}`);
+      }
+      
       const meta: BackupVersionMeta = {
         id: randomUUID(),
         databaseId: db.id,
@@ -659,7 +666,15 @@ export async function routes(app: FastifyInstance): Promise<void> {
       return meta;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      app.log.error({ backupError: errorMsg, databaseId: id, database: db.name });
+      const errorStack = err instanceof Error ? err.stack : undefined;
+      app.log.error({ 
+        backupError: errorMsg, 
+        databaseId: id, 
+        database: db.name,
+        engine: db.engine,
+        stack: errorStack,
+        outPath: outPath
+      });
       await sendAlert('backup_failed', {
         databaseId: id,
         databaseName: db.name,
@@ -694,18 +709,20 @@ export async function routes(app: FastifyInstance): Promise<void> {
       };
 
       const escapeShell = (str: string) => {
-        return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
+        // Échapper les guillemets simples et entourer avec des guillemets simples
+        return `'${str.replace(/'/g, "'\\''")}'`;
       };
 
       const escapePath = (path: string) => {
-        return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
+        // Échapper les guillemets simples et entourer avec des guillemets simples
+        return `'${path.replace(/'/g, "'\\''")}'`;
       };
 
       const hostForBackup = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
 
       const cmd = db.engine === 'mysql'
-        ? `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} > ${escapePath(outPath)}`
-        : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' pg_dump` : `pg_dump`) + ` -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --lock-wait-timeout=0 -f ${escapePath(outPath)}`;
+        ? `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} ${escapeShell(db.database)} > ${escapePath(outPath)}`
+        : (db.password ? `PGPASSWORD=${escapeShell(db.password)} pg_dump` : `pg_dump`) + ` -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --lock-wait-timeout=0 -f ${escapePath(outPath)}`;
     try {
 
       const useFakeDump = process.env.FAKE_DUMP === '1';
@@ -815,11 +832,13 @@ export async function routes(app: FastifyInstance): Promise<void> {
     if (!db) return reply.code(404).send({ message: 'database not found' });
 
     const escapeShell = (str: string) => {
-      return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
+      // Échapper les guillemets simples et entourer avec des guillemets simples
+      return `'${str.replace(/'/g, "'\\''")}'`;
     };
 
     const escapePath = (path: string) => {
-      return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
+      // Échapper les guillemets simples et entourer avec des guillemets simples
+      return `'${path.replace(/'/g, "'\\''")}'`;
     };
 
     const findMysql = () => {
@@ -834,8 +853,8 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
     const escapedPath = escapePath(v.path);
     const cmd = db.engine === 'mysql'
-      ? `${findMysql()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} < ${escapedPath}`
-      : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' psql` : `psql`) + ` -h ${escapeShell(hostForRestore)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -f ${escapedPath}`;
+      ? `${findMysql()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} ${escapeShell(db.database)} < ${escapedPath}`
+      : (db.password ? `PGPASSWORD=${escapeShell(db.password)} psql` : `psql`) + ` -h ${escapeShell(hostForRestore)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -f ${escapedPath}`;
 
     try {
 

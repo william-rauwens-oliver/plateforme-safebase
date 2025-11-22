@@ -136,11 +136,15 @@ export function App() {
     setGlobalBusy(true)
     try {
       const res = await fetch(`${config.apiUrl}/backup/${id}`, { method: 'POST', headers })
-      if (!res.ok) throw new Error('backup failed')
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Erreur inconnue' }))
+        throw new Error(errorData.error || errorData.message || 'backup failed')
+      }
       pushToast('Backup déclenché', 'success')
     } catch (err) {
-      pushToast('Erreur lors du backup', 'error')
-      console.error(err)
+      const errorMsg = err instanceof Error ? err.message : 'Erreur lors du backup'
+      pushToast(`Erreur: ${errorMsg}`, 'error')
+      console.error('Backup error:', err)
     } finally {
       setGlobalBusy(false)
     }
