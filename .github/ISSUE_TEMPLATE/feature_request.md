@@ -1,20 +1,20 @@
 ---
-name: ✨ Feature Request
+name: Feature Request
 about: Suggérer une nouvelle fonctionnalité
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
 ---
 
-## 🎯 Description de la Fonctionnalité
+## Description de la Fonctionnalité
 
 Une description claire et concise de la fonctionnalité souhaitée.
 
-## 💡 Motivation
+## Motivation
 
 Pourquoi cette fonctionnalité serait-elle utile ? Quel problème résout-elle ?
 
-## 📝 Description Détaillée
+## Description Détaillée
 
 ### Comportement Attendu
 
@@ -26,17 +26,17 @@ Décrivez en détail comment cette fonctionnalité devrait fonctionner.
 2. Cas d'usage 2
 3. Cas d'usage 3
 
-## 🔄 Alternatives Considérées
+## Alternatives Considérées
 
 Décrivez les alternatives ou solutions que vous avez envisagées.
 
-## 📋 Checklist
+## Checklist
 
 - [ ] Cette fonctionnalité n'existe pas déjà
 - [ ] J'ai vérifié la documentation
 - [ ] J'ai vérifié les issues existantes
 
-## 🔍 Informations Supplémentaires
+## Informations Supplémentaires
 
 Toute autre information pertinente (maquettes, exemples, etc.).
 

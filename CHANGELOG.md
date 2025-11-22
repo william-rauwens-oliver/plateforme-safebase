@@ -1,4 +1,4 @@
-# 📋 Changelog
+# Changelog
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
@@ -20,13 +20,13 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 ## [0.1.0] - 2025-01-09
 
 ### Added
-- ✨ API REST complète avec Fastify
+- API REST complète avec Fastify
   - Endpoints pour gestion des bases de données
   - Endpoints pour sauvegarde et restauration
   - Endpoints pour gestion des versions
   - Support MySQL et PostgreSQL
 
-- 🎨 Interface utilisateur React
+- Interface utilisateur React
   - Formulaire d'enregistrement de bases de données
   - Liste des connexions enregistrées
   - Modal de gestion des versions
@@ -34,28 +34,28 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
   - Thème clair/sombre
   - Design responsive
 
-- ⏰ Scheduler automatique
+- Scheduler automatique
   - Cron configuré (toutes les heures)
   - Scripts de backup automatique
   - Heartbeat pour monitoring
 
-- 🔐 Sécurité
+- Sécurité
   - Chiffrement AES-256-GCM des mots de passe
   - Validation des entrées avec Zod
   - API Key optionnelle
   - Headers de sécurité
 
-- 🧪 Tests
+- Tests
   - 17 tests backend (health, security, integration)
   - 8 tests frontend (App, security)
-  - Total : 25 tests (tous passent ✅)
+  - Total : 25 tests (tous passent)
 
-- 🐳 Conteneurisation
+- Conteneurisation
   - Docker Compose avec tous les services
   - Dockerfiles pour backend, frontend, scheduler
   - Support MySQL et PostgreSQL
 
-- 📚 Documentation
+- Documentation
   - Architecture complète
   - Guides de démarrage
   - Documentation des tests
