@@ -1,8 +1,8 @@
-# 🤝 Guide de Contribution - SafeBase
+# Guide de Contribution - SafeBase
 
 Merci de votre intérêt pour contribuer à SafeBase ! Ce document contient les conventions et processus pour contribuer au projet.
 
-## 📋 Table des Matières
+## Table des Matières
 
 - [Code de Conduite](#code-de-conduite)
 - [Processus de Contribution](#processus-de-contribution)
@@ -14,18 +14,18 @@ Merci de votre intérêt pour contribuer à SafeBase ! Ce document contient les 
 
 ---
 
-## 📜 Code de Conduite
+## Code de Conduite
 
 ### Nos Standards
 
-- ✅ Être respectueux et inclusif
-- ✅ Accepter les critiques constructives
-- ✅ Se concentrer sur ce qui est le mieux pour la communauté
-- ✅ Faire preuve d'empathie envers les autres membres
+- Être respectueux et inclusif
+- Accepter les critiques constructives
+- Se concentrer sur ce qui est le mieux pour la communauté
+- Faire preuve d'empathie envers les autres membres
 
 ---
 
-## 🔄 Processus de Contribution
+## Processus de Contribution
 
 ### 1. Fork et Clone
 
@@ -73,7 +73,7 @@ Puis créez une Pull Request sur GitHub depuis votre branche vers `develop`.
 
 ---
 
-## 💻 Conventions de Code
+## Conventions de Code
 
 ### TypeScript / JavaScript
 
@@ -88,13 +88,13 @@ Puis créez une Pull Request sur GitHub depuis votre branche vers `develop`.
 ### Exemple
 
 ```typescript
-// ✅ Bon
+// Bon
 const userName = 'john';
 function getUserData() { }
 class DatabaseManager { }
 const MAX_RETRIES = 3;
 
-// ❌ Mauvais
+// Mauvais
 const user_name = 'john';
 function get_user_data() { }
 class database_manager { }
@@ -119,7 +119,7 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
 
 ---
 
-## 📝 Conventions de Commit
+## Conventions de Commit
 
 Nous utilisons [Conventional Commits](https://www.conventionalcommits.org/).
 
@@ -162,7 +162,7 @@ chore(deps): mise à jour de fastify vers 4.28.1
 
 ---
 
-## 🌳 Structure des Branches
+## Structure des Branches
 
 ### Branches Principales
 
@@ -191,13 +191,13 @@ main ← develop ← feature/xxx
 
 ---
 
-## 🧪 Tests
+## Tests
 
 ### Exigences
 
-- ✅ Tous les nouveaux tests doivent passer
-- ✅ Les tests existants doivent continuer à passer
-- ✅ Couverture de code maintenue ou améliorée
+- Tous les nouveaux tests doivent passer
+- Les tests existants doivent continuer à passer
+- Couverture de code maintenue ou améliorée
 
 ### Exécuter les Tests
 
@@ -219,7 +219,7 @@ npm test
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 ### Mise à Jour de la Documentation
 
@@ -236,7 +236,7 @@ npm test
 
 ---
 
-## 🔍 Review Process
+## Review Process
 
 ### Avant de Soumettre une PR
 
@@ -254,7 +254,7 @@ npm test
 
 ---
 
-## ❓ Questions ?
+## Questions ?
 
 Si vous avez des questions, n'hésitez pas à :
 - Ouvrir une issue
@@ -263,5 +263,5 @@ Si vous avez des questions, n'hésitez pas à :
 
 ---
 
-**Merci de contribuer à SafeBase ! 🎉**
+**Merci de contribuer à SafeBase !**
 
