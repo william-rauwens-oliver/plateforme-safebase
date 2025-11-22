@@ -782,6 +782,37 @@ export async function routes(app: FastifyInstance): Promise<void> {
     const { versionId } = req.params as { versionId: string };
     const v = Store.getVersions().find(x => x.id === versionId);
     if (!v) return reply.code(404).send({ message: 'version not found' });
+<<<<<<< HEAD
+=======
+    
+    // Vérifier que le fichier de backup existe
+    if (!existsSync(v.path)) {
+      app.log.error({ message: 'Backup file not found', versionId, path: v.path });
+      return reply.code(404).send({ 
+        message: 'backup file not found',
+        path: v.path,
+        hint: 'Le fichier de backup a peut-être été supprimé ou déplacé'
+      });
+    }
+    
+    // Vérifier si le fichier a été modifié depuis le backup (optionnel, pour information)
+    const fileStats = statSync(v.path);
+    const backupDate = new Date(v.createdAt);
+    const fileModifiedDate = fileStats.mtime;
+    const fileWasModified = fileModifiedDate > backupDate;
+    
+    if (fileWasModified) {
+      app.log.info({ 
+        message: 'Backup file has been modified since creation', 
+        versionId, 
+        path: v.path,
+        backupDate: backupDate.toISOString(),
+        fileModifiedDate: fileModifiedDate.toISOString(),
+        note: 'La restauration utilisera le contenu actuel du fichier (modifié)'
+      });
+    }
+    
+>>>>>>> main
     const allDbs = await Store.getDatabases();
     const db = allDbs.find(d => d.id === v.databaseId);
     if (!db) return reply.code(404).send({ message: 'database not found' });
@@ -791,9 +822,33 @@ export async function routes(app: FastifyInstance): Promise<void> {
       return str.replace(/'/g, "'\\''").replace(/([;&|`$<>])/g, '\\$1');
     };
 
+<<<<<<< HEAD
     const cmd = db.engine === 'mysql'
       ? `mysql -h ${db.host} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} < ${v.path}`
       : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' psql` : `psql`) + ` -h ${db.host} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -f ${v.path}`;
+=======
+    // Échapper le chemin du fichier pour la commande shell
+    const escapePath = (path: string) => {
+      return path.replace(/'/g, "'\\''").replace(/([;&|`$<>()])/g, '\\$1');
+    };
+
+    // Pour MySQL, utiliser le client MAMP si disponible
+    const findMysql = () => {
+      const mamp80 = '/Applications/MAMP/Library/bin/mysql80/bin/mysql';
+      const mamp57 = '/Applications/MAMP/Library/bin/mysql57/bin/mysql';
+      if (existsSync(mamp80)) return mamp80;
+      if (existsSync(mamp57)) return mamp57;
+      return 'mysql'; // Fallback sur PATH système
+    };
+
+    // Pour PostgreSQL, utiliser 127.0.0.1 au lieu de localhost
+    const hostForRestore = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
+
+    const escapedPath = escapePath(v.path);
+    const cmd = db.engine === 'mysql'
+      ? `${findMysql()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p'${escapeShell(db.password)}' ${escapeShell(db.database)} < ${escapedPath}`
+      : (db.password ? `PGPASSWORD='${escapeShell(db.password)}' psql` : `psql`) + ` -h ${escapeShell(hostForRestore)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -f ${escapedPath}`;
+>>>>>>> main
 
     try {
       // Mode FAKE_DUMP désactivé par défaut (uniquement pour tests)
@@ -803,17 +858,54 @@ export async function routes(app: FastifyInstance): Promise<void> {
         // Simulation: considérer comme restauré sans exécuter de commande
         app.log.info({ message: 'Fake restore (FAKE_DUMP mode)', versionId, database: db.name });
       } else {
+<<<<<<< HEAD
         await exec(cmd);
+=======
+        app.log.info({ 
+          message: 'Starting restore', 
+          versionId, 
+          database: db.name, 
+          engine: db.engine, 
+          path: v.path,
+          fileSize: fileStats.size,
+          fileModified: fileWasModified ? 'Oui (le fichier a été modifié depuis le backup)' : 'Non',
+          note: 'La restauration utilise le contenu actuel du fichier SQL'
+        });
+        // La commande mysql/psql lit le fichier directement depuis le disque au moment de l'exécution
+        // Donc si le fichier a été modifié, il utilisera le contenu modifié
+        await exec(cmd);
+        app.log.info({ message: 'Restore completed', versionId, database: db.name });
+>>>>>>> main
       }
       return { status: 'restored', versionId };
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
+<<<<<<< HEAD
       app.log.error({ restoreError: errorMsg, versionId, database: db.name });
       await sendAlert('restore_failed', { versionId, error: errorMsg });
       return reply.code(500).send({ 
         message: 'restore failed',
         error: errorMsg,
         hint: process.env.FAKE_DUMP === '1' ? undefined : 'Vérifiez que la base de données est accessible et que mysql/psql sont installés'
+=======
+      const stderr = (err as any)?.stderr || '';
+      app.log.error({ 
+        restoreError: errorMsg, 
+        versionId, 
+        database: db.name,
+        path: v.path,
+        stderr,
+        command: cmd.replace(/-p'[^']*'/, "-p'***'").replace(/PGPASSWORD='[^']*'/, "PGPASSWORD='***'")
+      });
+      await sendAlert('restore_failed', { versionId, error: errorMsg, database: db.name });
+      return reply.code(500).send({ 
+        message: 'restore failed',
+        error: errorMsg,
+        stderr: stderr || undefined,
+        hint: process.env.FAKE_DUMP === '1' 
+          ? undefined 
+          : 'Vérifiez que la base de données est accessible, que mysql/psql sont installés, et que le fichier de backup est valide'
+>>>>>>> main
       });
     }
   });

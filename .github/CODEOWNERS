@@ -1,0 +1,18 @@
+# Code Owners
+# Ce fichier définit les propriétaires du code pour les reviews automatiques
+
+# Tous les fichiers
+* @william-rauwens-oliver
+
+# Backend
+/backend/ @william-rauwens-oliver
+
+# Frontend
+/frontend/ @william-rauwens-oliver
+
+# Documentation
+/docs/ @william-rauwens-oliver
+
+# CI/CD
+/.github/ @william-rauwens-oliver
+
