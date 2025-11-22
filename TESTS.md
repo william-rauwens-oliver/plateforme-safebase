@@ -105,25 +105,25 @@ Ce mode simule les sauvegardes sans exécuter réellement `mysqldump` ou `pg_dum
 ## Couverture des Tests
 
 ### Backend
-- ✅ Chiffrement/déchiffrement
-- ✅ Validation des entrées
-- ✅ Authentification API
-- ✅ Opérations Store (CRUD)
-- ✅ Endpoints API
-- ✅ Flux d'intégration complets
+-  Chiffrement/déchiffrement
+-  Validation des entrées
+-  Authentification API
+-  Opérations Store (CRUD)
+-  Endpoints API
+-  Flux d'intégration complets
 
 ### Frontend
-- ✅ Composants React
-- ✅ Hooks personnalisés
-- ✅ Interactions API
-- ✅ Gestion d'erreurs
-- ✅ Sécurité
+-  Composants React
+-  Hooks personnalisés
+-  Interactions API
+-  Gestion d'erreurs
+-  Sécurité
 
 ### E2E
-- ✅ Interface utilisateur
-- ✅ Flux API complets
-- ✅ Navigation
-- ✅ Thème
+-  Interface utilisateur
+-  Flux API complets
+-  Navigation
+-  Thème
 
 ## Bonnes Pratiques
 
