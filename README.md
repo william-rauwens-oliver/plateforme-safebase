@@ -194,7 +194,8 @@ npm test
 ## Documentation
 
 - **Présentation** : Diapositives pour la soutenance disponibles dans [`docs/PRESENTATION.md`](docs/PRESENTATION.md) et [`docs/PRESENTATION.pdf`](docs/PRESENTATION.pdf)
-- **Sécurité** : Voir [`SECURITE.md`](SECURITE.md) pour les bonnes pratiques de sécurité
+- **Sécurité** : Voir [`SECURITY.md`](SECURITY.md) pour la politique de sécurité
+- **Variables d'environnement** : Voir [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) pour la configuration
 - **Contribution** : Voir [`CONTRIBUTING.md`](CONTRIBUTING.md) pour les guidelines de contribution
 - **Changelog** : Voir [`CHANGELOG.md`](CHANGELOG.md) pour l'historique des changements
 

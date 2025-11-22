@@ -1,8 +1,8 @@
-# 🔧 Scripts Utilitaires - SafeBase
+# Scripts Utilitaires - SafeBase
 
 Ce dossier contient les scripts utilitaires pour le projet SafeBase.
 
-## 📋 Scripts Disponibles
+## Scripts Disponibles
 
 ### Tests
 - **test-fonctionnalites.sh** - Test complet des fonctionnalités de l'API
@@ -13,8 +13,9 @@ Ce dossier contient les scripts utilitaires pour le projet SafeBase.
 
 ### Configuration
 - **changer-mot-de-passe-postgres.sh** - Changer le mot de passe PostgreSQL
+- **fix-postgres-permissions.sh** - Corriger les permissions PostgreSQL
 
-## 🚀 Utilisation
+## Utilisation
 
 ### Tester les fonctionnalités
 ```bash
@@ -36,6 +37,9 @@ Ce dossier contient les scripts utilitaires pour le projet SafeBase.
 ./scripts/changer-mot-de-passe-postgres.sh
 ```
 
----
+## Note
 
-**Note** : Assurez-vous que les scripts ont les permissions d'exécution (`chmod +x scripts/*.sh`)
+Assurez-vous que les scripts ont les permissions d'exécution :
+```bash
+chmod +x scripts/*.sh
+```
