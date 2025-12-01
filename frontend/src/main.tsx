@@ -66,8 +66,15 @@ export function App() {
     password: string;
     database: string;
   }>({
-    name: '', engine: 'mysql', host: '127.0.0.1', port: 8889,
-    username: '', password: '', database: ''
+    // Par défaut : connexion MySQL locale via MAMP, vue depuis Docker
+    // (SafeBase en Docker → MySQL MAMP via host.docker.internal:8889)
+    name: '',
+    engine: 'mysql',
+    host: 'host.docker.internal',
+    port: 8889,
+    username: 'root',
+    password: 'root',
+    database: ''
   })
   const [availableDatabases, setAvailableDatabases] = useState<string[]>([])
   const [loadingDatabases, setLoadingDatabases] = useState(false)
@@ -334,11 +341,34 @@ export function App() {
                 const newEngine = e.target.value as 'mysql' | 'postgres';
 
                 if (newEngine === 'mysql') {
-
-                  setForm({ ...form, engine: newEngine, host: '127.0.0.1', port: 8889, username: '', password: '', database: '' });
+                  // MySQL local via MAMP, accessible depuis Docker
+                  // via host.docker.internal:8889
+                  const defaultHost = 'host.docker.internal';
+                  const defaultPort = 8889;
+                  setForm({
+                    ...form,
+                    engine: newEngine,
+                    host: defaultHost,
+                    port: defaultPort,
+                    username: 'root',
+                    password: 'root',
+                    database: ''
+                  });
                 } else {
-
-                  setForm({ ...form, engine: newEngine, host: 'localhost', port: 5432, username: 'postgres', password: '', database: '' });
+                  // PostgreSQL Docker (service "postgres" dans docker-compose)
+                  // Utilisateur et mot de passe par défaut du compose : safebase / rootpassword
+                  const defaultHost = 'postgres';
+                  const defaultPort = 5432;
+                  const defaultUser = 'safebase';
+                  setForm({
+                    ...form,
+                    engine: newEngine,
+                    host: defaultHost,
+                    port: defaultPort,
+                    username: defaultUser,
+                    password: 'rootpassword',
+                    database: ''
+                  });
                 }
                 setAvailableDatabases([]);
               }}>

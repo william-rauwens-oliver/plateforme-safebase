@@ -435,7 +435,9 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
     let cmd: string;
     if (db.engine === 'mysql') {
-      cmd = `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} ${escapeShell(db.database)} > ${escapePath(outPath)}`;
+      // Désactiver TLS/SSL pour éviter les erreurs de certificats auto-signés
+      // Utilise --ssl=0 (compatible avec MariaDB/mysqldump plus anciens)
+      cmd = `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} --ssl=0 ${escapeShell(db.database)} > ${escapePath(outPath)}`;
     } else {
 
       const pgDumpBase = db.password ? `PGPASSWORD=${escapeShell(db.password)} pg_dump` : `pg_dump`;
@@ -721,7 +723,8 @@ export async function routes(app: FastifyInstance): Promise<void> {
       const hostForBackup = db.engine === 'postgres' && db.host === 'localhost' ? '127.0.0.1' : db.host;
 
       const cmd = db.engine === 'mysql'
-        ? `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} ${escapeShell(db.database)} > ${escapePath(outPath)}`
+        // Même logique que pour /backup/:id : désactiver TLS pour les MySQL locaux
+        ? `${findMysqldump()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} --ssl=0 ${escapeShell(db.database)} > ${escapePath(outPath)}`
         : (db.password ? `PGPASSWORD=${escapeShell(db.password)} pg_dump` : `pg_dump`) + ` -h ${escapeShell(hostForBackup)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -F p --no-owner --no-privileges --lock-wait-timeout=0 -f ${escapePath(outPath)}`;
     try {
 
@@ -853,7 +856,8 @@ export async function routes(app: FastifyInstance): Promise<void> {
 
     const escapedPath = escapePath(v.path);
     const cmd = db.engine === 'mysql'
-      ? `${findMysql()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} ${escapeShell(db.database)} < ${escapedPath}`
+      // Désactiver TLS/SSL pour la restauration MySQL également (même problème de certificat MAMP)
+      ? `${findMysql()} -h ${escapeShell(db.host)} -P ${db.port} -u ${escapeShell(db.username)} -p${escapeShell(db.password)} --ssl=0 ${escapeShell(db.database)} < ${escapedPath}`
       : (db.password ? `PGPASSWORD=${escapeShell(db.password)} psql` : `psql`) + ` -h ${escapeShell(hostForRestore)} -p ${db.port} -U ${escapeShell(db.username)} -d ${escapeShell(db.database)} -f ${escapedPath}`;
 
     try {

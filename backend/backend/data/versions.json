@@ -1,10 +1,35 @@
 [
   {
-    "id": "d3882ec9-7b84-46c9-9eb6-472d8f4eb273",
-    "databaseId": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
-    "createdAt": "2025-11-22T22:33:30.300Z",
-    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/54863d55-7a2f-40aa-98b2-d84f2b556ad6/Base De Donnée MySQL_2025-11-22T22-33-30-219Z.sql",
+    "id": "1192859a-bd53-4a92-972a-aba1e426eff8",
+    "databaseId": "1dde6a6c-a6f7-489d-a2c9-a1e970b2fcbc",
+    "createdAt": "2025-12-01T14:10:23.303Z",
+    "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/1dde6a6c-a6f7-489d-a2c9-a1e970b2fcbc/testtest_2025-12-01T14-10-23-212Z.sql",
     "engine": "mysql",
     "sizeBytes": 8339
+  },
+  {
+    "id": "ae4feb02-afcb-4a66-88fe-30b3d086173a",
+    "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+    "createdAt": "2025-12-01T14:43:27.551Z",
+    "path": "/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-43-27-501Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 28209
+  },
+  {
+    "id": "2cbdfe16-93a4-4c6b-8c21-9e7ac6b6555f",
+    "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+    "createdAt": "2025-12-01T14:43:28.689Z",
+    "path": "/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-43-28-649Z.sql",
+    "engine": "mysql",
+    "sizeBytes": 28209,
+    "pinned": true
+  },
+  {
+    "id": "fc1aa6a6-8f75-48e7-811b-69fb827f8e29",
+    "databaseId": "a85275d6-2ed4-482a-8ed4-f403658f67a2",
+    "createdAt": "2025-12-01T14:55:06.012Z",
+    "path": "/backups/a85275d6-2ed4-482a-8ed4-f403658f67a2/ezgzg_2025-12-01T14-55-05-953Z.sql",
+    "engine": "postgres",
+    "sizeBytes": 697
   }
 ]

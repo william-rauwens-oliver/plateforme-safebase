@@ -1,5 +1,233 @@
 [
   {
+    "id": "ee1f79d8-7a34-4a26-8504-679426e635b3",
+    "type": "restore_success",
+    "timestamp": "2025-12-01T14:55:09.260Z",
+    "payload": {
+      "databaseId": "a85275d6-2ed4-482a-8ed4-f403658f67a2",
+      "databaseName": "ezgzg",
+      "versionId": "fc1aa6a6-8f75-48e7-811b-69fb827f8e29",
+      "path": "/backups/a85275d6-2ed4-482a-8ed4-f403658f67a2/ezgzg_2025-12-01T14-55-05-953Z.sql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "a78c5560-7840-4a41-912d-9fdb181a24bd",
+    "type": "backup_success",
+    "timestamp": "2025-12-01T14:55:06.013Z",
+    "payload": {
+      "databaseId": "a85275d6-2ed4-482a-8ed4-f403658f67a2",
+      "databaseName": "ezgzg",
+      "versionId": "fc1aa6a6-8f75-48e7-811b-69fb827f8e29",
+      "sizeBytes": 697,
+      "engine": "postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "60db1ede-b9a4-4155-b864-59ddc559d2f3",
+    "type": "backup_failed",
+    "timestamp": "2025-12-01T14:50:18.386Z",
+    "payload": {
+      "databaseId": "e561c9c4-372a-4f1e-9b00-e89ce1e817c0",
+      "databaseName": "yheheh",
+      "error": "Backup failed: Command failed: PGPASSWORD='root' pg_dump -h 'host.docker.internal' -p 5432 -U 'postgres' -d 'williamrauwensoliver' -F p --no-owner --no-privileges -f '/backups/e561c9c4-372a-4f1e-9b00-e89ce1e817c0/yheheh_2025-12-01T14-50-18-348Z.sql'\npg_dump: error: aborting because of server version mismatch\npg_dump: detail: server version: 18.1 (Postgres.app); pg_dump version: 17.7\n - pg_dump: error: aborting because of server version mismatch\npg_dump: detail: server version: 18.1 (Postgres.app); pg_dump version: 17.7\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "38c57409-0e72-406e-8221-27a858e47cc0",
+    "type": "backup_failed",
+    "timestamp": "2025-12-01T14:49:53.698Z",
+    "payload": {
+      "databaseId": "66a47a74-a0a5-4629-bae7-896e428625c2",
+      "databaseName": "retegopqs",
+      "error": "Backup failed: Command failed: PGPASSWORD='3KSc0XHfe2Tuk1KJfkQkvw==:eqk3wwo0Unz1Y0mP6HiG+wnEoTRzQ7pNMZ7RIx+Qo4o=:PrwGAw==:u7m7dAi+eXFbtXyj7cO/Zg==' pg_dump -h '127.0.0.1' -p 5432 -U 'postgres' -d 'postgres' -F p --no-owner --no-privileges -f '/backups/66a47a74-a0a5-4629-bae7-896e428625c2/retegopqs_2025-12-01T14-49-53-693Z.sql'\npg_dump: error: connection to server at \"127.0.0.1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n - pg_dump: error: connection to server at \"127.0.0.1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "1db2cac4-cf8d-4895-9184-0015e8e06734",
+    "type": "backup_failed",
+    "timestamp": "2025-12-01T14:47:56.629Z",
+    "payload": {
+      "databaseId": "66a47a74-a0a5-4629-bae7-896e428625c2",
+      "databaseName": "retegopqs",
+      "error": "Backup failed: Command failed: PGPASSWORD='3KSc0XHfe2Tuk1KJfkQkvw==:eqk3wwo0Unz1Y0mP6HiG+wnEoTRzQ7pNMZ7RIx+Qo4o=:PrwGAw==:u7m7dAi+eXFbtXyj7cO/Zg==' pg_dump -h '127.0.0.1' -p 5432 -U 'postgres' -d 'postgres' -F p --no-owner --no-privileges -f '/backups/66a47a74-a0a5-4629-bae7-896e428625c2/retegopqs_2025-12-01T14-47-56-611Z.sql'\npg_dump: error: connection to server at \"127.0.0.1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n - pg_dump: error: connection to server at \"127.0.0.1\", port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "c8fb373b-7a25-42e8-bac3-ea138130ecf7",
+    "type": "restore_success",
+    "timestamp": "2025-12-01T14:44:44.478Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "versionId": "2cbdfe16-93a4-4c6b-8c21-9e7ac6b6555f",
+      "path": "/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-43-28-649Z.sql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "574a4ad4-7303-4788-a9cd-dffbc603333a",
+    "type": "restore_failed",
+    "timestamp": "2025-12-01T14:43:48.744Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "versionId": "2cbdfe16-93a4-4c6b-8c21-9e7ac6b6555f",
+      "error": "Command failed: mysql -h 'host.docker.internal' -P 8889 -u 'root' -p'root' 'lp_official' < '/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-43-28-649Z.sql'\nmysql: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb' instead\nERROR 2026 (HY000): TLS/SSL error: self-signed certificate in certificate chain\n",
+      "stderr": "mysql: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb' instead\nERROR 2026 (HY000): TLS/SSL error: self-signed certificate in certificate chain\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "af74f306-5b0d-4a2f-bba6-ac955719ac0d",
+    "type": "restore_failed",
+    "timestamp": "2025-12-01T14:43:46.480Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "versionId": "2cbdfe16-93a4-4c6b-8c21-9e7ac6b6555f",
+      "error": "Command failed: mysql -h 'host.docker.internal' -P 8889 -u 'root' -p'root' 'lp_official' < '/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-43-28-649Z.sql'\nmysql: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb' instead\nERROR 2026 (HY000): TLS/SSL error: self-signed certificate in certificate chain\n",
+      "stderr": "mysql: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb' instead\nERROR 2026 (HY000): TLS/SSL error: self-signed certificate in certificate chain\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "2beec2d2-1264-4758-bb82-491c3507082d",
+    "type": "restore_failed",
+    "timestamp": "2025-12-01T14:43:37.222Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "versionId": "2cbdfe16-93a4-4c6b-8c21-9e7ac6b6555f",
+      "error": "Command failed: mysql -h 'host.docker.internal' -P 8889 -u 'root' -p'root' 'lp_official' < '/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-43-28-649Z.sql'\nmysql: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb' instead\nERROR 2026 (HY000): TLS/SSL error: self-signed certificate in certificate chain\n",
+      "stderr": "mysql: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb' instead\nERROR 2026 (HY000): TLS/SSL error: self-signed certificate in certificate chain\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "92589d51-eef2-4225-958d-994aaf5146e3",
+    "type": "backup_success",
+    "timestamp": "2025-12-01T14:43:28.690Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "versionId": "2cbdfe16-93a4-4c6b-8c21-9e7ac6b6555f",
+      "sizeBytes": 28209,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "e6993507-44c9-4572-92c3-3df85b152bc5",
+    "type": "backup_success",
+    "timestamp": "2025-12-01T14:43:27.553Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "versionId": "ae4feb02-afcb-4a66-88fe-30b3d086173a",
+      "sizeBytes": 28209,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "bf4c1b2b-92cb-4cb4-8f07-efec4282c6ec",
+    "type": "backup_failed",
+    "timestamp": "2025-12-01T14:42:48.106Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "error": "Backup failed: Command failed: mysqldump -h 'host.docker.internal' -P 8889 -u 'root' -p'root' --ssl-mode=DISABLED 'lp_official' > '/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-42-48-101Z.sql'\nmysqldump: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb-dump' instead\nmysqldump: unknown variable 'ssl-mode=DISABLED'\n - mysqldump: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb-dump' instead\nmysqldump: unknown variable 'ssl-mode=DISABLED'\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "520eb3e2-208b-4251-aef7-5fc062754653",
+    "type": "backup_failed",
+    "timestamp": "2025-12-01T14:42:46.980Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "error": "Backup failed: Command failed: mysqldump -h 'host.docker.internal' -P 8889 -u 'root' -p'root' --ssl-mode=DISABLED 'lp_official' > '/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-42-46-968Z.sql'\nmysqldump: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb-dump' instead\nmysqldump: unknown variable 'ssl-mode=DISABLED'\n - mysqldump: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb-dump' instead\nmysqldump: unknown variable 'ssl-mode=DISABLED'\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "fba1332e-24b0-46b2-8a02-462e969bbf91",
+    "type": "backup_failed",
+    "timestamp": "2025-12-01T14:41:01.142Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "error": "Backup failed: Command failed: mysqldump -h 'host.docker.internal' -P 8889 -u 'root' -p'root' 'lp_official' > '/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-41-01-112Z.sql'\nmysqldump: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb-dump' instead\nmysqldump: Got error: 2026: \"TLS/SSL error: self-signed certificate in certificate chain\" when trying to connect\n - mysqldump: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb-dump' instead\nmysqldump: Got error: 2026: \"TLS/SSL error: self-signed certificate in certificate chain\" when trying to connect\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "e52a2590-26cb-413e-bf55-322c3acec2e8",
+    "type": "backup_failed",
+    "timestamp": "2025-12-01T14:40:39.761Z",
+    "payload": {
+      "databaseId": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+      "databaseName": "test",
+      "error": "Backup failed: Command failed: mysqldump -h 'host.docker.internal' -P 8889 -u 'root' -p'root' 'lp_official' > '/backups/1f097c5f-eacf-468f-9800-f563a2dbb731/test_2025-12-01T14-40-39-714Z.sql'\nmysqldump: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb-dump' instead\nmysqldump: Got error: 2026: \"TLS/SSL error: self-signed certificate in certificate chain\" when trying to connect\n - mysqldump: Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb-dump' instead\nmysqldump: Got error: 2026: \"TLS/SSL error: self-signed certificate in certificate chain\" when trying to connect\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "9c40d7fa-49eb-422c-bd8e-411e131f0219",
+    "type": "restore_success",
+    "timestamp": "2025-12-01T14:12:08.409Z",
+    "payload": {
+      "databaseId": "66a47a74-a0a5-4629-bae7-896e428625c2",
+      "databaseName": "retegopqs",
+      "versionId": "3b28893e-0b01-46bc-a170-7a7ea55d6eee",
+      "path": "/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/66a47a74-a0a5-4629-bae7-896e428625c2/retegopqs_2025-12-01T14-12-05-432Z.sql"
+    },
+    "resolved": false
+  },
+  {
+    "id": "30cc4f7f-4814-4e18-85ef-7da5ff602b4c",
+    "type": "backup_success",
+    "timestamp": "2025-12-01T14:12:05.560Z",
+    "payload": {
+      "databaseId": "66a47a74-a0a5-4629-bae7-896e428625c2",
+      "databaseName": "retegopqs",
+      "versionId": "3b28893e-0b01-46bc-a170-7a7ea55d6eee",
+      "sizeBytes": 700,
+      "engine": "postgres"
+    },
+    "resolved": false
+  },
+  {
+    "id": "1b73ae04-8480-4306-a7e5-55c83f64f435",
+    "type": "backup_failed",
+    "timestamp": "2025-12-01T14:10:36.164Z",
+    "payload": {
+      "databaseId": "66a47a74-a0a5-4629-bae7-896e428625c2",
+      "databaseName": "retegopqs",
+      "error": "Backup failed: Command failed: PGPASSWORD='root' pg_dump -h '127.0.0.1' -p 5432 -U 'postgres' -d 'postgres' -F p --no-owner --no-privileges -f '/Applications/MAMP/htdocs/plateforme-safebase/backend/backups/66a47a74-a0a5-4629-bae7-896e428625c2/retegopqs_2025-12-01T14-10-36-059Z.sql'\npg_dump: error: server version: 18.1 (Postgres.app); pg_dump version: 14.18 (Homebrew)\npg_dump: error: aborting because of server version mismatch\n - pg_dump: error: server version: 18.1 (Postgres.app); pg_dump version: 14.18 (Homebrew)\npg_dump: error: aborting because of server version mismatch\n"
+    },
+    "resolved": false
+  },
+  {
+    "id": "8aa23dc4-33a8-4234-ad64-d9782ea1960d",
+    "type": "backup_success",
+    "timestamp": "2025-12-01T14:10:23.304Z",
+    "payload": {
+      "databaseId": "1dde6a6c-a6f7-489d-a2c9-a1e970b2fcbc",
+      "databaseName": "testtest",
+      "versionId": "1192859a-bd53-4a92-972a-aba1e426eff8",
+      "sizeBytes": 8339,
+      "engine": "mysql"
+    },
+    "resolved": false
+  },
+  {
     "id": "3ac348e5-5895-409f-b06d-8c824c70ca5b",
     "type": "backup_success",
     "timestamp": "2025-11-22T22:33:30.300Z",

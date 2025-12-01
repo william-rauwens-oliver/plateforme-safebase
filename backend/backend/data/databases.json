@@ -1,24 +1,35 @@
 [
   {
-    "id": "54863d55-7a2f-40aa-98b2-d84f2b556ad6",
-    "createdAt": "2025-11-22T22:28:33.509Z",
-    "name": "Base De Donnée MySQL",
+    "id": "1dde6a6c-a6f7-489d-a2c9-a1e970b2fcbc",
+    "createdAt": "2025-12-01T14:10:20.651Z",
+    "name": "testtest",
     "engine": "mysql",
     "host": "127.0.0.1",
     "port": 8889,
     "username": "root",
-    "password": "2DVhbIRY7kgtgxoNOWj27Q==:GXRtr71tQ1x8y841/NQnJsPDtd7yc+9r4KeMQnLeeYs=:4Az8cw==:PlpKtB43CeI0+l5iutrd6A==",
+    "password": "UdlxKgodi3BZ/ooIjapjDg==:ReodB2YRrbi9HW4nN4A7CcwsptSqhIh1Xy7qm4+jvHI=:eMKI15EgkUUYXQuYxdY/XEaQgarc2mWWVL8/5RD71v9EjO/e26K4PvDrnGo5jFndxFEbhTXmKtsTebikzsEk3ikFHBXJ3QAOko8cE/jsG6VODvGAtYUMblm5NQLdy0PIN2uhAnQvww==:E6CAIoU0qOsQCysyyL4oHg==",
     "database": "finance-flow"
   },
   {
-    "id": "eadafcab-2e0a-4b76-99a2-074b110222c6",
-    "createdAt": "2025-11-22T22:28:54.901Z",
-    "name": "Base De Donnée PostgreSQL",
+    "id": "1f097c5f-eacf-468f-9800-f563a2dbb731",
+    "createdAt": "2025-12-01T14:40:35.173Z",
+    "name": "test",
+    "engine": "mysql",
+    "host": "host.docker.internal",
+    "port": 8889,
+    "username": "root",
+    "password": "tHng/gdBNaDidsEWAzPHcg==:E+N6gkObjwHC4RXo61DHgPTrcWzdQ0XqG5Rr8J9XMZI=:yaKqvw==:t7qUQmx+B3dwqxN4hK6Pig==",
+    "database": "lp_official"
+  },
+  {
+    "id": "a85275d6-2ed4-482a-8ed4-f403658f67a2",
+    "createdAt": "2025-12-01T14:55:01.392Z",
+    "name": "ezgzg",
     "engine": "postgres",
-    "host": "localhost",
+    "host": "postgres",
     "port": 5432,
-    "username": "postgres",
-    "password": "OK3Q8eVAjBDwnbsINh0Egw==:kklX7/N0W3ZBL+TAkWfbMY6s1tb8D8IUnFC68wiIiDs=:Sbo51Q==:ZUYRRtSYzXBmOvEreLZUnQ==",
-    "database": "fittracker"
+    "username": "safebase",
+    "password": "rXinFbp2LsROrhjyneD2rQ==:Xj/9NyHZe/zNT/kL4i5W0NGUTSq1XXiYJ7c99l8lsXQ=:dFehfESKCpoTmdD2:ADshJv5YfqKBPcy58MsmSA==",
+    "database": "postgres"
   }
 ]
