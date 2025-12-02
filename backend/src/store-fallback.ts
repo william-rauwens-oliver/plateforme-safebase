@@ -4,7 +4,8 @@ import { join } from 'path';
 import { Alert, BackupVersionMeta, RegisteredDatabase } from './types.js';
 import { encrypt, decrypt } from './crypto.js';
 
-let dataDir = process.env.DATA_DIR || join(process.cwd(), 'backend', 'data');
+// Par défaut, utiliser un dossier "data" à la racine du process courant (backend/data en dev, /app/data en Docker)
+let dataDir = process.env.DATA_DIR || join(process.cwd(), 'data');
 let backupsDir = process.env.BACKUPS_DIR || '/backups';
 let dbsFile = join(dataDir, 'databases.json');
 let versionsFile = join(dataDir, 'versions.json');

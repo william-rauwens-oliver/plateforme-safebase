@@ -26,6 +26,7 @@ function usePersistentState<T>(key: string, initial: T) {
       const raw = localStorage.getItem(key)
       return raw ? (JSON.parse(raw) as T) : initial
     } catch {
+      // Ignorer les erreurs de lecture (localStorage indisponible, JSON invalide, etc.)
       return initial
     }
   })
@@ -33,7 +34,7 @@ function usePersistentState<T>(key: string, initial: T) {
     try { 
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
-
+      // Ignorer les erreurs d'écriture dans localStorage (quota, mode privé, etc.)
     }
   }, [key, value])
   return [value, setValue] as const
@@ -91,6 +92,8 @@ export function App() {
     return h
   }, [config.apiKey])
 
+  // Au montage ou lorsque la config API change, vérifier la santé et recharger la liste
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     checkHealth()
     refresh()
@@ -174,9 +177,12 @@ export function App() {
     const dsn = db.engine === 'mysql'
       ? `mysql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`
       : `postgres://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`
-    navigator.clipboard.writeText(dsn).then(() => pushToast('DSN copié', 'success')).catch(() => {
-
-    })
+    navigator.clipboard.writeText(dsn)
+      .then(() => pushToast('DSN copié', 'success'))
+      .catch((err) => {
+        console.error('Erreur lors de la copie du DSN:', err)
+        pushToast('Impossible de copier le DSN dans le presse-papiers', 'error')
+      })
   }
 
   async function deleteDatabase(id: string) {
@@ -238,7 +244,8 @@ export function App() {
             const errorData = await res.json().catch(() => ({ message: 'Erreur lors de la restauration' }))
             throw new Error(errorData.message || errorData.error || `Erreur ${res.status}`)
           }
-          const data = await res.json()
+          // Consommer la réponse sans utiliser la donnée (pour éviter un warning ESLint)
+          await res.json().catch(() => undefined)
           pushToast('Restauration réussie', 'success')
 
           const items = await fetch(`${config.apiUrl}/backups/${versionsModal.db.id}`, { headers }).then(r => r.json())
