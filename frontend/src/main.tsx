@@ -461,7 +461,29 @@ export function App() {
         <div className="card">
           <h2>Actions globales</h2>
           <div className="form-grid">
-            <div className="form-col-12"><input placeholder="API URL" value={config.apiUrl} onChange={e => setConfig({ ...config, apiUrl: e.target.value })} /></div>
+            <div className="form-col-12">
+              <input
+                placeholder="API URL"
+                value={config.apiUrl}
+                onChange={e => {
+                  let value = e.target.value.trim()
+                  // Si l'utilisateur colle une URL complète (ex: http://localhost:8080/health),
+                  // on ne garde que l'origine (http://localhost:8080)
+                  try {
+                    if (value.startsWith('http')) {
+                      const u = new URL(value)
+                      value = `${u.protocol}//${u.host}`
+                    }
+                  } catch {
+                    // En cas d'URL invalide, on ne casse pas la saisie
+                  }
+                  if (!value) {
+                    value = 'http://localhost:8080'
+                  }
+                  setConfig({ ...config, apiUrl: value })
+                }}
+              />
+            </div>
             <div className="form-col-12"><input placeholder="API Key (optionnel)" value={config.apiKey} onChange={e => setConfig({ ...config, apiKey: e.target.value })} /></div>
             <div className="form-col-12" style={{ display: 'flex', gap: '12px' }}>
               <button className="btn btn-secondary" onClick={refresh}>Recharger</button>
