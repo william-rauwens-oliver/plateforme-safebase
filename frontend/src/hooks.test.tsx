@@ -7,10 +7,10 @@ import React from 'react';
 function ensureTestLocalStorage() {
   const hasFullApi =
     typeof localStorage !== 'undefined' &&
-    typeof (localStorage as any).getItem === 'function' &&
-    typeof (localStorage as any).setItem === 'function' &&
-    typeof (localStorage as any).removeItem === 'function' &&
-    typeof (localStorage as any).clear === 'function';
+    typeof localStorage.getItem === 'function' &&
+    typeof localStorage.setItem === 'function' &&
+    typeof localStorage.removeItem === 'function' &&
+    typeof localStorage.clear === 'function';
 
   if (hasFullApi) return;
 
