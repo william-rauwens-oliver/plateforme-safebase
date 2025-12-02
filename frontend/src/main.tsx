@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
 type Db = {
@@ -92,27 +92,28 @@ export function App() {
     return h
   }, [config.apiKey])
 
-  // Au montage ou lorsque la config API change, vérifier la santé et recharger la liste
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    checkHealth()
-    refresh()
-
-  }, [config.apiUrl, config.apiKey, headers])
-
-  function checkHealth() {
+  const checkHealth = useCallback(() => {
     setHealth('pending')
-    fetch(`${config.apiUrl}/health`).then(r => r.json()).then(() => setHealth('ok')).catch(() => setHealth('down'))
-  }
+    fetch(`${config.apiUrl}/health`)
+      .then(r => r.json())
+      .then(() => setHealth('ok'))
+      .catch(() => setHealth('down'))
+  }, [config.apiUrl])
 
-  function refresh() {
+  const refresh = useCallback(() => {
     setIsLoadingList(true)
     fetch(`${config.apiUrl}/databases`, { headers })
       .then(r => r.json())
       .then(setDbs)
       .catch(() => setDbs([]))
       .finally(() => setIsLoadingList(false))
-  }
+  }, [config.apiUrl, headers])
+
+  // Au montage ou lorsque la config API change, vérifier la santé et recharger la liste
+  useEffect(() => {
+    checkHealth()
+    refresh()
+  }, [checkHealth, refresh])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
