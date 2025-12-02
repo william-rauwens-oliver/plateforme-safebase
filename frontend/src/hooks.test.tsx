@@ -2,6 +2,44 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 
+// Petit shim de localStorage pour les environnements de test qui ne
+// fournissent pas toutes les méthodes (ex: --localstorage-file mal configuré)
+function ensureTestLocalStorage() {
+  const hasFullApi =
+    typeof localStorage !== 'undefined' &&
+    typeof (localStorage as any).getItem === 'function' &&
+    typeof (localStorage as any).setItem === 'function' &&
+    typeof (localStorage as any).removeItem === 'function' &&
+    typeof (localStorage as any).clear === 'function';
+
+  if (hasFullApi) return;
+
+  const store = new Map<string, string>();
+  const memoryStorage: Storage = {
+    get length() {
+      return store.size;
+    },
+    clear() {
+      store.clear();
+    },
+    getItem(key: string) {
+      return store.has(key) ? store.get(key)! : null;
+    },
+    key(index: number) {
+      return Array.from(store.keys())[index] ?? null;
+    },
+    removeItem(key: string) {
+      store.delete(key);
+    },
+    setItem(key: string, value: string) {
+      store.set(key, value);
+    },
+  };
+
+  // @ts-expect-error: on remplace le localStorage global uniquement pour les tests
+  globalThis.localStorage = memoryStorage;
+}
+
 // Mock du hook usePersistentState (copie de l'implémentation réelle)
 function usePersistentState<T>(key: string, initial: T) {
   const [value, setValue] = React.useState<T>(() => {
@@ -25,8 +63,26 @@ function usePersistentState<T>(key: string, initial: T) {
 }
 
 describe('Frontend Hooks - Unit Tests', () => {
+  // S'assurer avant tous les tests que localStorage dispose bien de l'API complète
+  beforeAll(() => {
+    ensureTestLocalStorage();
+  });
+
   beforeEach(() => {
-    localStorage.clear();
+    // Certains environnements de test (ou options comme --localstorage-file)
+    // peuvent fournir un localStorage sans méthode clear()
+    if (typeof localStorage.clear === 'function') {
+      localStorage.clear();
+    } else {
+      // Fallback : supprimer manuellement les clés connues utilisées dans les tests
+      try {
+        Object.keys(localStorage).forEach((key) => {
+          localStorage.removeItem(key);
+        });
+      } catch {
+        // Ignorer toute erreur de nettoyage, les tests resteront isolés
+      }
+    }
     vi.clearAllMocks();
   });
 
