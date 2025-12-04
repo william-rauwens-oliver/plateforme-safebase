@@ -24,6 +24,7 @@ async function testDatabaseConnection(db: RegisteredDatabase): Promise<{ success
         database: db.database,
         connectTimeout: 10000,
         enableKeepAlive: false,
+        authPlugin: 'caching_sha2_password',
       });
 
       await connection.ping();
@@ -270,6 +271,7 @@ export async function routes(app: FastifyInstance): Promise<void> {
           password: password || '',
           connectTimeout: 10000,
           enableKeepAlive: false,
+          authPlugin: 'caching_sha2_password',
         });
         const [rows] = await connection.query('SHOW DATABASES');
         await connection.end();
