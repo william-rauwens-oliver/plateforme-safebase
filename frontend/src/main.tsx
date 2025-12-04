@@ -67,14 +67,14 @@ export function App() {
     password: string;
     database: string;
   }>({
-    // Par défaut : connexion MySQL locale via MAMP, vue depuis Docker
-    // (SafeBase en Docker → MySQL MAMP via host.docker.internal:8889)
+    // Par défaut : connexion MySQL du projet SafeBase (service Docker "mysql")
+    // Utilisateur/mot de passe par défaut définis dans docker-compose.yml
     name: '',
     engine: 'mysql',
-    host: 'host.docker.internal',
-    port: 8889,
-    username: 'root',
-    password: 'root',
+    host: 'mysql',
+    port: 3306,
+    username: 'safebase',
+    password: 'safebase',
     database: ''
   })
   const [availableDatabases, setAvailableDatabases] = useState<string[]>([])
@@ -349,17 +349,16 @@ export function App() {
                 const newEngine = e.target.value as 'mysql' | 'postgres';
 
                 if (newEngine === 'mysql') {
-                  // MySQL local via MAMP, accessible depuis Docker
-                  // via host.docker.internal:8889
-                  const defaultHost = 'host.docker.internal';
-                  const defaultPort = 8889;
+                  // MySQL Docker du projet (service "mysql" dans docker-compose)
+                  const defaultHost = 'mysql';
+                  const defaultPort = 3306;
                   setForm({
                     ...form,
                     engine: newEngine,
                     host: defaultHost,
                     port: defaultPort,
-                    username: 'root',
-                    password: 'root',
+                    username: 'safebase',
+                    password: 'safebase',
                     database: ''
                   });
                 } else {
