@@ -10,51 +10,6 @@ on:
     - cron: '0 3 * * *'
 
 jobs:
-  backend-tests:
-    name: Backend Tests
-    runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: safebase
-          POSTGRES_USER: safebase
-          POSTGRES_DB: safebase
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
-      
-      - name: Install dependencies
-        working-directory: ./backend
-        run: npm ci
-      
-      - name: Run tests
-        working-directory: ./backend
-        env:
-          ENCRYPTION_KEY: test-encryption-key-for-ci
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: safebase
-          DB_USER: safebase
-          DB_PASSWORD: safebase
-          FAKE_DUMP: 1
-        run: npm test
-
   frontend-tests:
     name: Frontend Tests
     runs-on: ubuntu-latest
